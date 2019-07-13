@@ -157,15 +157,15 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
-  public void align(final int size)
+  public void align(final int alignment)
     throws IOException, EOFException
   {
-    final var diff = this.offsetAbsolute() % (long) size;
+    final var diff = this.offsetAbsolute() % (long) alignment;
     if (diff == 0L) {
       return;
     }
 
-    this.skip((long) size - diff);
+    this.skip((long) alignment - diff);
   }
 
   @Override
