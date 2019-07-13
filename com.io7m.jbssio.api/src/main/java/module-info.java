@@ -20,5 +20,8 @@
 
 module com.io7m.jbssio.api
 {
+  requires static org.osgi.annotation.versioning;
+  requires static org.osgi.annotation.bundle;
+
   exports com.io7m.jbssio.api;
 }

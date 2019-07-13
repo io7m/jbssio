@@ -20,6 +20,10 @@
 
 module com.io7m.jbssio.vanilla
 {
+  requires static org.osgi.annotation.bundle;
+  requires static org.osgi.annotation.versioning;
+  requires static org.osgi.service.component.annotations;
+
   requires transitive com.io7m.jbssio.api;
 
   requires com.io7m.jintegers.core;

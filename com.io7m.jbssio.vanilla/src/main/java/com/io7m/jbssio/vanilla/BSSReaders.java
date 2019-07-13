@@ -18,6 +18,7 @@ package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSReaderProviderType;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
+import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -27,6 +28,7 @@ import java.util.Objects;
  * A default provider of readers.
  */
 
+@Component(service = BSSReaderProviderType.class)
 public final class BSSReaders implements BSSReaderProviderType
 {
   /**

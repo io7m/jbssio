@@ -18,4 +18,9 @@
  * Java bitstream structure I/O (API)
  */
 
+@Export
+@Version("1.0.0")
 package com.io7m.jbssio.api;
+
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;
