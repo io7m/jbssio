@@ -546,6 +546,66 @@ public final class BSSReadersSequentialTest
   }
 
   @Test
+  public void testReadDBE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putDouble(0, 1000.0);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0, reader.readDBE());
+      }
+    }
+  }
+
+  @Test
+  public void testReadDLE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putDouble(0, 1000.0);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0, reader.readDLE());
+      }
+    }
+  }
+
+  @Test
+  public void testReadFBE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putFloat(0, 1000.0f);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0f, reader.readFBE());
+      }
+    }
+  }
+
+  @Test
+  public void testReadFLE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putFloat(0, 1000.0f);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0f, reader.readFLE());
+      }
+    }
+  }
+
+  @Test
   public void testReadBytes()
     throws Exception
   {

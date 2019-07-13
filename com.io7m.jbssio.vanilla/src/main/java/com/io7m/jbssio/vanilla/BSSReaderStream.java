@@ -382,6 +382,50 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
+  public float readFBE()
+    throws IOException, EOFException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(4L, (long) r);
+    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
+    return this.buffer4w.getFloat(0);
+  }
+
+  @Override
+  public float readFLE()
+    throws IOException, EOFException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(4L, (long) r);
+    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
+    return this.buffer4w.getFloat(0);
+  }
+
+  @Override
+  public double readDBE()
+    throws IOException, EOFException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(8L, (long) r);
+    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
+    return this.buffer8w.getDouble(0);
+  }
+
+  @Override
+  public double readDLE()
+    throws IOException, EOFException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(8L, (long) r);
+    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
+    return this.buffer8w.getDouble(0);
+  }
+
+  @Override
   public long offsetAbsolute()
   {
     final var readerParent = this.parent;

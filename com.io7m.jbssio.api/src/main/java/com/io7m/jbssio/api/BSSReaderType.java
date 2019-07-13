@@ -337,4 +337,63 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
     int length)
     throws IOException, EOFException;
 
+  /**
+   * Read a 32-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readFBE()
+    throws IOException, EOFException;
+
+  /**
+   * Read a 32-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readFLE()
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  double readDBE()
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  double readDLE()
+    throws IOException, EOFException;
 }
