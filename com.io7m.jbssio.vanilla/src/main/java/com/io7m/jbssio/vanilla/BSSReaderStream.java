@@ -17,8 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSReaderSequentialType;
-import com.io7m.jintegers.Unsigned16;
-import com.io7m.jintegers.Unsigned32;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.io.input.CountingInputStream;
@@ -252,7 +250,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     checkEOF(r);
     this.checkNotShortRead(2L, (long) r);
     this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
-    return Unsigned16.unpackFromBuffer(this.buffer2w, 0);
+    return (int) this.buffer2w.getChar(0);
   }
 
   @Override
@@ -274,7 +272,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     checkEOF(r);
     this.checkNotShortRead(4L, (long) r);
     this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
-    return Unsigned32.unpackFromBuffer(this.buffer4w, 0);
+    return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
   }
 
   @Override
@@ -318,7 +316,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     checkEOF(r);
     this.checkNotShortRead(2L, (long) r);
     this.buffer2w.order(ByteOrder.BIG_ENDIAN);
-    return Unsigned16.unpackFromBuffer(this.buffer2w, 0);
+    return (int) this.buffer2w.getChar(0);
   }
 
   @Override
@@ -340,7 +338,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     checkEOF(r);
     this.checkNotShortRead(4L, (long) r);
     this.buffer4w.order(ByteOrder.BIG_ENDIAN);
-    return Unsigned32.unpackFromBuffer(this.buffer4w, 0);
+    return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
   }
 
   @Override
