@@ -268,13 +268,30 @@ final class BSSWriterStream implements BSSWriterSequentialType
     return this.size;
   }
 
+  private void writeS8p(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.checkHasBytesRemaining(1L, name);
+    this.stream.write(b);
+  }
+
+  private void writeU8p(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.checkHasBytesRemaining(1L, name);
+    this.stream.write(b);
+  }
+
   @Override
   public void writeS8(final int b)
     throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(1L, null);
-    this.stream.write(b);
+    this.writeS8p(null, b);
   }
 
   @Override
@@ -282,8 +299,7 @@ final class BSSWriterStream implements BSSWriterSequentialType
     throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(1L, null);
-    this.stream.write(b);
+    this.writeU8p(null, b);
   }
 
   @Override
@@ -292,9 +308,8 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final int b)
     throws IOException
   {
-    Objects.requireNonNull(name, "name");
-    this.checkHasBytesRemaining(1L, name);
-    this.stream.write(b);
+    this.checkNotClosed();
+    this.writeS8p(Objects.requireNonNull(name, "name"), b);
   }
 
   @Override
@@ -303,9 +318,8 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final int b)
     throws IOException
   {
-    Objects.requireNonNull(name, "name");
-    this.checkHasBytesRemaining(1L, name);
-    this.stream.write(b);
+    this.checkNotClosed();
+    this.writeU8p(Objects.requireNonNull(name, "name"), b);
   }
 
   @Override
