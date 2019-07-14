@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.OptionalLong;
 
 public final class BSSWritersSequentialTest
 {
@@ -39,6 +40,7 @@ public final class BSSWritersSequentialTest
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
         Assertions.assertEquals(0L, writer.offsetAbsolute());
         Assertions.assertEquals(0L, writer.offsetRelative());
+        Assertions.assertEquals(OptionalLong.empty(), writer.sizeLimit());
       }
     }
   }
@@ -166,18 +168,9 @@ public final class BSSWritersSequentialTest
       }
 
       Assertions.assertArrayEquals(new byte[]{
-        0x20,
-        0x0,
-        0x0,
-        0x0,
-        0x21,
-        0x0,
-        0x0,
-        0x0,
-        0x22,
-        0x0,
-        0x0,
-        0x0,
+        0x20, 0x0, 0x0, 0x0,
+        0x21, 0x0, 0x0, 0x0,
+        0x22, 0x0, 0x0, 0x0,
       }, stream.toByteArray());
     }
   }
@@ -206,10 +199,7 @@ public final class BSSWritersSequentialTest
       }
 
       Assertions.assertArrayEquals(new byte[]{
-        0x20,
-        0x0,
-        0x0,
-        0x0,
+        0x20, 0x0, 0x0, 0x0,
         0x21,
       }, stream.toByteArray());
     }
@@ -222,7 +212,12 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 12L)) {
+        Assertions.assertEquals(OptionalLong.of(12L), writer.sizeLimit());
+        LOG.debug("writer: {}", writer);
+
         try (var s = writer.createSubWriter("x", 4L)) {
+          Assertions.assertEquals(OptionalLong.of(4L), s.sizeLimit());
+
           Assertions.assertEquals(0L, writer.offsetAbsolute());
           Assertions.assertEquals(0L, writer.offsetRelative());
           Assertions.assertEquals(0L, s.offsetAbsolute());
@@ -250,6 +245,8 @@ public final class BSSWritersSequentialTest
         }
 
         try (var s = writer.createSubWriter("y", 4L)) {
+          Assertions.assertEquals(OptionalLong.of(4L), s.sizeLimit());
+
           Assertions.assertEquals(4L + 0L, writer.offsetAbsolute());
           Assertions.assertEquals(4L + 0L, writer.offsetRelative());
           Assertions.assertEquals(4L + 0L, s.offsetAbsolute());
@@ -277,6 +274,8 @@ public final class BSSWritersSequentialTest
         }
 
         try (var s = writer.createSubWriter("z", 4L)) {
+          Assertions.assertEquals(OptionalLong.of(4L), s.sizeLimit());
+
           Assertions.assertEquals(8L + 0L, writer.offsetAbsolute());
           Assertions.assertEquals(8L + 0L, writer.offsetRelative());
           Assertions.assertEquals(8L + 0L, s.offsetAbsolute());
