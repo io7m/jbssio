@@ -152,4 +152,464 @@ public interface BSSWriterType extends Closeable, BSSAddressableType
     String name,
     int b)
     throws IOException;
+
+  /**
+   * Write a 16-bit little-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS16LE(int b)
+    throws IOException;
+
+  /**
+   * Write a 16-bit big-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS16BE(int b)
+    throws IOException;
+
+  /**
+   * Write a 16-bit little-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU16LE(int b)
+    throws IOException;
+
+  /**
+   * Write a 16-bit big-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU16BE(int b)
+    throws IOException;
+
+  /**
+   * Write a named 16-bit little-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS16LE(
+    String name,
+    int b)
+    throws IOException;
+
+  /**
+   * Write a named 16-bit big-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS16BE(
+    String name,
+    int b)
+    throws IOException;
+
+  /**
+   * Write a named 16-bit little-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU16LE(
+    String name,
+    int b)
+    throws IOException;
+
+  /**
+   * Write a named 16-bit big-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU16BE(
+    String name,
+    int b)
+    throws IOException;
+
+  /**
+   * Write a 32-bit little-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS32LE(long b)
+    throws IOException;
+
+  /**
+   * Write a 32-bit big-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS32BE(long b)
+    throws IOException;
+
+  /**
+   * Write a 32-bit little-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU32LE(long b)
+    throws IOException;
+
+  /**
+   * Write a 32-bit big-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU32BE(long b)
+    throws IOException;
+
+  /**
+   * Write a named 32-bit little-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS32LE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a named 32-bit big-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS32BE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a named 32-bit little-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU32LE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a named 32-bit big-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU32BE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a 64-bit little-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS64LE(long b)
+    throws IOException;
+
+  /**
+   * Write a 64-bit big-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS64BE(long b)
+    throws IOException;
+
+  /**
+   * Write a 64-bit little-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU64LE(long b)
+    throws IOException;
+
+  /**
+   * Write a 64-bit big-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU64BE(long b)
+    throws IOException;
+
+  /**
+   * Write a named 64-bit little-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS64LE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a named 64-bit big-endian signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS64BE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a named 64-bit little-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU64LE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write a named 64-bit big-endian unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU64BE(
+    String name,
+    long b)
+    throws IOException;
+
+  /**
+   * Write bytes.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name   The name of the value
+   * @param buffer The byte buffer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeBytes(
+    String name,
+    byte[] buffer)
+    throws IOException;
+
+  /**
+   * Write bytes.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name   The name of the value
+   * @param buffer The byte buffer value
+   * @param offset The offset in {@code buffer}
+   * @param length The number of bytes to write
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeBytes(
+    String name,
+    byte[] buffer,
+    int offset,
+    int length)
+    throws IOException;
+
+  /**
+   * Write bytes.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param buffer The byte buffer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeBytes(
+    byte[] buffer)
+    throws IOException;
+
+  /**
+   * Write bytes.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param buffer The byte buffer value
+   * @param offset The offset in {@code buffer}
+   * @param length The number of bytes to write
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeBytes(
+    byte[] buffer,
+    int offset,
+    int length)
+    throws IOException;
 }

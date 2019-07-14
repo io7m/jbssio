@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.OptionalLong;
 
 public final class BSSWritersSequentialTest
@@ -342,6 +345,266 @@ public final class BSSWritersSequentialTest
           LOG.debug("ex: ", ex);
         }
       }
+    }
+  }
+
+  @Test
+  public void testWriteS8()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS8("q", 0x1);
+        writer.writeS8(0x2);
+      }
+
+      Assertions.assertArrayEquals(new byte[]{
+        0x1, 0x2
+      }, stream.toByteArray());
+    }
+  }
+
+  @Test
+  public void testWriteU8()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU8("q", 0x1);
+        writer.writeU8(0x2);
+      }
+
+      Assertions.assertArrayEquals(new byte[]{
+        0x1, 0x2
+      }, stream.toByteArray());
+    }
+  }
+
+  @Test
+  public void testWriteS16LE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS16LE("q", 0x1);
+        writer.writeS16LE(0x2);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.LITTLE_ENDIAN);
+      Assertions.assertEquals(0x1, buffer.getShort(0));
+      Assertions.assertEquals(0x2, buffer.getShort(2));
+    }
+  }
+
+  @Test
+  public void testWriteU16LE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU16LE("q", 0xffff);
+        writer.writeU16LE(0x2);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.LITTLE_ENDIAN);
+      Assertions.assertEquals(0xffff, buffer.getChar(0));
+      Assertions.assertEquals(0x2, buffer.getChar(2));
+    }
+  }
+
+  @Test
+  public void testWriteS16BE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS16BE("q", 0x1);
+        writer.writeS16BE(0x2);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+      Assertions.assertEquals(0x1, buffer.getShort(0));
+      Assertions.assertEquals(0x2, buffer.getShort(2));
+    }
+  }
+
+  @Test
+  public void testWriteU16BE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU16BE("q", 0xffff);
+        writer.writeU16BE(0x2);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+      Assertions.assertEquals(0xffff, buffer.getChar(0));
+      Assertions.assertEquals(0x2, buffer.getChar(2));
+    }
+  }
+
+  @Test
+  public void testWriteS32LE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS32LE("q", Integer.MAX_VALUE);
+        writer.writeS32LE(Integer.MIN_VALUE);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.LITTLE_ENDIAN);
+      Assertions.assertEquals(Integer.MAX_VALUE, buffer.getInt(0));
+      Assertions.assertEquals(Integer.MIN_VALUE, buffer.getInt(4));
+    }
+  }
+
+  @Test
+  public void testWriteU32LE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU32LE("q", 0xffff_ffffL);
+        writer.writeU32LE(0);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.LITTLE_ENDIAN);
+      Assertions.assertEquals(0xffff_ffffL, buffer.getInt(0) & 0xffff_ffffL);
+      Assertions.assertEquals(0, buffer.getInt(4));
+    }
+  }
+
+  @Test
+  public void testWriteS32BE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS32BE("q", Integer.MAX_VALUE);
+        writer.writeS32BE(Integer.MIN_VALUE);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+      Assertions.assertEquals(Integer.MAX_VALUE, buffer.getInt(0));
+      Assertions.assertEquals(Integer.MIN_VALUE, buffer.getInt(4));
+    }
+  }
+
+  @Test
+  public void testWriteU32BE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU32BE("q", 0xffff_ffffL);
+        writer.writeU32BE(0L);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+      Assertions.assertEquals(0xffff_ffffL, buffer.getInt(0) & 0xffff_ffffL);
+      Assertions.assertEquals(0, buffer.getInt(4));
+    }
+  }
+
+  @Test
+  public void testWriteS64LE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS64LE("q", Long.MAX_VALUE);
+        writer.writeS64LE(Long.MIN_VALUE);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.LITTLE_ENDIAN);
+      Assertions.assertEquals(Long.MAX_VALUE, buffer.getLong(0));
+      Assertions.assertEquals(Long.MIN_VALUE, buffer.getLong(8));
+    }
+  }
+
+  @Test
+  public void testWriteU64LE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU64LE("q", 0xffff_ffff_ffff_ffffL);
+        writer.writeU64LE(0);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.LITTLE_ENDIAN);
+      Assertions.assertEquals(0xffff_ffff_ffff_ffffL, buffer.getLong(0) & 0xffff_ffff_ffff_ffffL);
+      Assertions.assertEquals(0, buffer.getLong(8));
+    }
+  }
+
+  @Test
+  public void testWriteS64BE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeS64BE("q", Long.MAX_VALUE);
+        writer.writeS64BE(Long.MIN_VALUE);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+      Assertions.assertEquals(Long.MAX_VALUE, buffer.getLong(0));
+      Assertions.assertEquals(Long.MIN_VALUE, buffer.getLong(8));
+    }
+  }
+
+  @Test
+  public void testWriteU64BE()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeU64BE("q", 0xffff_ffff_ffff_ffffL);
+        writer.writeU64BE(0L);
+      }
+
+      final var buffer = ByteBuffer.wrap(stream.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+      Assertions.assertEquals(0xffff_ffff_ffff_ffffL, buffer.getLong(0) & 0xffff_ffff_ffff_ffffL);
+      Assertions.assertEquals(0, buffer.getLong(8));
+    }
+  }
+
+  @Test
+  public void testWriteBytes()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        writer.writeBytes("AAAA".getBytes(StandardCharsets.US_ASCII));
+        writer.writeBytes("BBBB".getBytes(StandardCharsets.US_ASCII), 0, 4);
+        writer.writeBytes("C", "CCCC".getBytes(StandardCharsets.US_ASCII));
+        writer.writeBytes("D", "DDDD".getBytes(StandardCharsets.US_ASCII), 0, 4);
+      }
+
+      Assertions.assertArrayEquals(new byte[]{
+        'A', 'A', 'A', 'A',
+        'B', 'B', 'B', 'B',
+        'C', 'C', 'C', 'C',
+        'D', 'D', 'D', 'D'
+      }, stream.toByteArray());
     }
   }
 }

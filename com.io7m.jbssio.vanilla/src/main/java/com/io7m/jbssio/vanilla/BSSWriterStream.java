@@ -32,6 +32,9 @@ import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
 final class BSSWriterStream implements BSSWriterSequentialType
 {
   private final BSSWriterStream parent;
@@ -320,6 +323,392 @@ final class BSSWriterStream implements BSSWriterSequentialType
   {
     this.checkNotClosed();
     this.writeU8p(Objects.requireNonNull(name, "name"), b);
+  }
+
+  private void writeS16LEp(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(2L, name);
+    this.buffer2w.order(LITTLE_ENDIAN);
+    this.buffer2w.putShort(0, (short) b);
+    this.stream.write(this.buffer2);
+  }
+
+  private void writeU16LEp(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(2L, name);
+    this.buffer2w.order(LITTLE_ENDIAN);
+    this.buffer2w.putChar(0, (char) b);
+    this.stream.write(this.buffer2);
+  }
+
+  private void writeS16BEp(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(2L, name);
+    this.buffer2w.order(BIG_ENDIAN);
+    this.buffer2w.putShort(0, (short) b);
+    this.stream.write(this.buffer2);
+  }
+
+  private void writeU16BEp(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(2L, name);
+    this.buffer2w.order(BIG_ENDIAN);
+    this.buffer2w.putChar(0, (char) b);
+    this.stream.write(this.buffer2);
+  }
+
+  @Override
+  public void writeS16LE(final int b)
+    throws IOException
+  {
+    this.writeS16LEp(null, b);
+  }
+
+  @Override
+  public void writeS16BE(final int b)
+    throws IOException
+  {
+    this.writeS16BEp(null, b);
+  }
+
+  @Override
+  public void writeU16LE(final int b)
+    throws IOException
+  {
+    this.writeU16LEp(null, b);
+  }
+
+  @Override
+  public void writeU16BE(final int b)
+    throws IOException
+  {
+    this.writeU16BEp(null, b);
+  }
+
+  @Override
+  public void writeS16LE(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.writeS16LEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeS16BE(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.writeS16BEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeU16LE(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.writeU16LEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeU16BE(
+    final String name,
+    final int b)
+    throws IOException
+  {
+    this.writeU16BEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  private void writeS32LEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(4L, name);
+    this.buffer4w.order(LITTLE_ENDIAN);
+    this.buffer4w.putInt(0, (int) b);
+    this.stream.write(this.buffer4);
+  }
+
+  private void writeU32LEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(4L, name);
+    this.buffer4w.order(LITTLE_ENDIAN);
+    this.buffer4w.putInt(0, (int) (b & 0xffff_ffff));
+    this.stream.write(this.buffer4);
+  }
+
+  private void writeS32BEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(4L, name);
+    this.buffer4w.order(BIG_ENDIAN);
+    this.buffer4w.putInt(0, (int) b);
+    this.stream.write(this.buffer4);
+  }
+
+  private void writeU32BEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(4L, name);
+    this.buffer4w.order(BIG_ENDIAN);
+    this.buffer4w.putInt(0, (int) (b & 0xffff_ffff));
+    this.stream.write(this.buffer4);
+  }
+
+  @Override
+  public void writeS32LE(final long b)
+    throws IOException
+  {
+    this.writeS32LEp(null, b);
+  }
+
+  @Override
+  public void writeS32BE(final long b)
+    throws IOException
+  {
+    this.writeS32BEp(null, b);
+  }
+
+  @Override
+  public void writeU32LE(final long b)
+    throws IOException
+  {
+    this.writeU32LEp(null, b);
+  }
+
+  @Override
+  public void writeU32BE(final long b)
+    throws IOException
+  {
+    this.writeU32BEp(null, b);
+  }
+
+  @Override
+  public void writeS32LE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeS32LEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeS32BE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeS32BEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeU32LE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeU32LEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeU32BE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeU32BEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  private void writeS64LEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(8L, name);
+    this.buffer8w.order(LITTLE_ENDIAN);
+    this.buffer8w.putLong(0, b);
+    this.stream.write(this.buffer8);
+  }
+
+  private void writeU64LEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(8L, name);
+    this.buffer8w.order(LITTLE_ENDIAN);
+    this.buffer8w.putLong(0, b);
+    this.stream.write(this.buffer8);
+  }
+
+  private void writeS64BEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(8L, name);
+    this.buffer8w.order(BIG_ENDIAN);
+    this.buffer8w.putLong(0, b);
+    this.stream.write(this.buffer8);
+  }
+
+  private void writeU64BEp(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(8L, name);
+    this.buffer8w.order(BIG_ENDIAN);
+    this.buffer8w.putLong(0, b);
+    this.stream.write(this.buffer8);
+  }
+
+  @Override
+  public void writeS64LE(final long b)
+    throws IOException
+  {
+    this.writeS64LEp(null, b);
+  }
+
+  @Override
+  public void writeS64BE(final long b)
+    throws IOException
+  {
+    this.writeS64BEp(null, b);
+  }
+
+  @Override
+  public void writeU64LE(final long b)
+    throws IOException
+  {
+    this.writeU64LEp(null, b);
+  }
+
+  @Override
+  public void writeU64BE(final long b)
+    throws IOException
+  {
+    this.writeU64BEp(null, b);
+  }
+
+  @Override
+  public void writeS64LE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeS64LEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeS64BE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeS64BEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeU64LE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeU64LEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  @Override
+  public void writeU64BE(
+    final String name,
+    final long b)
+    throws IOException
+  {
+    this.writeU64BEp(Objects.requireNonNull(name, "name"), b);
+  }
+
+  private void writeBytesP(
+    final String name,
+    final byte[] buffer,
+    final int offset,
+    final int length)
+    throws IOException
+  {
+    Objects.requireNonNull(buffer, "buffer");
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(length, name);
+    this.stream.write(buffer, offset, length);
+  }
+
+  @Override
+  public void writeBytes(
+    final String name,
+    final byte[] buffer)
+    throws IOException
+  {
+    this.writeBytesP(Objects.requireNonNull(name, "name"), buffer, 0, buffer.length);
+  }
+
+  @Override
+  public void writeBytes(
+    final String name,
+    final byte[] buffer,
+    final int offset,
+    final int length)
+    throws IOException
+  {
+    this.writeBytesP(name, buffer, offset, length);
+  }
+
+  @Override
+  public void writeBytes(final byte[] buffer)
+    throws IOException
+  {
+    this.writeBytesP(null, buffer, 0, buffer.length);
+  }
+
+  @Override
+  public void writeBytes(
+    final byte[] buffer,
+    final int offset,
+    final int length)
+    throws IOException
+  {
+    this.writeBytesP(null, buffer, offset, length);
   }
 
   @Override
