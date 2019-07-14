@@ -252,9 +252,8 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
   private void checkHasBytesRemaining(final long want)
     throws IOException
   {
-    final var targetPosition = this.offsetRelative + want;
-    if (targetPosition > this.rangeRelative.upper()) {
-      throw this.outOfBounds(targetPosition, IOException::new);
+    if (want > this.bytesRemaining()) {
+      throw this.outOfBounds(this.offsetRelative + want, IOException::new);
     }
   }
 

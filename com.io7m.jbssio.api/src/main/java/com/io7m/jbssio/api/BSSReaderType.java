@@ -401,4 +401,12 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
 
   double readDLE()
     throws IOException, EOFException;
+
+  /**
+   * Retrieve the number of bytes available for reading.
+   *
+   * @return The number of bytes remaining
+   */
+
+  long bytesRemaining();
 }

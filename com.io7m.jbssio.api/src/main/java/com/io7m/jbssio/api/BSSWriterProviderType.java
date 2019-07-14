@@ -16,11 +16,51 @@
 
 package com.io7m.jbssio.api;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+
 /**
  * A provider of writers.
  */
 
 public interface BSSWriterProviderType
 {
-  
+  /**
+   * Create a new sequential writer from the given stream.
+   *
+   * @param uri    The URI of the stream
+   * @param stream The stream
+   * @param name   The name of the initial writer
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSWriterSequentialType createWriterFromStream(
+    URI uri,
+    OutputStream stream,
+    String name)
+    throws IOException;
+
+  /**
+   * Create a new sequential writer from the given stream.
+   *
+   * @param uri    The URI of the stream
+   * @param stream The stream
+   * @param name   The name of the initial writer
+   * @param size   The maximum number of bytes that can be written
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSWriterSequentialType createWriterFromStream(
+    URI uri,
+    OutputStream stream,
+    String name,
+    long size)
+    throws IOException;
 }

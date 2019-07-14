@@ -17,6 +17,9 @@
 package com.io7m.jbssio.api;
 
 import java.io.Closeable;
+import java.io.EOFException;
+import java.io.IOException;
+import java.util.OptionalLong;
 
 /**
  * The base type of byte stream structure writers.
@@ -39,7 +42,7 @@ public interface BSSWriterType extends Closeable, BSSAddressableType
 
   /**
    * @param name The path of the new writer
-   * @param size A limit on the number of bytes that can be read
+   * @param size A limit on the number of bytes that can be written
    *
    * @return A new writer that can write at most {@code size} bytes
    *
@@ -50,4 +53,103 @@ public interface BSSWriterType extends Closeable, BSSAddressableType
   BSSWriterType createSubWriter(
     String name,
     long size);
+
+  /**
+   * Skip {@code size} bytes of the input.
+   *
+   * The writer will not be allowed to seek beyond the specified limit.
+   *
+   * @param size The number of bytes to skip
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void skip(long size)
+    throws IOException;
+
+  /**
+   * Skip enough bytes to align the writer position to a multiple of {@code size}. If the writer is
+   * alwritey aligned, no bytes are skipped.
+   *
+   * The writer will not be allowed to seek beyond the specified limit.
+   *
+   * @param size The number of bytes to skip
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void align(int size)
+    throws IOException;
+
+  /**
+   * @return The size limit defined for this writer, if any
+   */
+
+  OptionalLong sizeLimit();
+
+  /**
+   * Write an 8-bit signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS8(int b)
+    throws IOException;
+
+  /**
+   * Write an 8-bit unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU8(int b)
+    throws IOException;
+
+  /**
+   * Write a named 8-bit signed integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException On I/O errors, or if an attempt is made to seek or write beyond the
+   *                     writer's limit
+   */
+
+  void writeS8(
+    String name,
+    int b)
+    throws IOException;
+
+  /**
+   * Write a named 8-bit unsigned integer.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeU8(
+    String name,
+    int b)
+    throws IOException;
 }

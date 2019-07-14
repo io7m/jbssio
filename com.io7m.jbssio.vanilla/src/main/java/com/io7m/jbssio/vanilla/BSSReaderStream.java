@@ -45,20 +45,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private final ByteBuffer buffer2w;
   private final URI uri;
 
-  static BSSReaderStream create(
-    final URI uri,
-    final InputStream inStream,
-    final String inName,
-    final long inSize)
-  {
-    final var boundedStream =
-      new BoundedInputStream(Objects.requireNonNull(inStream, "stream"), inSize);
-    final var wrappedStream =
-      new CountingInputStream(boundedStream);
-
-    return new BSSReaderStream(null, uri, inName, wrappedStream, inSize);
-  }
-
   private BSSReaderStream(
     final BSSReaderStream inParent,
     final URI inURI,
@@ -79,6 +65,28 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.buffer4w = ByteBuffer.wrap(this.buffer4);
     this.buffer2 = new byte[2];
     this.buffer2w = ByteBuffer.wrap(this.buffer2);
+  }
+
+  static BSSReaderStream create(
+    final URI uri,
+    final InputStream inStream,
+    final String inName,
+    final long inSize)
+  {
+    final var boundedStream =
+      new BoundedInputStream(Objects.requireNonNull(inStream, "stream"), inSize);
+    final var wrappedStream =
+      new CountingInputStream(boundedStream);
+
+    return new BSSReaderStream(null, uri, inName, wrappedStream, inSize);
+  }
+
+  private static void checkEOF(final int r)
+    throws EOFException
+  {
+    if (r == -1) {
+      throw new EOFException();
+    }
   }
 
   @Override
@@ -171,14 +179,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
       this.path(),
       Long.toUnsignedString(this.offsetAbsolute()),
       Long.toUnsignedString(this.offsetRelative()));
-  }
-
-  private static void checkEOF(final int r)
-    throws EOFException
-  {
-    if (r == -1) {
-      throw new EOFException();
-    }
   }
 
   private void checkNotShortRead(
@@ -417,6 +417,12 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkNotShortRead(8L, (long) r);
     this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
     return this.buffer8w.getDouble(0);
+  }
+
+  @Override
+  public long bytesRemaining()
+  {
+    return this.size - this.stream.getByteCount();
   }
 
   @Override

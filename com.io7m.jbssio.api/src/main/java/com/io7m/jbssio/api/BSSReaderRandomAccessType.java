@@ -58,12 +58,6 @@ public interface BSSReaderRandomAccessType extends BSSReaderType
     throws IOException;
 
   /**
-   * @return The number of bytes remaining
-   */
-
-  long bytesRemaining();
-
-  /**
    * Seek directly to the given position within the current reader.
    *
    * @param position The position
