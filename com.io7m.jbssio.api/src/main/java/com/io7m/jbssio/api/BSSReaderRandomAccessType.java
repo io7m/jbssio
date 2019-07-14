@@ -26,12 +26,15 @@ public interface BSSReaderRandomAccessType extends BSSReaderType
 {
   @Override
   BSSReaderRandomAccessType createSubReader(
-    String name);
+    String name)
+    throws IOException;
 
   @Override
   default BSSReaderRandomAccessType createSubReader(
     final String name,
-    final long size) {
+    final long size)
+    throws IOException
+  {
     return this.createSubReader(name, 0L, size);
   }
 
@@ -44,12 +47,15 @@ public interface BSSReaderRandomAccessType extends BSSReaderType
    * @param size   The maximum number of bytes
    *
    * @return A new sub reader
+   *
+   * @throws IOException On I/O errors
    */
 
   BSSReaderRandomAccessType createSubReader(
     String name,
     long offset,
-    long size);
+    long size)
+    throws IOException;
 
   /**
    * @return The number of bytes remaining

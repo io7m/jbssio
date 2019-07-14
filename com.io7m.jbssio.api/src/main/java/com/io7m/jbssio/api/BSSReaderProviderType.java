@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 
 /**
  * A provider of readers.
@@ -80,6 +82,43 @@ public interface BSSReaderProviderType
   BSSReaderRandomAccessType createReaderFromByteBuffer(
     URI uri,
     ByteBuffer buffer,
+    String name)
+    throws IOException;
+
+  /**
+   * Create a new random access reader from the given file channel. Implementation are encouraged
+   * to use memory mapping for higher performance.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The file channel
+   * @param name    The name of the initial reader
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createReaderFromFileChannel(
+    URI uri,
+    FileChannel channel,
+    String name)
+    throws IOException;
+
+  /**
+   * Create a new random access reader from the given seekable byte channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial reader
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createReaderFromSeekableChannel(
+    URI uri,
+    SeekableByteChannel channel,
     String name)
     throws IOException;
 }

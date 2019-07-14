@@ -21,9 +21,12 @@ import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
 import org.osgi.service.component.annotations.Component;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 
 /**
@@ -76,6 +79,32 @@ public final class BSSReaders implements BSSReaderProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(buffer, "buffer");
     Objects.requireNonNull(name, "path");
-    return BSSReaderByteBuffer.create(uri, buffer, name);
+    return BSSReaderByteBuffer.createFromByteBuffer(uri, buffer, name);
+  }
+
+  @Override
+  public BSSReaderRandomAccessType createReaderFromFileChannel(
+    final URI uri,
+    final FileChannel channel,
+    final String name)
+    throws IOException
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(channel, "channel");
+    Objects.requireNonNull(name, "path");
+    return BSSReaderByteBuffer.createFromFileChannel(uri, channel, name);
+  }
+
+  @Override
+  public BSSReaderRandomAccessType createReaderFromSeekableChannel(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name)
+    throws IOException
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(channel, "channel");
+    Objects.requireNonNull(name, "path");
+    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name);
   }
 }

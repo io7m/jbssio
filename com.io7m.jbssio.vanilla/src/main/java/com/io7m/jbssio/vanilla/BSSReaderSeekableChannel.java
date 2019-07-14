@@ -23,31 +23,35 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
+final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
 {
   private final String path;
-  private final ByteBuffer map;
+  private final SeekableByteChannel channel;
+  private final ByteBuffer buffer;
   private final AtomicBoolean closed;
   private final Callable<Void> onClose;
-  private final BSSReaderByteBuffer parent;
+  private final BSSReaderSeekableChannel parent;
   private final URI uri;
   private final RangeHalfOpenL rangeRelative;
   private long offsetRelative;
 
-  private BSSReaderByteBuffer(
-    final BSSReaderByteBuffer inParent,
+  private BSSReaderSeekableChannel(
+    final BSSReaderSeekableChannel inParent,
     final URI inURI,
     final RangeHalfOpenL inRange,
     final String inName,
-    final ByteBuffer inMap,
+    final SeekableByteChannel inChannel,
+    final ByteBuffer inBuffer,
     final AtomicBoolean inClosed,
     final Callable<Void> inOnClose)
   {
@@ -59,8 +63,10 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
       Objects.requireNonNull(inRange, "inRange");
     this.path =
       Objects.requireNonNull(inName, "inName");
-    this.map =
-      Objects.requireNonNull(inMap, "map");
+    this.channel =
+      Objects.requireNonNull(inChannel, "channel");
+    this.buffer =
+      Objects.requireNonNull(inBuffer, "buffer");
     this.closed =
       Objects.requireNonNull(inClosed, "closed");
     this.onClose =
@@ -69,36 +75,23 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.offsetRelative = 0L;
   }
 
-  static BSSReaderRandomAccessType createFromByteBuffer(
+  static BSSReaderRandomAccessType createFromChannel(
     final URI uri,
-    final ByteBuffer buffer,
-    final String name)
-  {
-    return new BSSReaderByteBuffer(
-      null,
-      uri,
-      RangeHalfOpenL.of(0L, Integer.toUnsignedLong(buffer.capacity())),
-      name,
-      buffer,
-      new AtomicBoolean(false),
-      () -> null);
-  }
-
-  static BSSReaderRandomAccessType createFromFileChannel(
-    final URI uri,
-    final FileChannel channel,
+    final SeekableByteChannel channel,
     final String name)
     throws IOException
   {
+    final var buffer = ByteBuffer.allocateDirect(8);
     final var size = channel.size();
-    final var map = channel.map(FileChannel.MapMode.READ_ONLY, 0L, size);
     final var closed = new AtomicBoolean(false);
-    return new BSSReaderByteBuffer(
+
+    return new BSSReaderSeekableChannel(
       null,
       uri,
       RangeHalfOpenL.of(0L, size),
       name,
-      map,
+      channel,
+      buffer,
       closed,
       () -> {
         if (closed.compareAndSet(false, true)) {
@@ -132,12 +125,13 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
         .append(inName)
         .toString();
 
-    return new BSSReaderByteBuffer(
+    return new BSSReaderSeekableChannel(
       this,
       this.uri,
       this.rangeRelative,
       newName,
-      this.map,
+      this.channel,
+      this.buffer,
       this.closed,
       () -> null);
   }
@@ -188,12 +182,13 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
           .toString());
     }
 
-    return new BSSReaderByteBuffer(
+    return new BSSReaderSeekableChannel(
       this,
       this.uri,
       newRange,
       newName,
-      this.map,
+      this.channel,
+      this.buffer,
       this.closed,
       () -> null);
   }
@@ -209,7 +204,6 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     throws IOException
   {
     this.checkNotClosed();
-
     if (!this.rangeRelative.includesValue(position)) {
       throw this.outOfBounds(position, IOException::new);
     }
@@ -305,7 +299,13 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(1L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 1L;
-    return (int) this.map.get(Math.toIntExact(position));
+
+    this.buffer.position(0);
+    this.buffer.limit(1);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (int) this.buffer.get(0);
   }
 
   @Override
@@ -316,7 +316,13 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(1L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 1L;
-    return (int) this.map.get(Math.toIntExact(position)) & 0xff;
+
+    this.buffer.position(0);
+    this.buffer.limit(1);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (int) this.buffer.get(0) & 0xff;
   }
 
   @Override
@@ -327,8 +333,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return (int) this.map.getShort(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(2);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (int) this.buffer.getShort(0);
   }
 
   @Override
@@ -339,8 +351,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return (int) this.map.getChar(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(2);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (int) this.buffer.getChar(0);
   }
 
   @Override
@@ -351,8 +369,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return (long) this.map.getInt(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (long) this.buffer.getInt(0);
   }
 
   @Override
@@ -363,8 +387,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return (long) (this.map.getInt(Math.toIntExact(position))) & 0xffff_ffffL;
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (long) this.buffer.getInt(0) & 0xffff_ffffL;
   }
 
   @Override
@@ -375,8 +405,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return this.map.getLong(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getLong(0);
   }
 
   @Override
@@ -387,8 +423,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return this.map.getLong(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getLong(0);
   }
 
   @Override
@@ -399,8 +441,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return (int) this.map.getShort(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(2);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (int) this.buffer.getShort(0);
   }
 
   @Override
@@ -411,8 +459,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return (int) this.map.getChar(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(2);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (int) this.buffer.getChar(0);
   }
 
   @Override
@@ -423,8 +477,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return (long) this.map.getInt(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (long) this.buffer.getInt(0);
   }
 
   @Override
@@ -435,8 +495,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return (long) (this.map.getInt(Math.toIntExact(position))) & 0xffff_ffffL;
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return (long) this.buffer.getInt(0) & 0xffff_ffffL;
   }
 
   @Override
@@ -447,8 +513,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return this.map.getLong(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getLong(0);
   }
 
   @Override
@@ -459,23 +531,32 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return this.map.getLong(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getLong(0);
   }
 
   @Override
   public int readBytes(
-    final byte[] buffer,
+    final byte[] inBuffer,
     final int offset,
     final int length)
     throws IOException, EOFException
   {
     this.checkNotClosed();
-    final var llong = Integer.toUnsignedLong(length);
-    this.checkHasBytesRemaining(llong);
-    this.map.get(buffer, offset, length);
-    this.offsetRelative += llong;
-    return length;
+    final var llength = Integer.toUnsignedLong(length);
+    this.checkHasBytesRemaining(llength);
+    final var position = this.offsetAbsolute();
+    this.offsetRelative += llength;
+
+    final var wrapper = ByteBuffer.wrap(inBuffer);
+    this.channel.position(position);
+    return this.channel.read(wrapper);
   }
 
   @Override
@@ -486,8 +567,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return this.map.getFloat(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getFloat(0);
   }
 
   @Override
@@ -498,8 +585,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return this.map.getFloat(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getFloat(0);
   }
 
   @Override
@@ -510,8 +603,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
-    this.map.order(ByteOrder.BIG_ENDIAN);
-    return this.map.getDouble(Math.toIntExact(position));
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getDouble(0);
   }
 
   @Override
@@ -522,8 +621,14 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     this.checkHasBytesRemaining(8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
-    return this.map.getDouble(Math.toIntExact(position));
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getDouble(0);
   }
 
   @Override
@@ -558,12 +663,12 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
   public void close()
     throws IOException
   {
-    try {
-      this.onClose.call();
-    } catch (final IOException e) {
-      throw e;
-    } catch (final Exception e) {
-      throw new IOException(e);
-    }
+      try {
+        this.onClose.call();
+      } catch (final IOException e) {
+        throw e;
+      } catch (final Exception e) {
+        throw new IOException(e);
+      }
   }
 }

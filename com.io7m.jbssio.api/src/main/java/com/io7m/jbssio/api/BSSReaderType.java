@@ -34,10 +34,13 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
    * @param name The path of the new reader
    *
    * @return A new reader
+   *
+   * @throws IOException On I/O errors
    */
 
   BSSReaderType createSubReader(
-    String name);
+    String name)
+    throws IOException;
 
   /**
    * @param name The path of the new reader
@@ -47,11 +50,13 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
    *
    * @throws IllegalArgumentException If the number of bytes exceeds the limit of the current
    *                                  reader
+   * @throws IOException              On I/O errors
    */
 
   BSSReaderType createSubReader(
     String name,
-    long size);
+    long size)
+    throws IOException;
 
   /**
    * Skip {@code size} bytes of the input.

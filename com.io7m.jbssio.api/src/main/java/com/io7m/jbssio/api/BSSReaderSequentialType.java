@@ -16,6 +16,8 @@
 
 package com.io7m.jbssio.api;
 
+import java.io.IOException;
+
 /**
  * The type of sequential readers.
  */
@@ -24,10 +26,12 @@ public interface BSSReaderSequentialType extends BSSReaderType
 {
   @Override
   BSSReaderSequentialType createSubReader(
-    String name);
+    String name)
+    throws IOException;
 
   @Override
   BSSReaderSequentialType createSubReader(
     String name,
-    long size);
+    long size)
+    throws IOException;
 }

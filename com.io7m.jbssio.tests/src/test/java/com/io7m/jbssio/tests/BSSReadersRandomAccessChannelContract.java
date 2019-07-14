@@ -16,6 +16,7 @@
 
 package com.io7m.jbssio.tests;
 
+import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.vanilla.BSSReaders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,23 +24,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.Channel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 
-public final class BSSReadersRandomAccessTest
+public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 {
-  private static final Logger LOG = LoggerFactory.getLogger(BSSReadersRandomAccessTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(
+    BSSReadersRandomAccessChannelContract.class);
+
+  protected abstract T channelOf(byte[] data) throws IOException;
+
+  protected abstract BSSReaderRandomAccessType readerOf(T channel)
+    throws IOException;
 
   @Test
   public void testEmptyStream()
     throws Exception
   {
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(new byte[0]);
+    
+    final var stream = this.channelOf(new byte[0]);
 
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.offsetAbsolute());
       Assertions.assertEquals(0L, reader.offsetRelative());
     }
@@ -54,9 +64,9 @@ public final class BSSReadersRandomAccessTest
       data[index] = (byte) index;
     }
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       try (var s0 = reader.createSubReader("x")) {
         try (var s1 = s0.createSubReader("y")) {
           try (var s2 = s1.createSubReader("z")) {
@@ -79,9 +89,9 @@ public final class BSSReadersRandomAccessTest
       data[index] = (byte) index;
     }
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.offsetAbsolute());
       Assertions.assertEquals(0L, reader.offsetRelative());
       LOG.debug("reader:    {}", reader);
@@ -171,9 +181,9 @@ public final class BSSReadersRandomAccessTest
       data[index] = (byte) index;
     }
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       try (var subReader = reader.createSubReader("s", 4L)) {
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
@@ -214,9 +224,9 @@ public final class BSSReadersRandomAccessTest
       data[index] = (byte) index;
     }
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       try (var subReader = reader.createSubReader("s", 4L)) {
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
@@ -255,9 +265,9 @@ public final class BSSReadersRandomAccessTest
       data[index] = (byte) index;
     }
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.offsetAbsolute());
       Assertions.assertEquals(0L, reader.offsetRelative());
       LOG.debug("reader:    {}", reader);
@@ -278,9 +288,9 @@ public final class BSSReadersRandomAccessTest
   {
     final var data = new byte[16];
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       reader.skip(4L);
       reader.skip(4L);
       reader.skip(4L);
@@ -295,9 +305,9 @@ public final class BSSReadersRandomAccessTest
   {
     final var data = new byte[16];
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       for (var index = 0L; index < 16L; ++index) {
         reader.seekTo(index);
       }
@@ -311,9 +321,9 @@ public final class BSSReadersRandomAccessTest
   {
     final var data = new byte[9];
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       reader.skip(1L);
       Assertions.assertEquals(1L, reader.offsetAbsolute());
       Assertions.assertEquals(1L, reader.offsetRelative());
@@ -348,9 +358,9 @@ public final class BSSReadersRandomAccessTest
   {
     final var data = new byte[0];
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.bytesRemaining());
       Assertions.assertThrows(IOException.class, reader::readS16BE);
       Assertions.assertThrows(IOException.class, reader::readS16LE);
@@ -377,9 +387,8 @@ public final class BSSReadersRandomAccessTest
     data[0] = Byte.MIN_VALUE;
     data[1] = Byte.MAX_VALUE;
 
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8());
       Assertions.assertEquals(31L, reader.bytesRemaining());
@@ -396,8 +405,8 @@ public final class BSSReadersRandomAccessTest
     data.putShort(0, Short.MIN_VALUE);
     data.putShort(2, Short.MAX_VALUE);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE());
       Assertions.assertEquals(30L, reader.bytesRemaining());
@@ -414,8 +423,8 @@ public final class BSSReadersRandomAccessTest
     data.putInt(0, Integer.MIN_VALUE);
     data.putInt(4, Integer.MAX_VALUE);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE());
       Assertions.assertEquals(28L, reader.bytesRemaining());
@@ -432,8 +441,8 @@ public final class BSSReadersRandomAccessTest
     data.putLong(0, Long.MIN_VALUE);
     data.putLong(8, Long.MAX_VALUE);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE());
       Assertions.assertEquals(24L, reader.bytesRemaining());
@@ -449,8 +458,8 @@ public final class BSSReadersRandomAccessTest
     data.putShort(0, Short.MIN_VALUE);
     data.putShort(2, Short.MAX_VALUE);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE());
       Assertions.assertEquals(30L, reader.bytesRemaining());
@@ -466,8 +475,8 @@ public final class BSSReadersRandomAccessTest
     data.putInt(0, Integer.MIN_VALUE);
     data.putInt(4, Integer.MAX_VALUE);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE());
       Assertions.assertEquals(28L, reader.bytesRemaining());
@@ -483,8 +492,8 @@ public final class BSSReadersRandomAccessTest
     data.putLong(0, Long.MIN_VALUE);
     data.putLong(8, Long.MAX_VALUE);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE());
       Assertions.assertEquals(24L, reader.bytesRemaining());
@@ -499,10 +508,9 @@ public final class BSSReadersRandomAccessTest
     final var data = new byte[32];
     data[0] = 0;
     data[1] = (byte) 0xff;
-
-    final var readers = new BSSReaders();
-    final var stream = ByteBuffer.wrap(data);
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+    
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0, reader.readU8());
       Assertions.assertEquals(31L, reader.bytesRemaining());
@@ -518,8 +526,8 @@ public final class BSSReadersRandomAccessTest
     data.putChar(0, (char) 0);
     data.putChar(2, (char) 0xffff);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0, reader.readU16LE());
       Assertions.assertEquals(30L, reader.bytesRemaining());
@@ -535,8 +543,8 @@ public final class BSSReadersRandomAccessTest
     data.putInt(0, 0);
     data.putInt(4, 0xffff_ffff);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0L, reader.readU32LE());
       Assertions.assertEquals(28L, reader.bytesRemaining());
@@ -552,8 +560,8 @@ public final class BSSReadersRandomAccessTest
     data.putLong(0, 0L);
     data.putLong(8, 0xffff_ffff_ffff_ffffL);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0L, reader.readU64LE());
       Assertions.assertEquals(24L, reader.bytesRemaining());
@@ -569,8 +577,8 @@ public final class BSSReadersRandomAccessTest
     data.putChar(0, (char) 0);
     data.putChar(2, (char) 0xffff);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0, reader.readU16BE());
       Assertions.assertEquals(30L, reader.bytesRemaining());
@@ -586,8 +594,8 @@ public final class BSSReadersRandomAccessTest
     data.putInt(0, 0);
     data.putInt(4, 0xffff_ffff);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0L, reader.readU32BE());
       Assertions.assertEquals(28L, reader.bytesRemaining());
@@ -603,8 +611,8 @@ public final class BSSReadersRandomAccessTest
     data.putLong(0, 0L);
     data.putLong(8, 0xffff_ffff_ffff_ffffL);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(0L, reader.readU64BE());
       Assertions.assertEquals(24L, reader.bytesRemaining());
@@ -619,8 +627,8 @@ public final class BSSReadersRandomAccessTest
     final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
     data.putDouble(0, 1000.0);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(1000.0, reader.readDBE());
       Assertions.assertEquals(24L, reader.bytesRemaining());
@@ -634,8 +642,9 @@ public final class BSSReadersRandomAccessTest
     final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
     data.putDouble(0, 1000.0);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(1000.0, reader.readDLE());
       Assertions.assertEquals(24L, reader.bytesRemaining());
@@ -649,8 +658,8 @@ public final class BSSReadersRandomAccessTest
     final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
     data.putFloat(0, 1000.0f);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(1000.0f, reader.readFBE());
       Assertions.assertEquals(28L, reader.bytesRemaining());
@@ -664,8 +673,8 @@ public final class BSSReadersRandomAccessTest
     final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
     data.putFloat(0, 1000.0f);
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(1000.0f, reader.readFLE());
       Assertions.assertEquals(28L, reader.bytesRemaining());
@@ -679,8 +688,8 @@ public final class BSSReadersRandomAccessTest
     final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
     final var buffer = new byte[16];
 
-    final var readers = new BSSReaders();
-    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(16, reader.readBytes(buffer, 0, buffer.length));
       Assertions.assertEquals(16L, reader.bytesRemaining());
