@@ -366,7 +366,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      Assertions.assertEquals(0L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
       Assertions.assertThrows(IOException.class, reader::readS16BE);
       Assertions.assertThrows(IOException.class, reader::readS16LE);
       Assertions.assertThrows(IOException.class, reader::readS32BE);
@@ -447,11 +447,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8());
-      Assertions.assertEquals(31L, reader.bytesRemaining());
+      Assertions.assertEquals(31L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Byte.MAX_VALUE, reader.readS8());
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -465,11 +465,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE());
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MAX_VALUE, reader.readS16LE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -483,11 +483,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32LE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -501,9 +501,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MAX_VALUE, reader.readS64LE());
     }
   }
@@ -518,9 +518,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE());
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MAX_VALUE, reader.readS16BE());
     }
   }
@@ -535,9 +535,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32BE());
     }
   }
@@ -552,9 +552,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MAX_VALUE, reader.readS64BE());
     }
   }
@@ -569,9 +569,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0, reader.readU8());
-      Assertions.assertEquals(31L, reader.bytesRemaining());
+      Assertions.assertEquals(31L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xff, reader.readU8());
     }
   }
@@ -586,9 +586,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0, reader.readU16LE());
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff, reader.readU16LE());
     }
   }
@@ -603,9 +603,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU32LE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffffL, reader.readU32LE());
     }
   }
@@ -620,9 +620,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU64LE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64LE());
     }
   }
@@ -637,9 +637,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0, reader.readU16BE());
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff, reader.readU16BE());
     }
   }
@@ -654,9 +654,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU32BE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffffL, reader.readU32BE());
     }
   }
@@ -671,9 +671,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU64BE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64BE());
     }
   }
@@ -687,9 +687,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0, reader.readDBE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -703,9 +703,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
     final var channel = this.channelOf(data.array());
 
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0, reader.readDLE());
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -718,9 +718,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0f, reader.readFBE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -733,9 +733,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0f, reader.readFLE());
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -748,11 +748,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(16, reader.readBytes(buffer, 0, buffer.length));
-      Assertions.assertEquals(16L, reader.bytesRemaining());
+      Assertions.assertEquals(16L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(16, reader.readBytes(buffer));
-      Assertions.assertEquals(0L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
       Assertions.assertThrows(IOException.class, () -> reader.readBytes(buffer));
     }
   }
@@ -767,11 +767,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8("q"));
-      Assertions.assertEquals(31L, reader.bytesRemaining());
+      Assertions.assertEquals(31L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Byte.MAX_VALUE, reader.readS8("q"));
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -785,11 +785,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE("q"));
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MAX_VALUE, reader.readS16LE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -803,11 +803,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32LE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -821,9 +821,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MAX_VALUE, reader.readS64LE("q"));
     }
   }
@@ -838,9 +838,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE("q"));
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Short.MAX_VALUE, reader.readS16BE("q"));
     }
   }
@@ -855,9 +855,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32BE("q"));
     }
   }
@@ -872,9 +872,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(Long.MAX_VALUE, reader.readS64BE("q"));
     }
   }
@@ -889,9 +889,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0, reader.readU8("q"));
-      Assertions.assertEquals(31L, reader.bytesRemaining());
+      Assertions.assertEquals(31L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xff, reader.readU8("q"));
     }
   }
@@ -906,9 +906,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0, reader.readU16LE("q"));
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff, reader.readU16LE("q"));
     }
   }
@@ -923,9 +923,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU32LE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffffL, reader.readU32LE("q"));
     }
   }
@@ -940,9 +940,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU64LE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64LE("q"));
     }
   }
@@ -957,9 +957,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0, reader.readU16BE("q"));
-      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff, reader.readU16BE("q"));
     }
   }
@@ -974,9 +974,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU32BE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffffL, reader.readU32BE("q"));
     }
   }
@@ -991,9 +991,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0L, reader.readU64BE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64BE("q"));
     }
   }
@@ -1007,9 +1007,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0, reader.readDBE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -1023,9 +1023,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
     final var channel = this.channelOf(data.array());
 
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0, reader.readDLE("q"));
-      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -1038,9 +1038,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0f, reader.readFBE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -1053,9 +1053,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0f, reader.readFLE("q"));
-      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
 
@@ -1068,11 +1068,11 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
-      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(16, reader.readBytes("q", buffer, 0, buffer.length));
-      Assertions.assertEquals(16L, reader.bytesRemaining());
+      Assertions.assertEquals(16L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(16, reader.readBytes("q", buffer));
-      Assertions.assertEquals(0L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
       Assertions.assertThrows(IOException.class, () -> reader.readBytes("q", buffer));
     }
   }

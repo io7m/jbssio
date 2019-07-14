@@ -28,6 +28,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class BSSReaderStream implements BSSReaderSequentialType
@@ -36,7 +37,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private final String path;
   private final CountingInputStream stream;
   private final AtomicBoolean closed;
-  private final long size;
+  private final OptionalLong size;
   private final byte[] buffer8;
   private final byte[] buffer4;
   private final byte[] buffer2;
@@ -50,14 +51,20 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final URI inURI,
     final String inName,
     final CountingInputStream inStream,
-    final long inSize)
+    final OptionalLong inSize)
   {
-    this.uri = Objects.requireNonNull(inURI, "uri");
     this.parent = inParent;
-    this.path = Objects.requireNonNull(inName, "path");
-    this.stream = Objects.requireNonNull(inStream, "inStream");
+
+    this.uri =
+      Objects.requireNonNull(inURI, "uri");
+    this.path =
+      Objects.requireNonNull(inName, "path");
+    this.stream =
+      Objects.requireNonNull(inStream, "inStream");
+    this.size =
+      Objects.requireNonNull(inSize, "inSize");
+
     this.closed = new AtomicBoolean(false);
-    this.size = inSize;
 
     this.buffer8 = new byte[8];
     this.buffer8w = ByteBuffer.wrap(this.buffer8);
@@ -71,13 +78,18 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final URI uri,
     final InputStream inStream,
     final String inName,
-    final long inSize)
+    final OptionalLong inSize)
   {
-    final var boundedStream =
-      new BoundedInputStream(Objects.requireNonNull(inStream, "stream"), inSize);
-    final var wrappedStream =
-      new CountingInputStream(boundedStream);
+    Objects.requireNonNull(inStream, "stream");
 
+    final InputStream boundedStream;
+    if (inSize.isPresent()) {
+      boundedStream = new BoundedInputStream(inStream, inSize.getAsLong());
+    } else {
+      boundedStream = inStream;
+    }
+
+    final var wrappedStream = new CountingInputStream(boundedStream);
     return new BSSReaderStream(null, uri, inName, wrappedStream, inSize);
   }
 
@@ -115,25 +127,27 @@ final class BSSReaderStream implements BSSReaderSequentialType
   {
     Objects.requireNonNull(inName, "inName");
 
-    if (Long.compareUnsigned(newSize, this.size) > 0) {
-      final var lineSeparator = System.lineSeparator();
-      throw new IllegalArgumentException(
-        new StringBuilder(128)
-          .append("Sub-reader bounds cannot exceed the bounds of this reader.")
-          .append(lineSeparator)
-          .append("  Reader URI: ")
-          .append(this.uri)
-          .append(lineSeparator)
-          .append("  Reader path: ")
-          .append(this.path)
-          .append(lineSeparator)
-          .append("  Reader size limit: ")
-          .append(Long.toUnsignedString(this.size))
-          .append(lineSeparator)
-          .append("  Requested size limit: ")
-          .append(Long.toUnsignedString(newSize))
-          .toString());
-    }
+    this.size.ifPresent(currentSize -> {
+      if (Long.compareUnsigned(newSize, currentSize) > 0) {
+        final var lineSeparator = System.lineSeparator();
+        throw new IllegalArgumentException(
+          new StringBuilder(128)
+            .append("Sub-reader bounds cannot exceed the bounds of this reader.")
+            .append(lineSeparator)
+            .append("  Reader URI: ")
+            .append(this.uri)
+            .append(lineSeparator)
+            .append("  Reader path: ")
+            .append(this.path)
+            .append(lineSeparator)
+            .append("  Reader size limit: ")
+            .append(Long.toUnsignedString(currentSize))
+            .append(lineSeparator)
+            .append("  Requested size limit: ")
+            .append(Long.toUnsignedString(newSize))
+            .toString());
+      }
+    });
 
     final var boundedStream =
       new BoundedInputStream(new CloseShieldInputStream(this.stream), newSize);
@@ -147,7 +161,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
         .append(inName)
         .toString();
 
-    return new BSSReaderStream(this, this.uri, newName, wrappedStream, newSize);
+    return new BSSReaderStream(this, this.uri, newName, wrappedStream, OptionalLong.of(newSize));
   }
 
   @Override
@@ -684,9 +698,11 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
-  public long bytesRemaining()
+  public OptionalLong bytesRemaining()
   {
-    return this.size - this.stream.getByteCount();
+    return this.size.stream()
+      .map(s -> s - this.stream.getByteCount())
+      .findFirst();
   }
 
   @Override

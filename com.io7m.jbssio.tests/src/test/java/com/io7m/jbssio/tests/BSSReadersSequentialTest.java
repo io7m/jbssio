@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.OptionalLong;
 
 public final class BSSReadersSequentialTest
 {
@@ -52,6 +53,7 @@ public final class BSSReadersSequentialTest
       try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
         Assertions.assertEquals(0L, reader.offsetAbsolute());
         Assertions.assertEquals(0L, reader.offsetRelative());
+        Assertions.assertEquals(OptionalLong.empty(), reader.bytesRemaining());
       }
     }
   }
@@ -99,6 +101,8 @@ public final class BSSReadersSequentialTest
         LOG.debug("reader:    {}", reader);
 
         try (var subReader = reader.createSubReader("s", 4L)) {
+          Assertions.assertEquals(OptionalLong.of(4L), subReader.bytesRemaining());
+
           Assertions.assertEquals(0L, subReader.offsetRelative());
           Assertions.assertEquals(0L, subReader.offsetAbsolute());
           Assertions.assertEquals(0L, reader.offsetAbsolute());
@@ -136,6 +140,8 @@ public final class BSSReadersSequentialTest
         }
 
         try (var subReader = reader.createSubReader("s")) {
+          Assertions.assertEquals(OptionalLong.empty(), subReader.bytesRemaining());
+
           Assertions.assertEquals(0L, subReader.offsetRelative());
           Assertions.assertEquals(4L, subReader.offsetAbsolute());
           Assertions.assertEquals(4L, reader.offsetAbsolute());
@@ -170,6 +176,8 @@ public final class BSSReadersSequentialTest
         }
 
         try (var subReader = reader.createSubReader("s", 4L)) {
+          Assertions.assertEquals(OptionalLong.of(4L), subReader.bytesRemaining());
+
           Assertions.assertEquals(0L, subReader.offsetRelative());
           Assertions.assertEquals(8L, subReader.offsetAbsolute());
           Assertions.assertEquals(8L, reader.offsetAbsolute());

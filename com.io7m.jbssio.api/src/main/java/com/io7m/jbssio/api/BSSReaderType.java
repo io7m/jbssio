@@ -19,6 +19,7 @@ package com.io7m.jbssio.api;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.OptionalLong;
 
 /**
  * The base type of byte stream structure readers.
@@ -403,13 +404,14 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
     throws IOException, EOFException;
 
   /**
-   * Retrieve the number of bytes available for reading.
+   * Retrieve the number of bytes available for reading. The value is only available for sources
+   * that are bounded. That is; the sources are either fixed-size files, or are sources for which
+   * a bound has been explicitly specified.
    *
    * @return The number of bytes remaining
    */
 
-  long bytesRemaining();
-
+  OptionalLong bytesRemaining();
 
   /**
    * Read an 8-bit signed integer.

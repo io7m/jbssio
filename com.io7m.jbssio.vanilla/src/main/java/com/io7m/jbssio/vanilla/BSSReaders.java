@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
+import java.util.OptionalLong;
 
 /**
  * A default provider of readers.
@@ -54,7 +55,7 @@ public final class BSSReaders implements BSSReaderProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(stream, "stream");
     Objects.requireNonNull(name, "path");
-    return BSSReaderStream.create(uri, stream, name, 0xffff_ffff_ffff_ffffL);
+    return BSSReaderStream.create(uri, stream, name, OptionalLong.empty());
   }
 
   @Override
@@ -67,7 +68,7 @@ public final class BSSReaders implements BSSReaderProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(stream, "stream");
     Objects.requireNonNull(name, "path");
-    return BSSReaderStream.create(uri, stream, name, size);
+    return BSSReaderStream.create(uri, stream, name, OptionalLong.of(size));
   }
 
   @Override

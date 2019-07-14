@@ -27,6 +27,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -199,9 +200,9 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
   }
 
   @Override
-  public long bytesRemaining()
+  public OptionalLong bytesRemaining()
   {
-    return this.rangeRelative.upper() - this.offsetRelative;
+    return OptionalLong.of(this.rangeRelative.upper() - this.offsetRelative);
   }
 
   @Override
@@ -254,8 +255,12 @@ final class BSSReaderByteBuffer implements BSSReaderRandomAccessType
     final long want)
     throws IOException
   {
-    if (want > this.bytesRemaining()) {
-      throw this.outOfBounds(this.offsetRelative + want, name, IOException::new);
+    final var remaining = this.bytesRemaining();
+    if (remaining.isPresent()) {
+      final var size = remaining.getAsLong();
+      if (want > size) {
+        throw this.outOfBounds(this.offsetRelative + want, name, IOException::new);
+      }
     }
   }
 
