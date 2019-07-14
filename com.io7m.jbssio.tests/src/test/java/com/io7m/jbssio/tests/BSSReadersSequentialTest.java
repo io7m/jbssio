@@ -37,6 +37,7 @@ public final class BSSReadersSequentialTest
     final Exception e,
     final String text)
   {
+    LOG.debug("ex: ", e);
     Assertions.assertTrue(
       e.getMessage().contains(text),
       "Exception message " + e.getMessage() + " contains " + text);

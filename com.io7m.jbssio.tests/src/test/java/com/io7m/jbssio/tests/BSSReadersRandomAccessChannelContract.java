@@ -36,6 +36,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
     final Exception e,
     final String text)
   {
+    LOG.debug("ex: ", e);
     Assertions.assertTrue(
       e.getMessage().contains(text),
       "Exception message " + e.getMessage() + " contains " + text);
