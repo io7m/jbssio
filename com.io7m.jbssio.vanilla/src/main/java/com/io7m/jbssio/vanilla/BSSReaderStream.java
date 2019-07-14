@@ -155,7 +155,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     throws IOException, EOFException
   {
     final var r = this.stream.skip(skipSize);
-    this.checkNotShortRead(skipSize, r);
+    this.checkNotShortRead(null, skipSize, r);
   }
 
   @Override
@@ -182,39 +182,55 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   private void checkNotShortRead(
+    final String name,
     final long expected,
     final long received)
     throws IOException
   {
     if (expected != received) {
       final var lineSeparator = System.lineSeparator();
-      throw new IOException(
-        new StringBuilder(128)
-          .append("Short read.")
-          .append(lineSeparator)
-          .append("  Reader URI: ")
-          .append(this.uri())
-          .append(lineSeparator)
-          .append("  Reader path: ")
-          .append(this.path())
-          .append(lineSeparator)
-          .append("  Offset: 0x")
-          .append(Long.toUnsignedString(this.offsetAbsolute(), 16))
-          .append(lineSeparator)
-          .append("  Expected: ")
-          .append(expected)
-          .append(" octets")
-          .append(lineSeparator)
-          .append("  Received: ")
-          .append(received)
-          .append(" octets")
-          .append(lineSeparator)
-          .toString());
+      final var stringBuilder = new StringBuilder(128);
+
+      stringBuilder
+        .append("Short read.")
+        .append(lineSeparator)
+        .append("  Reader URI: ")
+        .append(this.uri())
+        .append(lineSeparator);
+
+      stringBuilder
+        .append("  Reader path: ")
+        .append(this.path());
+
+      if (name != null) {
+        stringBuilder
+          .append(":")
+          .append(name);
+      }
+      stringBuilder.append(lineSeparator);
+
+      stringBuilder
+        .append("  Offset: 0x")
+        .append(Long.toUnsignedString(this.offsetAbsolute(), 16))
+        .append(lineSeparator);
+
+      stringBuilder
+        .append("  Expected: ")
+        .append(expected)
+        .append(" octets")
+        .append(lineSeparator);
+
+      stringBuilder
+        .append("  Received: ")
+        .append(received)
+        .append(" octets")
+        .append(lineSeparator);
+
+      throw new IOException(stringBuilder.toString());
     }
   }
 
-  @Override
-  public int readS8()
+  private int readS8p(final String name)
     throws IOException
   {
     final var r = this.stream.read();
@@ -222,8 +238,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     return (int) (byte) r;
   }
 
-  @Override
-  public int readU8()
+  private int readU8p(final String name)
     throws IOException
   {
     final var r = this.stream.read();
@@ -231,136 +246,429 @@ final class BSSReaderStream implements BSSReaderSequentialType
     return r & 0xff;
   }
 
+  private int readS16LEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer2, 0, 2);
+    checkEOF(r);
+    this.checkNotShortRead(name, 2L, (long) r);
+    this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
+    return (int) this.buffer2w.getShort(0);
+  }
+
+  private int readU16LEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer2, 0, 2);
+    checkEOF(r);
+    this.checkNotShortRead(name, 2L, (long) r);
+    this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
+    return (int) this.buffer2w.getChar(0);
+  }
+
+  private long readS32LEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(name, 4L, (long) r);
+    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
+    return (long) this.buffer4w.getInt(0);
+  }
+
+  private long readU32LEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(name, 4L, (long) r);
+    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
+    return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
+  }
+
+  private long readS64LEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(name, 8L, (long) r);
+    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
+    return this.buffer8w.getLong(0);
+  }
+
+  private long readU64LEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(name, 8L, (long) r);
+    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
+    return this.buffer8w.getLong(0);
+  }
+
+  private int readS16BEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer2, 0, 2);
+    checkEOF(r);
+    this.checkNotShortRead(name, 2L, (long) r);
+    this.buffer2w.order(ByteOrder.BIG_ENDIAN);
+    return (int) this.buffer2w.getShort(0);
+  }
+
+  private int readU16BEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer2, 0, 2);
+    checkEOF(r);
+    this.checkNotShortRead(name, 2L, (long) r);
+    this.buffer2w.order(ByteOrder.BIG_ENDIAN);
+    return (int) this.buffer2w.getChar(0);
+  }
+
+  private long readS32BEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(name, 4L, (long) r);
+    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
+    return (long) this.buffer4w.getInt(0);
+  }
+
+  private long readU32BEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(name, 4L, (long) r);
+    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
+    return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
+  }
+
+  private long readS64BEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(name, 8L, (long) r);
+    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
+    return this.buffer8w.getLong(0);
+  }
+
+  private long readU64BEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(name, 8L, (long) r);
+    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
+    return this.buffer8w.getLong(0);
+  }
+
+  private float readFBEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(name, 4L, (long) r);
+    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
+    return this.buffer4w.getFloat(0);
+  }
+
+  private float readFLEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer4, 0, 4);
+    checkEOF(r);
+    this.checkNotShortRead(name, 4L, (long) r);
+    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
+    return this.buffer4w.getFloat(0);
+  }
+
+  private double readDBEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(name, 8L, (long) r);
+    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
+    return this.buffer8w.getDouble(0);
+  }
+
+  private double readDLEp(final String name)
+    throws IOException
+  {
+    final var r = this.stream.read(this.buffer8, 0, 8);
+    checkEOF(r);
+    this.checkNotShortRead(name, 8L, (long) r);
+    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
+    return this.buffer8w.getDouble(0);
+  }
+
+  @Override
+  public int readS8()
+    throws IOException
+  {
+    return this.readS8p(null);
+  }
+
+  @Override
+  public int readU8()
+    throws IOException
+  {
+    return this.readU8p(null);
+  }
+
   @Override
   public int readS16LE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer2, 0, 2);
-    checkEOF(r);
-    this.checkNotShortRead(2L, (long) r);
-    this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
-    return (int) this.buffer2w.getShort(0);
+    return this.readS16LEp(null);
   }
 
   @Override
   public int readU16LE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer2, 0, 2);
-    checkEOF(r);
-    this.checkNotShortRead(2L, (long) r);
-    this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
-    return (int) this.buffer2w.getChar(0);
+    return this.readU16LEp(null);
   }
 
   @Override
   public long readS32LE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer4, 0, 4);
-    checkEOF(r);
-    this.checkNotShortRead(4L, (long) r);
-    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
-    return (long) this.buffer4w.getInt(0);
+    return this.readS32LEp(null);
   }
 
   @Override
   public long readU32LE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer4, 0, 4);
-    checkEOF(r);
-    this.checkNotShortRead(4L, (long) r);
-    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
-    return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
+    return this.readU32LEp(null);
   }
 
   @Override
   public long readS64LE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer8, 0, 8);
-    checkEOF(r);
-    this.checkNotShortRead(8L, (long) r);
-    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
-    return this.buffer8w.getLong(0);
+    return this.readS64LEp(null);
   }
 
   @Override
   public long readU64LE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer8, 0, 8);
-    checkEOF(r);
-    this.checkNotShortRead(8L, (long) r);
-    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
-    return this.buffer8w.getLong(0);
+    return this.readU64LEp(null);
   }
 
   @Override
   public int readS16BE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer2, 0, 2);
-    checkEOF(r);
-    this.checkNotShortRead(2L, (long) r);
-    this.buffer2w.order(ByteOrder.BIG_ENDIAN);
-    return (int) this.buffer2w.getShort(0);
+    return this.readS16BEp(null);
   }
 
   @Override
   public int readU16BE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer2, 0, 2);
-    checkEOF(r);
-    this.checkNotShortRead(2L, (long) r);
-    this.buffer2w.order(ByteOrder.BIG_ENDIAN);
-    return (int) this.buffer2w.getChar(0);
+    return this.readU16BEp(null);
   }
 
   @Override
   public long readS32BE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer4, 0, 4);
-    checkEOF(r);
-    this.checkNotShortRead(4L, (long) r);
-    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
-    return (long) this.buffer4w.getInt(0);
+    return this.readS32BEp(null);
   }
 
   @Override
   public long readU32BE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer4, 0, 4);
-    checkEOF(r);
-    this.checkNotShortRead(4L, (long) r);
-    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
-    return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
+    return this.readU32BEp(null);
   }
 
   @Override
   public long readS64BE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer8, 0, 8);
-    checkEOF(r);
-    this.checkNotShortRead(8L, (long) r);
-    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
-    return this.buffer8w.getLong(0);
+    return this.readS64BEp(null);
   }
 
   @Override
   public long readU64BE()
     throws IOException, EOFException
   {
-    final var r = this.stream.read(this.buffer8, 0, 8);
+    return this.readU64BEp(null);
+  }
+
+  @Override
+  public float readFBE()
+    throws IOException, EOFException
+  {
+    return this.readFBEp(null);
+  }
+
+  @Override
+  public float readFLE()
+    throws IOException, EOFException
+  {
+    return this.readFLEp(null);
+  }
+
+  @Override
+  public double readDBE()
+    throws IOException, EOFException
+  {
+    return this.readDBEp(null);
+  }
+
+  @Override
+  public double readDLE()
+    throws IOException, EOFException
+  {
+    return this.readDLEp(null);
+  }
+
+  @Override
+  public int readS8(final String name)
+    throws IOException
+  {
+    return this.readS8p(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readU8(final String name)
+    throws IOException
+  {
+    return this.readU8p(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readS16LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS16LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readU16LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU16LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS32LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS32LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU32LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU32LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS64LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS64LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU64LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU64LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readS16BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS16BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readU16BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU16BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS32BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS32BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU32BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU32BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS64BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS64BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU64BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU64BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public float readFBE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readFBEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public float readFLE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readFLEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public double readDBE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readDBEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public double readDLE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readDLEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readBytes(
+    final String name,
+    final byte[] buffer,
+    final int offset,
+    final int length)
+    throws IOException, EOFException
+  {
+    final var r = this.stream.read(buffer, offset, length);
     checkEOF(r);
-    this.checkNotShortRead(8L, (long) r);
-    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
-    return this.buffer8w.getLong(0);
+    return r;
   }
 
   @Override
@@ -373,50 +681,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final var r = this.stream.read(buffer, offset, length);
     checkEOF(r);
     return r;
-  }
-
-  @Override
-  public float readFBE()
-    throws IOException, EOFException
-  {
-    final var r = this.stream.read(this.buffer4, 0, 4);
-    checkEOF(r);
-    this.checkNotShortRead(4L, (long) r);
-    this.buffer4w.order(ByteOrder.BIG_ENDIAN);
-    return this.buffer4w.getFloat(0);
-  }
-
-  @Override
-  public float readFLE()
-    throws IOException, EOFException
-  {
-    final var r = this.stream.read(this.buffer4, 0, 4);
-    checkEOF(r);
-    this.checkNotShortRead(4L, (long) r);
-    this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
-    return this.buffer4w.getFloat(0);
-  }
-
-  @Override
-  public double readDBE()
-    throws IOException, EOFException
-  {
-    final var r = this.stream.read(this.buffer8, 0, 8);
-    checkEOF(r);
-    this.checkNotShortRead(8L, (long) r);
-    this.buffer8w.order(ByteOrder.BIG_ENDIAN);
-    return this.buffer8w.getDouble(0);
-  }
-
-  @Override
-  public double readDLE()
-    throws IOException, EOFException
-  {
-    final var r = this.stream.read(this.buffer8, 0, 8);
-    checkEOF(r);
-    this.checkNotShortRead(8L, (long) r);
-    this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
-    return this.buffer8w.getDouble(0);
   }
 
   @Override

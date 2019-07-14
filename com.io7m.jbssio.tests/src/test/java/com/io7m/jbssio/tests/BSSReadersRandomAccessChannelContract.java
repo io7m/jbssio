@@ -17,27 +17,32 @@
 package com.io7m.jbssio.tests;
 
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
-import com.io7m.jbssio.vanilla.BSSReaders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 
 public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 {
   private static final Logger LOG = LoggerFactory.getLogger(
     BSSReadersRandomAccessChannelContract.class);
 
-  protected abstract T channelOf(byte[] data) throws IOException;
+  private static void checkExceptionMessageContains(
+    final Exception e,
+    final String text)
+  {
+    Assertions.assertTrue(
+      e.getMessage().contains(text),
+      "Exception message " + e.getMessage() + " contains " + text);
+  }
+
+  protected abstract T channelOf(byte[] data)
+    throws IOException;
 
   protected abstract BSSReaderRandomAccessType readerOf(T channel)
     throws IOException;
@@ -46,7 +51,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
   public void testEmptyStream()
     throws Exception
   {
-    
+
     final var stream = this.channelOf(new byte[0]);
 
     try (var reader = this.readerOf(stream)) {
@@ -64,7 +69,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       data[index] = (byte) index;
     }
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       try (var s0 = reader.createSubReader("x")) {
@@ -89,7 +94,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       data[index] = (byte) index;
     }
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.offsetAbsolute());
@@ -181,7 +186,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       data[index] = (byte) index;
     }
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       try (var subReader = reader.createSubReader("s", 4L)) {
@@ -224,7 +229,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       data[index] = (byte) index;
     }
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       try (var subReader = reader.createSubReader("s", 4L)) {
@@ -265,7 +270,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       data[index] = (byte) index;
     }
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.offsetAbsolute());
@@ -288,7 +293,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
   {
     final var data = new byte[16];
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       reader.skip(4L);
@@ -305,7 +310,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
   {
     final var data = new byte[16];
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       for (var index = 0L; index < 16L; ++index) {
@@ -321,7 +326,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
   {
     final var data = new byte[9];
 
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       reader.skip(1L);
@@ -358,7 +363,6 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
   {
     final var data = new byte[0];
 
-    
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(0L, reader.bytesRemaining());
@@ -376,6 +380,59 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       Assertions.assertThrows(IOException.class, reader::readU64BE);
       Assertions.assertThrows(IOException.class, reader::readU64LE);
       Assertions.assertThrows(IOException.class, reader::readU8);
+    }
+  }
+
+  @Test
+  public void testReadShortNamed()
+    throws Exception
+  {
+    final var data = new byte[0];
+
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS16BE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS16LE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS32BE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS32LE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS64BE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS64LE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readS8("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU16BE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU16LE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU32BE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU32LE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU64BE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU64LE("q")), "q");
+      checkExceptionMessageContains(Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readU8("q")), "q");
     }
   }
 
@@ -508,7 +565,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
     final var data = new byte[32];
     data[0] = 0;
     data[1] = (byte) 0xff;
-    
+
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
@@ -643,7 +700,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
     data.putDouble(0, 1000.0);
 
     final var channel = this.channelOf(data.array());
-    
+
     try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining());
       Assertions.assertEquals(1000.0, reader.readDLE());
@@ -696,6 +753,326 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       Assertions.assertEquals(16, reader.readBytes(buffer));
       Assertions.assertEquals(0L, reader.bytesRemaining());
       Assertions.assertThrows(IOException.class, () -> reader.readBytes(buffer));
+    }
+  }
+
+  @Test
+  public void testReadS8Named()
+    throws Exception
+  {
+    final var data = new byte[32];
+    data[0] = Byte.MIN_VALUE;
+    data[1] = Byte.MAX_VALUE;
+
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8("q"));
+      Assertions.assertEquals(31L, reader.bytesRemaining());
+      Assertions.assertEquals(Byte.MAX_VALUE, reader.readS8("q"));
+      Assertions.assertEquals(30L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadS16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putShort(0, Short.MIN_VALUE);
+    data.putShort(2, Short.MAX_VALUE);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE("q"));
+      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(Short.MAX_VALUE, reader.readS16LE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadS32LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putInt(0, Integer.MIN_VALUE);
+    data.putInt(4, Integer.MAX_VALUE);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32LE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadS64LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putLong(0, Long.MIN_VALUE);
+    data.putLong(8, Long.MAX_VALUE);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(Long.MAX_VALUE, reader.readS64LE("q"));
+    }
+  }
+
+  @Test
+  public void testReadS16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putShort(0, Short.MIN_VALUE);
+    data.putShort(2, Short.MAX_VALUE);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE("q"));
+      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(Short.MAX_VALUE, reader.readS16BE("q"));
+    }
+  }
+
+  @Test
+  public void testReadS32BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putInt(0, Integer.MIN_VALUE);
+    data.putInt(4, Integer.MAX_VALUE);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32BE("q"));
+    }
+  }
+
+  @Test
+  public void testReadS64BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putLong(0, Long.MIN_VALUE);
+    data.putLong(8, Long.MAX_VALUE);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(Long.MAX_VALUE, reader.readS64BE("q"));
+    }
+  }
+
+  @Test
+  public void testReadU8Named()
+    throws Exception
+  {
+    final var data = new byte[32];
+    data[0] = 0;
+    data[1] = (byte) 0xff;
+
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerOf(stream)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0, reader.readU8("q"));
+      Assertions.assertEquals(31L, reader.bytesRemaining());
+      Assertions.assertEquals(0xff, reader.readU8("q"));
+    }
+  }
+
+  @Test
+  public void testReadU16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, (char) 0);
+    data.putChar(2, (char) 0xffff);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0, reader.readU16LE("q"));
+      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(0xffff, reader.readU16LE("q"));
+    }
+  }
+
+  @Test
+  public void testReadU32LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putInt(0, 0);
+    data.putInt(4, 0xffff_ffff);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.readU32LE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(0xffff_ffffL, reader.readU32LE("q"));
+    }
+  }
+
+  @Test
+  public void testReadU64LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putLong(0, 0L);
+    data.putLong(8, 0xffff_ffff_ffff_ffffL);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.readU64LE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64LE("q"));
+    }
+  }
+
+  @Test
+  public void testReadU16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, (char) 0);
+    data.putChar(2, (char) 0xffff);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0, reader.readU16BE("q"));
+      Assertions.assertEquals(30L, reader.bytesRemaining());
+      Assertions.assertEquals(0xffff, reader.readU16BE("q"));
+    }
+  }
+
+  @Test
+  public void testReadU32BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putInt(0, 0);
+    data.putInt(4, 0xffff_ffff);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.readU32BE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+      Assertions.assertEquals(0xffff_ffffL, reader.readU32BE("q"));
+    }
+  }
+
+  @Test
+  public void testReadU64BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putLong(0, 0L);
+    data.putLong(8, 0xffff_ffff_ffff_ffffL);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(0L, reader.readU64BE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+      Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64BE("q"));
+    }
+  }
+
+  @Test
+  public void testReadDBENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putDouble(0, 1000.0);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(1000.0, reader.readDBE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadDLENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putDouble(0, 1000.0);
+
+    final var channel = this.channelOf(data.array());
+
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(1000.0, reader.readDLE("q"));
+      Assertions.assertEquals(24L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadFBENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putFloat(0, 1000.0f);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(1000.0f, reader.readFBE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadFLENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putFloat(0, 1000.0f);
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(1000.0f, reader.readFLE("q"));
+      Assertions.assertEquals(28L, reader.bytesRemaining());
+    }
+  }
+
+  @Test
+  public void testReadBytesNamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    final var buffer = new byte[16];
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining());
+      Assertions.assertEquals(16, reader.readBytes("q", buffer, 0, buffer.length));
+      Assertions.assertEquals(16L, reader.bytesRemaining());
+      Assertions.assertEquals(16, reader.readBytes("q", buffer));
+      Assertions.assertEquals(0L, reader.bytesRemaining());
+      Assertions.assertThrows(IOException.class, () -> reader.readBytes("q", buffer));
     }
   }
 }

@@ -205,7 +205,7 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
   {
     this.checkNotClosed();
     if (!this.rangeRelative.includesValue(position)) {
-      throw this.outOfBounds(position, IOException::new);
+      throw this.outOfBounds(position, null, IOException::new);
     }
     this.offsetRelative = position;
   }
@@ -226,7 +226,7 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     throws IOException, EOFException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(size);
+    this.checkHasBytesRemaining(null, size);
     this.offsetRelative += size;
   }
 
@@ -243,11 +243,13 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     this.skip((long) alignment - diff);
   }
 
-  private void checkHasBytesRemaining(final long want)
+  private void checkHasBytesRemaining(
+    final String name,
+    final long want)
     throws IOException
   {
     if (want > this.bytesRemaining()) {
-      throw this.outOfBounds(this.offsetRelative + want, IOException::new);
+      throw this.outOfBounds(this.offsetRelative + want, name, IOException::new);
     }
   }
 
@@ -263,39 +265,54 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
 
   private IOException outOfBounds(
     final long targetPosition,
+    final String name,
     final Function<String, IOException> exceptionSupplier)
   {
     final var lineSeparator = System.lineSeparator();
-    return exceptionSupplier.apply(
-      new StringBuilder(128)
-        .append("Out of bounds.")
-        .append(lineSeparator)
-        .append("  Reader URI: ")
-        .append(this.uri())
-        .append(lineSeparator)
-        .append("  Reader path: ")
-        .append(this.path())
-        .append(lineSeparator)
-        .append("  Reader bounds: [absolute 0x")
-        .append(Long.toUnsignedString(this.absoluteOf(this.rangeRelative.lower()), 16))
-        .append(", 0x")
-        .append(Long.toUnsignedString(this.absoluteOf(this.rangeRelative.upper()), 16))
-        .append(")")
-        .append(lineSeparator)
-        .append("  Target offset: absolute 0x")
-        .append(Long.toUnsignedString(this.absoluteOf(targetPosition), 16))
-        .append(lineSeparator)
-        .append("  Offset: absolute 0x")
-        .append(Long.toUnsignedString(this.offsetAbsolute(), 16))
-        .toString());
+    final var stringBuilder = new StringBuilder(128);
+
+    stringBuilder
+      .append("Out of bounds.")
+      .append(lineSeparator)
+      .append("  Reader URI: ")
+      .append(this.uri())
+      .append(lineSeparator);
+
+    stringBuilder
+      .append("  Reader path: ")
+      .append(this.path());
+
+    if (name != null) {
+      stringBuilder.append(":")
+        .append(name);
+    }
+    stringBuilder.append(lineSeparator);
+
+    stringBuilder
+      .append("  Reader bounds: [absolute 0x")
+      .append(Long.toUnsignedString(this.absoluteOf(this.rangeRelative.lower()), 16))
+      .append(", 0x")
+      .append(Long.toUnsignedString(this.absoluteOf(this.rangeRelative.upper()), 16))
+      .append(")")
+      .append(lineSeparator);
+
+    stringBuilder
+      .append("  Target offset: absolute 0x")
+      .append(Long.toUnsignedString(this.absoluteOf(targetPosition), 16))
+      .append(lineSeparator);
+
+    stringBuilder
+      .append("  Offset: absolute 0x")
+      .append(Long.toUnsignedString(this.offsetAbsolute(), 16));
+
+    return exceptionSupplier.apply(stringBuilder.toString());
   }
 
-  @Override
-  public int readS8()
-    throws IOException, EOFException
+  private int readS8p(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(1L);
+    this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 1L;
 
@@ -307,12 +324,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (int) this.buffer.get(0);
   }
 
-  @Override
-  public int readU8()
-    throws IOException, EOFException
+  private int readU8p(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(1L);
+    this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 1L;
 
@@ -324,12 +340,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (int) this.buffer.get(0) & 0xff;
   }
 
-  @Override
-  public int readS16LE()
-    throws IOException, EOFException
+  private int readS16LEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(2L);
+    this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
 
@@ -342,12 +357,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (int) this.buffer.getShort(0);
   }
 
-  @Override
-  public int readU16LE()
-    throws IOException, EOFException
+  private int readU16LEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(2L);
+    this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
 
@@ -360,12 +374,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (int) this.buffer.getChar(0);
   }
 
-  @Override
-  public long readS32LE()
-    throws IOException, EOFException
+  private long readS32LEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(4L);
+    this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
 
@@ -378,12 +391,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (long) this.buffer.getInt(0);
   }
 
-  @Override
-  public long readU32LE()
-    throws IOException, EOFException
+  private long readU32LEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(4L);
+    this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
 
@@ -396,12 +408,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (long) this.buffer.getInt(0) & 0xffff_ffffL;
   }
 
-  @Override
-  public long readS64LE()
-    throws IOException, EOFException
+  private long readS64LEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(8L);
+    this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
 
@@ -414,12 +425,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return this.buffer.getLong(0);
   }
 
-  @Override
-  public long readU64LE()
-    throws IOException, EOFException
+  private long readU64LEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(8L);
+    this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
 
@@ -432,12 +442,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return this.buffer.getLong(0);
   }
 
-  @Override
-  public int readS16BE()
-    throws IOException, EOFException
+  private int readS16BEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(2L);
+    this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
 
@@ -450,12 +459,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (int) this.buffer.getShort(0);
   }
 
-  @Override
-  public int readU16BE()
-    throws IOException, EOFException
+  private int readU16BEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(2L);
+    this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 2L;
 
@@ -468,12 +476,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (int) this.buffer.getChar(0);
   }
 
-  @Override
-  public long readS32BE()
-    throws IOException, EOFException
+  private long readS32BEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(4L);
+    this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
 
@@ -486,12 +493,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (long) this.buffer.getInt(0);
   }
 
-  @Override
-  public long readU32BE()
-    throws IOException, EOFException
+  private long readU32BEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(4L);
+    this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 4L;
 
@@ -504,12 +510,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return (long) this.buffer.getInt(0) & 0xffff_ffffL;
   }
 
-  @Override
-  public long readS64BE()
-    throws IOException, EOFException
+  private long readS64BEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(8L);
+    this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
 
@@ -522,12 +527,11 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return this.buffer.getLong(0);
   }
 
-  @Override
-  public long readU64BE()
-    throws IOException, EOFException
+  private long readU64BEp(final String name)
+    throws IOException
   {
     this.checkNotClosed();
-    this.checkHasBytesRemaining(8L);
+    this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetAbsolute();
     this.offsetRelative += 8L;
 
@@ -540,16 +544,83 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
     return this.buffer.getLong(0);
   }
 
-  @Override
-  public int readBytes(
+  private float readFBEp(final String name)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 4L);
+    final var position = this.offsetAbsolute();
+    this.offsetRelative += 4L;
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getFloat(0);
+  }
+
+  private float readFLEp(final String name)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 4L);
+    final var position = this.offsetAbsolute();
+    this.offsetRelative += 4L;
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(4);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getFloat(0);
+  }
+
+  private double readDBEp(final String name)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 8L);
+    final var position = this.offsetAbsolute();
+    this.offsetRelative += 8L;
+
+    this.buffer.order(BIG_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getDouble(0);
+  }
+
+  private double readDLEp(final String name)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 8L);
+    final var position = this.offsetAbsolute();
+    this.offsetRelative += 8L;
+
+    this.buffer.order(LITTLE_ENDIAN);
+    this.buffer.position(0);
+    this.buffer.limit(8);
+    this.channel.position(position);
+    this.channel.read(this.buffer);
+    this.buffer.flip();
+    return this.buffer.getDouble(0);
+  }
+
+  private int readBytesP(
+    final String name,
     final byte[] inBuffer,
-    final int offset,
     final int length)
-    throws IOException, EOFException
+    throws IOException
   {
     this.checkNotClosed();
     final var llength = Integer.toUnsignedLong(length);
-    this.checkHasBytesRemaining(llength);
+    this.checkHasBytesRemaining(name, llength);
     final var position = this.offsetAbsolute();
     this.offsetRelative += llength;
 
@@ -559,75 +630,276 @@ final class BSSReaderSeekableChannel implements BSSReaderRandomAccessType
   }
 
   @Override
+  public int readS8(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS8p(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readU8(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU8p(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readS16LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS16LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readU16LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU16LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS32LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS32LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU32LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU32LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS64LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS64LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU64LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU64LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readS16BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS16BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readU16BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU16BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS32BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS32BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU32BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU32BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readS64BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readS64BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public long readU64BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readU64BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public float readFBE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readFBEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public float readFLE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readFLEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public double readDBE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readDBEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public double readDLE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readDLEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public int readS8()
+    throws IOException, EOFException
+  {
+    return this.readS8p(null);
+  }
+
+  @Override
+  public int readU8()
+    throws IOException, EOFException
+  {
+    return this.readU8p(null);
+  }
+
+  @Override
+  public int readS16LE()
+    throws IOException, EOFException
+  {
+    return this.readS16LEp(null);
+  }
+
+  @Override
+  public int readU16LE()
+    throws IOException, EOFException
+  {
+    return this.readU16LEp(null);
+  }
+
+  @Override
+  public long readS32LE()
+    throws IOException, EOFException
+  {
+    return this.readS32LEp(null);
+  }
+
+  @Override
+  public long readU32LE()
+    throws IOException, EOFException
+  {
+    return this.readU32LEp(null);
+  }
+
+  @Override
+  public long readS64LE()
+    throws IOException, EOFException
+  {
+    return this.readS64LEp(null);
+  }
+
+  @Override
+  public long readU64LE()
+    throws IOException, EOFException
+  {
+    return this.readU64LEp(null);
+  }
+
+  @Override
+  public int readS16BE()
+    throws IOException, EOFException
+  {
+    return this.readS16BEp(null);
+  }
+
+  @Override
+  public int readU16BE()
+    throws IOException, EOFException
+  {
+    return this.readU16BEp(null);
+  }
+
+  @Override
+  public long readS32BE()
+    throws IOException, EOFException
+  {
+    return this.readS32BEp(null);
+  }
+
+  @Override
+  public long readU32BE()
+    throws IOException, EOFException
+  {
+    return this.readU32BEp(null);
+  }
+
+  @Override
+  public long readS64BE()
+    throws IOException, EOFException
+  {
+    return this.readS64BEp(null);
+  }
+
+  @Override
+  public long readU64BE()
+    throws IOException, EOFException
+  {
+    return this.readU64BEp(null);
+  }
+
+  @Override
   public float readFBE()
     throws IOException, EOFException
   {
-    this.checkNotClosed();
-    this.checkHasBytesRemaining(4L);
-    final var position = this.offsetAbsolute();
-    this.offsetRelative += 4L;
-
-    this.buffer.order(BIG_ENDIAN);
-    this.buffer.position(0);
-    this.buffer.limit(4);
-    this.channel.position(position);
-    this.channel.read(this.buffer);
-    this.buffer.flip();
-    return this.buffer.getFloat(0);
+    return this.readFBEp(null);
   }
 
   @Override
   public float readFLE()
     throws IOException, EOFException
   {
-    this.checkNotClosed();
-    this.checkHasBytesRemaining(4L);
-    final var position = this.offsetAbsolute();
-    this.offsetRelative += 4L;
-
-    this.buffer.order(LITTLE_ENDIAN);
-    this.buffer.position(0);
-    this.buffer.limit(4);
-    this.channel.position(position);
-    this.channel.read(this.buffer);
-    this.buffer.flip();
-    return this.buffer.getFloat(0);
+    return this.readFLEp(null);
   }
 
   @Override
   public double readDBE()
     throws IOException, EOFException
   {
-    this.checkNotClosed();
-    this.checkHasBytesRemaining(8L);
-    final var position = this.offsetAbsolute();
-    this.offsetRelative += 8L;
-
-    this.buffer.order(BIG_ENDIAN);
-    this.buffer.position(0);
-    this.buffer.limit(8);
-    this.channel.position(position);
-    this.channel.read(this.buffer);
-    this.buffer.flip();
-    return this.buffer.getDouble(0);
+    return this.readDBEp(null);
   }
 
   @Override
   public double readDLE()
     throws IOException, EOFException
   {
-    this.checkNotClosed();
-    this.checkHasBytesRemaining(8L);
-    final var position = this.offsetAbsolute();
-    this.offsetRelative += 8L;
+    return this.readDLEp(null);
+  }
 
-    this.buffer.order(LITTLE_ENDIAN);
-    this.buffer.position(0);
-    this.buffer.limit(8);
-    this.channel.position(position);
-    this.channel.read(this.buffer);
-    this.buffer.flip();
-    return this.buffer.getDouble(0);
+  @Override
+  public int readBytes(
+    final byte[] inBuffer,
+    final int offset,
+    final int length)
+    throws IOException, EOFException
+  {
+    return this.readBytesP(null, inBuffer, length);
+  }
+
+  @Override
+  public int readBytes(
+    final String name,
+    final byte[] inBuffer,
+    final int offset,
+    final int length)
+    throws IOException, EOFException
+  {
+    return this.readBytesP(Objects.requireNonNull(name, "name"), inBuffer, length);
   }
 
   @Override

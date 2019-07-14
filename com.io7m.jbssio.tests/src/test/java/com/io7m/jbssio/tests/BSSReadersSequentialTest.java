@@ -33,6 +33,15 @@ public final class BSSReadersSequentialTest
 {
   private static final Logger LOG = LoggerFactory.getLogger(BSSReadersSequentialTest.class);
 
+  private static void checkExceptionMessageContains(
+    final Exception e,
+    final String text)
+  {
+    Assertions.assertTrue(
+      e.getMessage().contains(text),
+      "Exception message " + e.getMessage() + " contains " + text);
+  }
+
   @Test
   public void testEmptyStream()
     throws Exception
@@ -303,6 +312,22 @@ public final class BSSReadersSequentialTest
         Assertions.assertThrows(IOException.class, reader::readU64BE);
         Assertions.assertThrows(IOException.class, reader::readU64LE);
         Assertions.assertThrows(IOException.class, reader::readU8);
+      }
+    }
+  }
+
+  @Test
+  public void testReadShortNamed()
+    throws Exception
+  {
+    final var data = new byte[1];
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data)) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 1L)) {
+        checkExceptionMessageContains(Assertions.assertThrows(
+          IOException.class,
+          () -> reader.readS16BE("q")), "q");
       }
     }
   }
@@ -617,6 +642,321 @@ public final class BSSReadersSequentialTest
       try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(16, reader.readBytes(buffer, 0, buffer.length));
         Assertions.assertEquals(16, reader.readBytes(buffer));
+        Assertions.assertThrows(EOFException.class, () -> reader.readBytes(buffer));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS8Named()
+    throws Exception
+  {
+    final var data = new byte[32];
+    data[0] = Byte.MIN_VALUE;
+    data[1] = Byte.MAX_VALUE;
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data)) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8("q"));
+        Assertions.assertEquals(Byte.MAX_VALUE, reader.readS8("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putShort(0, Short.MIN_VALUE);
+    data.putShort(2, Short.MAX_VALUE);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE("q"));
+        Assertions.assertEquals(Short.MAX_VALUE, reader.readS16LE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS32LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putInt(0, Integer.MIN_VALUE);
+    data.putInt(4, Integer.MAX_VALUE);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE("q"));
+        Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32LE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS64LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putLong(0, Long.MIN_VALUE);
+    data.putLong(8, Long.MAX_VALUE);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE("q"));
+        Assertions.assertEquals(Long.MAX_VALUE, reader.readS64LE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putShort(0, Short.MIN_VALUE);
+    data.putShort(2, Short.MAX_VALUE);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE("q"));
+        Assertions.assertEquals(Short.MAX_VALUE, reader.readS16BE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS32BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putInt(0, Integer.MIN_VALUE);
+    data.putInt(4, Integer.MAX_VALUE);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE("q"));
+        Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32BE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadS64BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putLong(0, Long.MIN_VALUE);
+    data.putLong(8, Long.MAX_VALUE);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE("q"));
+        Assertions.assertEquals(Long.MAX_VALUE, reader.readS64BE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU8Named()
+    throws Exception
+  {
+    final var data = new byte[32];
+    data[0] = 0;
+    data[1] = (byte) 0xff;
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data)) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0, reader.readU8("q"));
+        Assertions.assertEquals(0xff, reader.readU8("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, (char) 0);
+    data.putChar(2, (char) 0xffff);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0, reader.readU16LE("q"));
+        Assertions.assertEquals(0xffff, reader.readU16LE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU32LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putInt(0, 0);
+    data.putInt(4, 0xffff_ffff);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0L, reader.readU32LE("q"));
+        Assertions.assertEquals(0xffff_ffffL, reader.readU32LE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU64LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putLong(0, 0L);
+    data.putLong(8, 0xffff_ffff_ffff_ffffL);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0L, reader.readU64LE("q"));
+        Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64LE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, (char) 0);
+    data.putChar(2, (char) 0xffff);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0, reader.readU16BE("q"));
+        Assertions.assertEquals(0xffff, reader.readU16BE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU32BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putInt(0, 0);
+    data.putInt(4, 0xffff_ffff);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0L, reader.readU32BE("q"));
+        Assertions.assertEquals(0xffff_ffffL, reader.readU32BE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadU64BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putLong(0, 0L);
+    data.putLong(8, 0xffff_ffff_ffff_ffffL);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(0L, reader.readU64BE("q"));
+        Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64BE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadDBENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putDouble(0, 1000.0);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0, reader.readDBE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadDLENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putDouble(0, 1000.0);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0, reader.readDLE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadFBENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putFloat(0, 1000.0f);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0f, reader.readFBE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadFLENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putFloat(0, 1000.0f);
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1000.0f, reader.readFLE("q"));
+      }
+    }
+  }
+
+  @Test
+  public void testReadBytesNamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    final var buffer = new byte[16];
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(16, reader.readBytes("q", buffer, 0, buffer.length));
+        Assertions.assertEquals(16, reader.readBytes("q", buffer));
         Assertions.assertThrows(EOFException.class, () -> reader.readBytes(buffer));
       }
     }

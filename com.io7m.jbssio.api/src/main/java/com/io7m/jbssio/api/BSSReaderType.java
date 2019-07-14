@@ -409,4 +409,358 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
    */
 
   long bytesRemaining();
+
+
+  /**
+   * Read an 8-bit signed integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readS8(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read an 8-bit unsigned integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readU8(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read an 16-bit signed, little-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readS16LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read an 16-bit signed, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readU16LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read an 32-bit signed, little-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readS32LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read an 32-bit unsigned, little-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readU32LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit signed, little-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readS64LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit unsigned, little-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readU64LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 16-bit signed, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readS16BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 16-bit unsigned, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readU16BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 32-bit signed, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readS32BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 32-bit unsigned, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readU32BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit signed, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readS64BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit unsigned, big-endian integer.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  long readU64BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read bytes.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name   The name of the value to be used in diagnostic messages
+   * @param buffer The buffer to which to copy bytes
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  default int readBytes(
+    final String name,
+    final byte[] buffer)
+    throws IOException, EOFException
+  {
+    return this.readBytes(name, buffer, 0, buffer.length);
+  }
+
+  /**
+   * Read bytes.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name   The name of the value to be used in diagnostic messages
+   * @param buffer The buffer to which to copy bytes
+   * @param offset The offset in {@code buffer} to which to write
+   * @param length The maximum number of bytes to read
+   *
+   * @return The number of bytes read
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  int readBytes(
+    String name,
+    byte[] buffer,
+    int offset,
+    int length)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 32-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readFBE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 32-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readFLE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  double readDBE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  double readDLE(String name)
+    throws IOException, EOFException;
 }
