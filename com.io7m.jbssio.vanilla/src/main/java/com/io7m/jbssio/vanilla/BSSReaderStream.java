@@ -92,16 +92,14 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final var wrappedStream =
       new CountingInputStream(new CloseShieldInputStream(this.stream));
 
-    return new BSSReaderStream(
-      this,
-      this.uri,
+    final var newName =
       new StringBuilder(32)
         .append(this.path)
         .append('.')
         .append(inName)
-        .toString(),
-      wrappedStream,
-      this.size);
+        .toString();
+
+    return new BSSReaderStream(this, this.uri, newName, wrappedStream, this.size);
   }
 
   @Override
@@ -136,16 +134,14 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final var wrappedStream =
       new CountingInputStream(boundedStream);
 
-    return new BSSReaderStream(
-      this,
-      this.uri,
+    final var newName =
       new StringBuilder(32)
         .append(this.path)
         .append('.')
         .append(inName)
-        .toString(),
-      wrappedStream,
-      newSize);
+        .toString();
+
+    return new BSSReaderStream(this, this.uri, newName, wrappedStream, newSize);
   }
 
   @Override

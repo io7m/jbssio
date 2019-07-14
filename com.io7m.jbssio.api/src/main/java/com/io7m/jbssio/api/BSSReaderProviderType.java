@@ -19,6 +19,7 @@ package com.io7m.jbssio.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
 
 /**
  * A provider of readers.
@@ -62,5 +63,23 @@ public interface BSSReaderProviderType
     InputStream stream,
     String name,
     long size)
+    throws IOException;
+
+  /**
+   * Create a new random access reader from the given byte buffer.
+   *
+   * @param uri    The URI of the stream
+   * @param buffer The buffer
+   * @param name   The name of the initial reader
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createReaderFromByteBuffer(
+    URI uri,
+    ByteBuffer buffer,
+    String name)
     throws IOException;
 }

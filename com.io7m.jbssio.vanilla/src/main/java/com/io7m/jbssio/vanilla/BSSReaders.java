@@ -17,11 +17,13 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSReaderProviderType;
+import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -63,5 +65,17 @@ public final class BSSReaders implements BSSReaderProviderType
     Objects.requireNonNull(stream, "stream");
     Objects.requireNonNull(name, "path");
     return BSSReaderStream.create(uri, stream, name, size);
+  }
+
+  @Override
+  public BSSReaderRandomAccessType createReaderFromByteBuffer(
+    final URI uri,
+    final ByteBuffer buffer,
+    final String name)
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(buffer, "buffer");
+    Objects.requireNonNull(name, "path");
+    return BSSReaderByteBuffer.create(uri, buffer, name);
   }
 }
