@@ -22,7 +22,7 @@ import java.io.IOException;
  * A random-access reader.
  */
 
-public interface BSSReaderRandomAccessType extends BSSReaderType
+public interface BSSReaderRandomAccessType extends BSSReaderType, BSSSeekableType
 {
   @Override
   BSSReaderRandomAccessType createSubReader(
@@ -30,17 +30,14 @@ public interface BSSReaderRandomAccessType extends BSSReaderType
     throws IOException;
 
   @Override
-  default BSSReaderRandomAccessType createSubReader(
-    final String name,
-    final long size)
-    throws IOException
-  {
-    return this.createSubReader(name, 0L, size);
-  }
+  BSSReaderRandomAccessType createSubReader(
+    String name,
+    long size)
+    throws IOException;
 
   /**
-   * Create a new sub reader with the given {@code name}, using the given {@code offset} (relative
-   * to the current reader) and maximum length {@code size}.
+   * Create a new sub reader with the given {@code name}, starting at {@code offset} bytes from the
+   * start of the bounds of the current reader, limited to {@code size} bytes.
    *
    * @param name   The new name
    * @param offset The relative offset
@@ -57,14 +54,4 @@ public interface BSSReaderRandomAccessType extends BSSReaderType
     long size)
     throws IOException;
 
-  /**
-   * Seek directly to the given position within the current reader.
-   *
-   * @param position The position
-   *
-   * @throws IOException If the seek position is not within the bounds of the current reader
-   */
-
-  void seekTo(long position)
-    throws IOException;
 }

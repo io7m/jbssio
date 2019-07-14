@@ -14,37 +14,49 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 package com.io7m.jbssio.tests;
 
-import com.io7m.jbssio.api.BSSReaderRandomAccessType;
-import com.io7m.jbssio.vanilla.BSSReaders;
+import com.io7m.jbssio.api.BSSWriterRandomAccessType;
+import com.io7m.jbssio.vanilla.BSSWriters;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.OptionalLong;
 
-public final class BSSReadersRandomAccessSeekableChannelTest
-  extends BSSReadersRandomAccessChannelContract<SeekableByteChannel>
+public final class BSSWritersRandomAccessSeekableChannelTest extends BSSWritersRandomAccessChannelContract<FileChannel>
 {
+  private final HashMap<byte[], Path> pathsOf = new HashMap<>();
+
   @Override
-  protected SeekableByteChannel channelOf(final byte[] data)
+  protected FileChannel channelOf(final byte[] data)
     throws IOException
   {
-    final var path = Files.createTempFile("jbssio-readers-", ".dat");
+    final var path = Files.createTempFile("jbssio-writers-", ".dat");
     Files.write(path, data);
-    return Files.newByteChannel(path, StandardOpenOption.READ);
+    this.pathsOf.put(data, path);
+    return FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.READ);
   }
 
   @Override
-  protected BSSReaderRandomAccessType readerOf(final SeekableByteChannel channel)
+  protected BSSWriterRandomAccessType writerOf(final FileChannel channel)
     throws IOException
   {
-    return new BSSReaders()
-      .createReaderFromSeekableChannel(URI.create("urn:fake"), channel, "a",
-                                       OptionalLong.of(channel.size()));
+    return new BSSWriters().createWriterFromChannel(
+      URI.create("urn:fake"),
+      channel,
+      "a",
+      OptionalLong.of(channel.size()));
+  }
+
+  @Override
+  protected byte[] writtenDataOf(final byte[] data)
+    throws IOException
+  {
+    return Files.readAllBytes(this.pathsOf.get(data));
   }
 }

@@ -14,37 +14,35 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
 package com.io7m.jbssio.api;
 
-import java.net.URI;
+import java.io.Closeable;
+import java.nio.channels.ClosedChannelException;
 
 /**
- * An addressable object.
+ * A closeable interface.
  */
 
-public interface BSSAddressableType
+public interface BSSCloseableType extends Closeable
 {
   /**
-   * @return The object's current absolute offset
+   * @return {@code true} if this object has been closed
    */
 
-  long offsetCurrentAbsolute();
+  boolean isClosed();
 
   /**
-   * @return The object's current relative offset
+   * Check if the current object is closed. If it is, raise {@code ClosedChannelException}
+   *
+   * @throws ClosedChannelException If the object is closed
    */
 
-  long offsetCurrentRelative();
-
-  /**
-   * @return The URI of the object
-   */
-
-  URI uri();
-
-  /**
-   * @return The path of the object
-   */
-
-  String path();
+  default void checkNotClosed()
+    throws ClosedChannelException
+  {
+    if (this.isClosed()) {
+      throw new ClosedChannelException();
+    }
+  }
 }

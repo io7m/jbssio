@@ -16,10 +16,8 @@
 
 package com.io7m.jbssio.api;
 
-import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.OptionalLong;
 
 /**
  * The base type of byte stream structure readers.
@@ -29,7 +27,7 @@ import java.util.OptionalLong;
  * diagnostic messages.
  */
 
-public interface BSSReaderType extends Closeable, BSSAddressableType
+public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSSSkippableType
 {
   /**
    * @param name The path of the new reader
@@ -58,37 +56,6 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
     String name,
     long size)
     throws IOException;
-
-  /**
-   * Skip {@code size} bytes of the input.
-   *
-   * The reader will not be allowed to seek beyond the specified limit.
-   *
-   * @param size The number of bytes to skip
-   *
-   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
-   *                      reader's limit
-   * @throws EOFException If EOF is reached
-   */
-
-  void skip(long size)
-    throws IOException, EOFException;
-
-  /**
-   * Skip enough bytes to align the reader position to a multiple of {@code size}. If the reader is
-   * already aligned, no bytes are skipped.
-   *
-   * The reader will not be allowed to seek beyond the specified limit.
-   *
-   * @param size The number of bytes to skip
-   *
-   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
-   *                      reader's limit
-   * @throws EOFException If EOF is reached
-   */
-
-  void align(int size)
-    throws IOException, EOFException;
 
   /**
    * Read an 8-bit signed integer.
@@ -402,16 +369,6 @@ public interface BSSReaderType extends Closeable, BSSAddressableType
 
   double readDLE()
     throws IOException, EOFException;
-
-  /**
-   * Retrieve the number of bytes available for reading. The value is only available for sources
-   * that are bounded. That is; the sources are either fixed-size files, or are sources for which
-   * a bound has been explicitly specified.
-   *
-   * @return The number of bytes remaining
-   */
-
-  OptionalLong bytesRemaining();
 
   /**
    * Read an 8-bit signed integer.

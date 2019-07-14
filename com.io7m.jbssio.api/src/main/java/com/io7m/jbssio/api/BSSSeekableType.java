@@ -14,47 +14,25 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
 package com.io7m.jbssio.api;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
- * A random access writer.
+ * An object that can seek arbitrarily.
  */
 
-public interface BSSWriterRandomAccessType extends BSSWriterType, BSSSeekableType
+public interface BSSSeekableType
 {
-  @Override
-  BSSWriterRandomAccessType createSubWriter(
-    String name)
-    throws IOException;
-
-  @Override
-  default BSSWriterRandomAccessType createSubWriter(
-    final String name,
-    final long size)
-    throws IOException
-  {
-    return this.createSubWriter(Objects.requireNonNull(name, "name"), 0L, size);
-  }
-
   /**
-   * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
-   * to the current writer) and maximum length {@code size}.
+   * Seek directly to the given position within the current observer.
    *
-   * @param name   The new name
-   * @param offset The relative offset
-   * @param size   The maximum number of bytes
+   * @param position The position
    *
-   * @return A new sub writer
-   *
-   * @throws IOException On I/O errors
+   * @throws IOException If the seek position is not within the bounds of the current observer
    */
 
-  BSSWriterRandomAccessType createSubWriter(
-    String name,
-    long offset,
-    long size)
+  void seekTo(long position)
     throws IOException;
 }

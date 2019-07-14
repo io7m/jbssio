@@ -17,12 +17,15 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSWriterProviderType;
+import com.io7m.jbssio.api.BSSWriterRandomAccessType;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
 
@@ -67,5 +70,33 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(stream, "stream");
     Objects.requireNonNull(name, "name");
     return BSSWriterStream.create(uri, stream, name, OptionalLong.of(size));
+  }
+
+  @Override
+  public BSSWriterRandomAccessType createWriterFromByteBuffer(
+    final URI uri,
+    final ByteBuffer buffer,
+    final String name)
+    throws IOException
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(buffer, "buffer");
+    Objects.requireNonNull(name, "name");
+    return BSSWriterByteBuffer.createFromByteBuffer(uri, buffer, name);
+  }
+
+  @Override
+  public BSSWriterRandomAccessType createWriterFromChannel(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name,
+    final OptionalLong size)
+    throws IOException
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(channel, "channel");
+    Objects.requireNonNull(name, "name");
+    Objects.requireNonNull(size, "size");
+    return BSSWriterSeekableChannel.createFromChannel(uri, channel, name, size);
   }
 }

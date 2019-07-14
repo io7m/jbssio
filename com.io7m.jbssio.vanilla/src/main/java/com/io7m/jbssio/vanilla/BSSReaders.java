@@ -100,12 +100,14 @@ public final class BSSReaders implements BSSReaderProviderType
   public BSSReaderRandomAccessType createReaderFromSeekableChannel(
     final URI uri,
     final SeekableByteChannel channel,
-    final String name)
+    final String name,
+    final OptionalLong size)
     throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "path");
-    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name);
+    Objects.requireNonNull(size, "size");
+    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name, size);
   }
 }

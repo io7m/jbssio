@@ -176,7 +176,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   public void align(final int alignment)
     throws IOException, EOFException
   {
-    final var diff = this.offsetAbsolute() % (long) alignment;
+    final var diff = this.offsetCurrentAbsolute() % (long) alignment;
     if (diff == 0L) {
       return;
     }
@@ -191,8 +191,8 @@ final class BSSReaderStream implements BSSReaderSequentialType
       "[BSSReaderStream %s %s [absolute %s] [relative %s]]",
       this.uri(),
       this.path(),
-      Long.toUnsignedString(this.offsetAbsolute()),
-      Long.toUnsignedString(this.offsetRelative()));
+      Long.toUnsignedString(this.offsetCurrentAbsolute()),
+      Long.toUnsignedString(this.offsetCurrentRelative()));
   }
 
   private void checkNotShortRead(
@@ -225,7 +225,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
 
       stringBuilder
         .append("  Offset: 0x")
-        .append(Long.toUnsignedString(this.offsetAbsolute(), 16))
+        .append(Long.toUnsignedString(this.offsetCurrentAbsolute(), 16))
         .append(lineSeparator);
 
       stringBuilder
@@ -706,17 +706,17 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
-  public long offsetAbsolute()
+  public long offsetCurrentAbsolute()
   {
     final var readerParent = this.parent;
     if (readerParent == null) {
       return this.stream.getByteCount();
     }
-    return readerParent.offsetAbsolute();
+    return readerParent.offsetCurrentAbsolute();
   }
 
   @Override
-  public long offsetRelative()
+  public long offsetCurrentRelative()
   {
     return this.stream.getByteCount();
   }
@@ -740,5 +740,15 @@ final class BSSReaderStream implements BSSReaderSequentialType
     if (this.closed.compareAndSet(false, true)) {
       this.stream.close();
     }
+  }
+
+  @Override
+  public boolean isClosed()
+  {
+    final var parentRef = this.parent;
+    if (parentRef != null) {
+      return parentRef.isClosed() || this.closed.get();
+    }
+    return this.closed.get();
   }
 }

@@ -39,8 +39,8 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var stream = ByteBuffer.wrap(new byte[0]);
 
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      Assertions.assertEquals(0L, reader.offsetAbsolute());
-      Assertions.assertEquals(0L, reader.offsetRelative());
+      Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(0L, reader.offsetCurrentRelative());
     }
   }
 
@@ -81,40 +81,40 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      Assertions.assertEquals(0L, reader.offsetAbsolute());
-      Assertions.assertEquals(0L, reader.offsetRelative());
+      Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(0L, reader.offsetCurrentRelative());
       LOG.debug("reader:    {}", reader);
 
       try (var subReader = reader.createSubReader("s", 4L)) {
-        Assertions.assertEquals(0L, subReader.offsetRelative());
-        Assertions.assertEquals(0L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
 
         Assertions.assertEquals(0, subReader.readS8());
-        Assertions.assertEquals(1L, subReader.offsetRelative());
-        Assertions.assertEquals(1L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(1L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(1L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
         Assertions.assertEquals(1, subReader.readU8());
-        Assertions.assertEquals(2L, subReader.offsetRelative());
-        Assertions.assertEquals(2L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(2L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(2L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
         Assertions.assertEquals(2, subReader.readS8());
-        Assertions.assertEquals(3L, subReader.offsetRelative());
-        Assertions.assertEquals(3L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(3L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(3L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
         Assertions.assertEquals(3, subReader.readU8());
-        Assertions.assertEquals(4L, subReader.offsetRelative());
-        Assertions.assertEquals(4L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(4L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(4L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
@@ -123,38 +123,88 @@ public final class BSSReadersRandomAccessByteBufferTest
       }
 
       try (var subReader = reader.createSubReader("s", 4L)) {
-        Assertions.assertEquals(0L, subReader.offsetRelative());
-        Assertions.assertEquals(0L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
 
         Assertions.assertEquals(0, subReader.readS8());
-        Assertions.assertEquals(1L, subReader.offsetRelative());
-        Assertions.assertEquals(1L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(1L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(1L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
         Assertions.assertEquals(1, subReader.readU8());
-        Assertions.assertEquals(2L, subReader.offsetRelative());
-        Assertions.assertEquals(2L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(2L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(2L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
         Assertions.assertEquals(2, subReader.readS8());
-        Assertions.assertEquals(3L, subReader.offsetRelative());
-        Assertions.assertEquals(3L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(3L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(3L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
         Assertions.assertEquals(3, subReader.readU8());
-        Assertions.assertEquals(4L, subReader.offsetRelative());
-        Assertions.assertEquals(4L, subReader.offsetAbsolute());
-        Assertions.assertEquals(0L, reader.offsetAbsolute());
+        Assertions.assertEquals(4L, subReader.offsetCurrentRelative());
+        Assertions.assertEquals(4L, subReader.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
 
+        Assertions.assertThrows(IOException.class, subReader::readS8);
+        Assertions.assertThrows(IOException.class, subReader::readU8);
+      }
+    }
+  }
+
+  @Test
+  public void testSubreaderRangesCurrentPosition()
+    throws Exception
+  {
+    final var data = new byte[12];
+    for (var index = 0; index < 12; ++index) {
+      data[index] = (byte) index;
+    }
+
+    final var readers = new BSSReaders();
+    final var stream = ByteBuffer.wrap(data);
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+      reader.seekTo(0L);
+      LOG.debug("reader: {}", reader);
+
+      try (var subReader = reader.createSubReader("s", 4L)) {
+        Assertions.assertEquals(0, subReader.readS8());
+        Assertions.assertEquals(1, subReader.readU8());
+        Assertions.assertEquals(2, subReader.readS8());
+        Assertions.assertEquals(3, subReader.readU8());
+        Assertions.assertThrows(IOException.class, subReader::readS8);
+        Assertions.assertThrows(IOException.class, subReader::readU8);
+      }
+
+      reader.seekTo(4L);
+      LOG.debug("reader: {}", reader);
+
+      try (var subReader = reader.createSubReader("s", 4L)) {
+        Assertions.assertEquals(4, subReader.readS8());
+        Assertions.assertEquals(5, subReader.readU8());
+        Assertions.assertEquals(6, subReader.readS8());
+        Assertions.assertEquals(7, subReader.readU8());
+        Assertions.assertThrows(IOException.class, subReader::readS8);
+        Assertions.assertThrows(IOException.class, subReader::readU8);
+      }
+
+      reader.seekTo(8L);
+      LOG.debug("reader: {}", reader);
+
+      try (var subReader = reader.createSubReader("s", 4L)) {
+        Assertions.assertEquals(8, subReader.readS8());
+        Assertions.assertEquals(9, subReader.readU8());
+        Assertions.assertEquals(10, subReader.readS8());
+        Assertions.assertEquals(11, subReader.readU8());
         Assertions.assertThrows(IOException.class, subReader::readS8);
         Assertions.assertThrows(IOException.class, subReader::readU8);
       }
@@ -173,33 +223,107 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      LOG.debug("reader: {}", reader);
+
+      try (var subReader = reader.createSubReader("s", 0L, 4L)) {
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(0, subReader.readS8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(1, subReader.readU8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(2, subReader.readS8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(3, subReader.readU8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertThrows(IOException.class, subReader::readS8);
         Assertions.assertThrows(IOException.class, subReader::readU8);
       }
 
-      reader.seekTo(4L);
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      LOG.debug("reader: {}", reader);
+      try (var subReader = reader.createSubReader("s", 4L, 4L)) {
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(4, subReader.readS8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(5, subReader.readU8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(6, subReader.readS8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(7, subReader.readU8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertThrows(IOException.class, subReader::readS8);
         Assertions.assertThrows(IOException.class, subReader::readU8);
       }
 
-      reader.seekTo(8L);
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      LOG.debug("reader: {}", reader);
+      try (var subReader = reader.createSubReader("s", 8L, 4L)) {
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(8, subReader.readS8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(9, subReader.readU8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(10, subReader.readS8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(11, subReader.readU8());
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertThrows(IOException.class, subReader::readS8);
         Assertions.assertThrows(IOException.class, subReader::readU8);
+      }
+    }
+  }
+
+  @Test
+  public void testSubreaderOffsetAbsoluteSimple()
+    throws Exception
+  {
+    final var data = new byte[12];
+    for (var index = 0; index < 12; ++index) {
+      data[index] = (byte) index;
+    }
+
+    final var readers = new BSSReaders();
+    final var stream = ByteBuffer.wrap(data);
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+      try (var subReader = reader.createSubReader("s", 4L)) {
+        reader.seekTo(4L);
+        subReader.seekTo(0L);
+        Assertions.assertEquals(4L, subReader.offsetCurrentAbsolute());
+      }
+    }
+  }
+
+  @Test
+  public void testSubreaderOffsetSimple()
+    throws Exception
+  {
+    final var data = new byte[12];
+    for (var index = 0; index < 12; ++index) {
+      data[index] = (byte) index;
+    }
+
+    final var readers = new BSSReaders();
+    final var stream = ByteBuffer.wrap(data);
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+      try (var subReader = reader.createSubReader("s",  4L,4L)) {
+        Assertions.assertEquals(4L, subReader.offsetCurrentAbsolute());
+      }
+    }
+  }
+
+  @Test
+  public void testSubreaderOffsetShortRead()
+    throws Exception
+  {
+    final var data = new byte[12];
+    for (var index = 0; index < 12; ++index) {
+      data[index] = (byte) index;
+    }
+
+    final var readers = new BSSReaders();
+    final var stream = ByteBuffer.wrap(data);
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
+      try (var subReader = reader.createSubReader("s",  4L,4L)) {
+        subReader.skip(4L);
+        Assertions.assertThrows(IOException.class, subReader::readS8);
       }
     }
   }
@@ -217,30 +341,50 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
       try (var subReader = reader.createSubReader("s", 4L)) {
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
         Assertions.assertEquals(2, subReader.readS8());
         Assertions.assertEquals(3, subReader.readU8());
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertThrows(IOException.class, subReader::readS8);
         Assertions.assertThrows(IOException.class, subReader::readU8);
 
         reader.seekTo(4L);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         subReader.seekTo(0L);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(4, subReader.readS8());
         Assertions.assertEquals(5, subReader.readU8());
         Assertions.assertEquals(6, subReader.readS8());
         Assertions.assertEquals(7, subReader.readU8());
         Assertions.assertThrows(IOException.class, subReader::readS8);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertThrows(IOException.class, subReader::readU8);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
 
         reader.seekTo(8L);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         subReader.seekTo(0L);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(8, subReader.readS8());
         Assertions.assertEquals(9, subReader.readU8());
         Assertions.assertEquals(10, subReader.readS8());
         Assertions.assertEquals(11, subReader.readU8());
         Assertions.assertThrows(IOException.class, subReader::readS8);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
         Assertions.assertThrows(IOException.class, subReader::readU8);
+        LOG.debug("reader:    {}", reader);
+        LOG.debug("subReader: {}", subReader);
       }
     }
   }
@@ -257,8 +401,8 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      Assertions.assertEquals(0L, reader.offsetAbsolute());
-      Assertions.assertEquals(0L, reader.offsetRelative());
+      Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(0L, reader.offsetCurrentRelative());
       LOG.debug("reader:    {}", reader);
 
       final var ex =
@@ -267,7 +411,7 @@ public final class BSSReadersRandomAccessByteBufferTest
         });
 
       LOG.debug("ex: ", ex);
-      Assertions.assertTrue(ex.getMessage().contains("Requested bounds: [0x0, 0x5)"));
+      Assertions.assertTrue(ex.getMessage().contains("Requested bounds: absolute [0x0, 0x5)"));
     }
   }
 
@@ -313,29 +457,32 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      reader.skip(1L);
-      Assertions.assertEquals(1L, reader.offsetAbsolute());
-      Assertions.assertEquals(1L, reader.offsetRelative());
-
-      reader.align(4);
-      Assertions.assertEquals(4L, reader.offsetAbsolute());
-      Assertions.assertEquals(4L, reader.offsetRelative());
-
-      reader.align(4);
-      Assertions.assertEquals(4L, reader.offsetAbsolute());
-      Assertions.assertEquals(4L, reader.offsetRelative());
+      Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(0L, reader.offsetCurrentRelative());
 
       reader.skip(1L);
-      Assertions.assertEquals(5L, reader.offsetAbsolute());
-      Assertions.assertEquals(5L, reader.offsetRelative());
+      Assertions.assertEquals(1L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(1L, reader.offsetCurrentRelative());
 
       reader.align(4);
-      Assertions.assertEquals(8L, reader.offsetAbsolute());
-      Assertions.assertEquals(8L, reader.offsetRelative());
+      Assertions.assertEquals(4L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(4L, reader.offsetCurrentRelative());
+
+      reader.align(4);
+      Assertions.assertEquals(4L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(4L, reader.offsetCurrentRelative());
 
       reader.skip(1L);
-      Assertions.assertEquals(9L, reader.offsetAbsolute());
-      Assertions.assertEquals(9L, reader.offsetRelative());
+      Assertions.assertEquals(5L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(5L, reader.offsetCurrentRelative());
+
+      reader.align(4);
+      Assertions.assertEquals(8L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(8L, reader.offsetCurrentRelative());
+
+      reader.skip(1L);
+      Assertions.assertEquals(9L, reader.offsetCurrentAbsolute());
+      Assertions.assertEquals(9L, reader.offsetCurrentRelative());
 
       Assertions.assertThrows(IOException.class, () -> reader.align(4));
     }

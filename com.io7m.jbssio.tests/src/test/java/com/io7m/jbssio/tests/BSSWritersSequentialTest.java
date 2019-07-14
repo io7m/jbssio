@@ -41,9 +41,9 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
-        Assertions.assertEquals(0L, writer.offsetAbsolute());
-        Assertions.assertEquals(0L, writer.offsetRelative());
-        Assertions.assertEquals(OptionalLong.empty(), writer.sizeLimit());
+        Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, writer.offsetCurrentRelative());
+        Assertions.assertEquals(OptionalLong.empty(), writer.bytesRemaining());
       }
     }
   }
@@ -55,11 +55,29 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       final var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a");
-      Assertions.assertEquals(0L, writer.offsetAbsolute());
-      Assertions.assertEquals(0L, writer.offsetRelative());
-
+      Assertions.assertFalse(writer.isClosed());
       writer.close();
+      Assertions.assertTrue(writer.isClosed());
       Assertions.assertThrows(IOException.class, () -> writer.writeS8(0x0));
+    }
+  }
+
+  @Test
+  public void testClosedNested()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      final var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a");
+      Assertions.assertFalse(writer.isClosed());
+
+      try (var s = writer.createSubWriter("x")) {
+        writer.close();
+        Assertions.assertTrue(writer.isClosed());
+        Assertions.assertThrows(IOException.class, () -> writer.writeS8(0x0));
+        Assertions.assertTrue(s.isClosed());
+        Assertions.assertThrows(IOException.class, () -> s.writeS8(0x0));
+      }
     }
   }
 
@@ -96,12 +114,12 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
-        Assertions.assertEquals(0L, writer.offsetAbsolute());
-        Assertions.assertEquals(0L, writer.offsetRelative());
+        Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, writer.offsetCurrentRelative());
 
         writer.skip(10L);
-        Assertions.assertEquals(10L, writer.offsetAbsolute());
-        Assertions.assertEquals(10L, writer.offsetRelative());
+        Assertions.assertEquals(10L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(10L, writer.offsetCurrentRelative());
       }
 
       Assertions.assertArrayEquals(new byte[10], stream.toByteArray());
@@ -115,12 +133,12 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 10L)) {
-        Assertions.assertEquals(0L, writer.offsetAbsolute());
-        Assertions.assertEquals(0L, writer.offsetRelative());
+        Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, writer.offsetCurrentRelative());
 
         writer.skip(10L);
-        Assertions.assertEquals(10L, writer.offsetAbsolute());
-        Assertions.assertEquals(10L, writer.offsetRelative());
+        Assertions.assertEquals(10L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(10L, writer.offsetCurrentRelative());
 
         final var ex = Assertions.assertThrows(IOException.class, () -> {
           writer.skip(1L);
@@ -139,35 +157,35 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
-        Assertions.assertEquals(0L, writer.offsetAbsolute());
-        Assertions.assertEquals(0L, writer.offsetRelative());
+        Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, writer.offsetCurrentRelative());
 
         writer.writeU8(0x20);
         writer.align(4);
-        Assertions.assertEquals(4L, writer.offsetAbsolute());
-        Assertions.assertEquals(4L, writer.offsetRelative());
+        Assertions.assertEquals(4L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(4L, writer.offsetCurrentRelative());
 
         writer.align(4);
-        Assertions.assertEquals(4L, writer.offsetAbsolute());
-        Assertions.assertEquals(4L, writer.offsetRelative());
+        Assertions.assertEquals(4L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(4L, writer.offsetCurrentRelative());
 
         writer.writeU8(0x21);
         writer.align(4);
-        Assertions.assertEquals(8L, writer.offsetAbsolute());
-        Assertions.assertEquals(8L, writer.offsetRelative());
+        Assertions.assertEquals(8L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(8L, writer.offsetCurrentRelative());
 
         writer.align(4);
-        Assertions.assertEquals(8L, writer.offsetAbsolute());
-        Assertions.assertEquals(8L, writer.offsetRelative());
+        Assertions.assertEquals(8L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(8L, writer.offsetCurrentRelative());
 
         writer.writeU8(0x22);
         writer.align(4);
-        Assertions.assertEquals(12L, writer.offsetAbsolute());
-        Assertions.assertEquals(12L, writer.offsetRelative());
+        Assertions.assertEquals(12L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(12L, writer.offsetCurrentRelative());
 
         writer.align(4);
-        Assertions.assertEquals(12L, writer.offsetAbsolute());
-        Assertions.assertEquals(12L, writer.offsetRelative());
+        Assertions.assertEquals(12L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(12L, writer.offsetCurrentRelative());
       }
 
       Assertions.assertArrayEquals(new byte[]{
@@ -185,17 +203,17 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 5L)) {
-        Assertions.assertEquals(0L, writer.offsetAbsolute());
-        Assertions.assertEquals(0L, writer.offsetRelative());
+        Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(0L, writer.offsetCurrentRelative());
 
         writer.writeU8(0x20);
         writer.align(4);
-        Assertions.assertEquals(4L, writer.offsetAbsolute());
-        Assertions.assertEquals(4L, writer.offsetRelative());
+        Assertions.assertEquals(4L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(4L, writer.offsetCurrentRelative());
 
         writer.align(4);
-        Assertions.assertEquals(4L, writer.offsetAbsolute());
-        Assertions.assertEquals(4L, writer.offsetRelative());
+        Assertions.assertEquals(4L, writer.offsetCurrentAbsolute());
+        Assertions.assertEquals(4L, writer.offsetCurrentRelative());
 
         writer.writeU8(0x21);
         Assertions.assertThrows(IOException.class, () -> writer.align(4));
@@ -215,94 +233,94 @@ public final class BSSWritersSequentialTest
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
       try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 12L)) {
-        Assertions.assertEquals(OptionalLong.of(12L), writer.sizeLimit());
+        Assertions.assertEquals(OptionalLong.of(12L), writer.bytesRemaining());
         LOG.debug("writer: {}", writer);
 
         try (var s = writer.createSubWriter("x", 4L)) {
-          Assertions.assertEquals(OptionalLong.of(4L), s.sizeLimit());
+          Assertions.assertEquals(OptionalLong.of(4L), s.bytesRemaining());
 
-          Assertions.assertEquals(0L, writer.offsetAbsolute());
-          Assertions.assertEquals(0L, writer.offsetRelative());
-          Assertions.assertEquals(0L, s.offsetAbsolute());
-          Assertions.assertEquals(0L, s.offsetRelative());
+          Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(0L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(0L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(0L, s.offsetCurrentRelative());
           s.writeU8(0x0);
-          Assertions.assertEquals(1L, writer.offsetAbsolute());
-          Assertions.assertEquals(1L, writer.offsetRelative());
-          Assertions.assertEquals(1L, s.offsetAbsolute());
-          Assertions.assertEquals(1L, s.offsetRelative());
+          Assertions.assertEquals(1L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(1L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(1L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(1L, s.offsetCurrentRelative());
           s.writeU8("name", 0x1);
-          Assertions.assertEquals(2L, writer.offsetAbsolute());
-          Assertions.assertEquals(2L, writer.offsetRelative());
-          Assertions.assertEquals(2L, s.offsetAbsolute());
-          Assertions.assertEquals(2L, s.offsetRelative());
+          Assertions.assertEquals(2L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(2L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(2L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(2L, s.offsetCurrentRelative());
           s.writeS8(0x2);
-          Assertions.assertEquals(3L, writer.offsetAbsolute());
-          Assertions.assertEquals(3L, writer.offsetRelative());
-          Assertions.assertEquals(3L, s.offsetAbsolute());
-          Assertions.assertEquals(3L, s.offsetRelative());
+          Assertions.assertEquals(3L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(3L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(3L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(3L, s.offsetCurrentRelative());
           s.writeS8("name", 0x3);
-          Assertions.assertEquals(4L, writer.offsetAbsolute());
-          Assertions.assertEquals(4L, writer.offsetRelative());
-          Assertions.assertEquals(4L, s.offsetAbsolute());
-          Assertions.assertEquals(4L, s.offsetRelative());
+          Assertions.assertEquals(4L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(4L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L, s.offsetCurrentRelative());
         }
 
         try (var s = writer.createSubWriter("y", 4L)) {
-          Assertions.assertEquals(OptionalLong.of(4L), s.sizeLimit());
+          Assertions.assertEquals(OptionalLong.of(4L), s.bytesRemaining());
 
-          Assertions.assertEquals(4L + 0L, writer.offsetAbsolute());
-          Assertions.assertEquals(4L + 0L, writer.offsetRelative());
-          Assertions.assertEquals(4L + 0L, s.offsetAbsolute());
-          Assertions.assertEquals(0L, s.offsetRelative());
+          Assertions.assertEquals(4L + 0L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L + 0L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(4L + 0L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(0L, s.offsetCurrentRelative());
           s.writeU8(0x0);
-          Assertions.assertEquals(4L + 1L, writer.offsetAbsolute());
-          Assertions.assertEquals(4L + 1L, writer.offsetRelative());
-          Assertions.assertEquals(4L + 1L, s.offsetAbsolute());
-          Assertions.assertEquals(1L, s.offsetRelative());
+          Assertions.assertEquals(4L + 1L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L + 1L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(4L + 1L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(1L, s.offsetCurrentRelative());
           s.writeU8(0x1);
-          Assertions.assertEquals(4L + 2L, writer.offsetAbsolute());
-          Assertions.assertEquals(4L + 2L, writer.offsetRelative());
-          Assertions.assertEquals(4L + 2L, s.offsetAbsolute());
-          Assertions.assertEquals(2L, s.offsetRelative());
+          Assertions.assertEquals(4L + 2L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L + 2L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(4L + 2L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(2L, s.offsetCurrentRelative());
           s.writeU8(0x2);
-          Assertions.assertEquals(4L + 3L, writer.offsetAbsolute());
-          Assertions.assertEquals(4L + 3L, writer.offsetRelative());
-          Assertions.assertEquals(4L + 3L, s.offsetAbsolute());
-          Assertions.assertEquals(3L, s.offsetRelative());
+          Assertions.assertEquals(4L + 3L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L + 3L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(4L + 3L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(3L, s.offsetCurrentRelative());
           s.writeU8(0x3);
-          Assertions.assertEquals(4L + 4L, writer.offsetAbsolute());
-          Assertions.assertEquals(4L + 4L, writer.offsetRelative());
-          Assertions.assertEquals(4L + 4L, s.offsetAbsolute());
-          Assertions.assertEquals(4L, s.offsetRelative());
+          Assertions.assertEquals(4L + 4L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L + 4L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(4L + 4L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L, s.offsetCurrentRelative());
         }
 
         try (var s = writer.createSubWriter("z", 4L)) {
-          Assertions.assertEquals(OptionalLong.of(4L), s.sizeLimit());
+          Assertions.assertEquals(OptionalLong.of(4L), s.bytesRemaining());
 
-          Assertions.assertEquals(8L + 0L, writer.offsetAbsolute());
-          Assertions.assertEquals(8L + 0L, writer.offsetRelative());
-          Assertions.assertEquals(8L + 0L, s.offsetAbsolute());
-          Assertions.assertEquals(0L, s.offsetRelative());
+          Assertions.assertEquals(8L + 0L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(8L + 0L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(8L + 0L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(0L, s.offsetCurrentRelative());
           s.writeU8(0x0);
-          Assertions.assertEquals(8L + 1L, writer.offsetAbsolute());
-          Assertions.assertEquals(8L + 1L, writer.offsetRelative());
-          Assertions.assertEquals(8L + 1L, s.offsetAbsolute());
-          Assertions.assertEquals(1L, s.offsetRelative());
+          Assertions.assertEquals(8L + 1L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(8L + 1L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(8L + 1L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(1L, s.offsetCurrentRelative());
           s.writeU8(0x1);
-          Assertions.assertEquals(8L + 2L, writer.offsetAbsolute());
-          Assertions.assertEquals(8L + 2L, writer.offsetRelative());
-          Assertions.assertEquals(8L + 2L, s.offsetAbsolute());
-          Assertions.assertEquals(2L, s.offsetRelative());
+          Assertions.assertEquals(8L + 2L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(8L + 2L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(8L + 2L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(2L, s.offsetCurrentRelative());
           s.writeU8(0x2);
-          Assertions.assertEquals(8L + 3L, writer.offsetAbsolute());
-          Assertions.assertEquals(8L + 3L, writer.offsetRelative());
-          Assertions.assertEquals(8L + 3L, s.offsetAbsolute());
-          Assertions.assertEquals(3L, s.offsetRelative());
+          Assertions.assertEquals(8L + 3L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(8L + 3L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(8L + 3L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(3L, s.offsetCurrentRelative());
           s.writeU8(0x3);
-          Assertions.assertEquals(8L + 4L, writer.offsetAbsolute());
-          Assertions.assertEquals(8L + 4L, writer.offsetRelative());
-          Assertions.assertEquals(8L + 4L, s.offsetAbsolute());
-          Assertions.assertEquals(4L, s.offsetRelative());
+          Assertions.assertEquals(8L + 4L, writer.offsetCurrentAbsolute());
+          Assertions.assertEquals(8L + 4L, writer.offsetCurrentRelative());
+          Assertions.assertEquals(8L + 4L, s.offsetCurrentAbsolute());
+          Assertions.assertEquals(4L, s.offsetCurrentRelative());
         }
       }
 

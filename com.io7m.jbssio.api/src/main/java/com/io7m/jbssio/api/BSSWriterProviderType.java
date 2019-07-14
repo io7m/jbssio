@@ -19,6 +19,9 @@ package com.io7m.jbssio.api;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
+import java.util.OptionalLong;
 
 /**
  * A provider of writers.
@@ -62,5 +65,43 @@ public interface BSSWriterProviderType
     OutputStream stream,
     String name,
     long size)
+    throws IOException;
+
+  /**
+   * Create a new random access writer from the given byte buffer.
+   *
+   * @param uri    The URI of the stream
+   * @param buffer The buffer
+   * @param name   The name of the initial writer
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSWriterRandomAccessType createWriterFromByteBuffer(
+    URI uri,
+    ByteBuffer buffer,
+    String name)
+    throws IOException;
+
+  /**
+   * Create a new random access writer from the given channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial writer
+   * @param size    A limit on the number of bytes that can be written
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSWriterRandomAccessType createWriterFromChannel(
+    URI uri,
+    SeekableByteChannel channel,
+    String name,
+    OptionalLong size)
     throws IOException;
 }

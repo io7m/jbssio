@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,14 +82,6 @@ final class BSSWriterStream implements BSSWriterSequentialType
   {
     final var wrappedStream = new CountingOutputStream(inStream);
     return new BSSWriterStream(null, uri, inName, wrappedStream, 0L, inSize);
-  }
-
-  private void checkNotClosed()
-    throws ClosedChannelException
-  {
-    if (this.closed.get()) {
-      throw new ClosedChannelException();
-    }
   }
 
   private long absoluteOf(
@@ -257,7 +248,7 @@ final class BSSWriterStream implements BSSWriterSequentialType
   {
     this.checkNotClosed();
 
-    final var diff = this.offsetAbsolute() % (long) alignment;
+    final var diff = this.offsetCurrentAbsolute() % (long) alignment;
     if (diff == 0L) {
       return;
     }
@@ -266,9 +257,11 @@ final class BSSWriterStream implements BSSWriterSequentialType
   }
 
   @Override
-  public OptionalLong sizeLimit()
+  public OptionalLong bytesRemaining()
   {
-    return this.size;
+    return this.size.stream()
+      .map(s -> s - this.stream.getByteCount())
+      .findFirst();
   }
 
   private void writeS8p(
@@ -718,22 +711,22 @@ final class BSSWriterStream implements BSSWriterSequentialType
       "[BSSWriterStream %s %s [absolute %s] [relative %s]]",
       this.uri(),
       this.path(),
-      Long.toUnsignedString(this.offsetAbsolute()),
-      Long.toUnsignedString(this.offsetRelative()));
+      Long.toUnsignedString(this.offsetCurrentAbsolute()),
+      Long.toUnsignedString(this.offsetCurrentRelative()));
   }
 
   @Override
-  public long offsetAbsolute()
+  public long offsetCurrentAbsolute()
   {
     final var parentW = this.parent;
     if (parentW != null) {
-      return parentW.offsetAbsolute();
+      return parentW.offsetCurrentAbsolute();
     }
-    return this.offsetRelative();
+    return this.offsetCurrentRelative();
   }
 
   @Override
-  public long offsetRelative()
+  public long offsetCurrentRelative()
   {
     return this.stream.getByteCount();
   }
@@ -757,5 +750,15 @@ final class BSSWriterStream implements BSSWriterSequentialType
     if (this.closed.compareAndSet(false, true)) {
       this.stream.close();
     }
+  }
+
+  @Override
+  public boolean isClosed()
+  {
+    final var parentRef = this.parent;
+    if (parentRef != null) {
+      return parentRef.isClosed() || this.closed.get();
+    }
+    return this.closed.get();
   }
 }
