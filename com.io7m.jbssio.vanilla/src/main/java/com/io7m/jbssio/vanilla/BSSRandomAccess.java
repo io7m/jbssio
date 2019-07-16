@@ -71,7 +71,7 @@ abstract class BSSRandomAccess
   {
     var currentNode = this;
     while (currentNode != null) {
-      if (currentNode.parentRangeRelative.isUpperUnbounded()) {
+      if (!currentNode.parentRangeRelative.isUpperUnbounded()) {
         throw new IllegalStateException(
           "All ancestors of an unbounded object must also be unbounded");
       }
