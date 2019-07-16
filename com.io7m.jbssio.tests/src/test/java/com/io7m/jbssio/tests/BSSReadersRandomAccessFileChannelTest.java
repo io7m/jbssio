@@ -42,6 +42,6 @@ public final class BSSReadersRandomAccessFileChannelTest
     throws IOException
   {
     return new BSSReaders()
-      .createReaderFromFileChannel(URI.create("urn:fake"), channel, "a");
+      .createReaderFromChannelBounded(URI.create("urn:fake"), channel, "a", channel.size());
   }
 }

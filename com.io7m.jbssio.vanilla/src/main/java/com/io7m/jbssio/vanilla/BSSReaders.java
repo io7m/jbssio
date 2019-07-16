@@ -21,11 +21,9 @@ import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
 import org.osgi.service.component.annotations.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
@@ -59,7 +57,7 @@ public final class BSSReaders implements BSSReaderProviderType
   }
 
   @Override
-  public BSSReaderSequentialType createReaderFromStream(
+  public BSSReaderSequentialType createReaderFromStreamBounded(
     final URI uri,
     final InputStream stream,
     final String name,
@@ -84,30 +82,27 @@ public final class BSSReaders implements BSSReaderProviderType
   }
 
   @Override
-  public BSSReaderRandomAccessType createReaderFromFileChannel(
+  public BSSReaderRandomAccessType createReaderFromChannel(
     final URI uri,
-    final FileChannel channel,
+    final SeekableByteChannel channel,
     final String name)
-    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "path");
-    return BSSReaderByteBuffer.createFromFileChannel(uri, channel, name);
+    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.empty());
   }
 
   @Override
-  public BSSReaderRandomAccessType createReaderFromSeekableChannel(
+  public BSSReaderRandomAccessType createReaderFromChannelBounded(
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
-    final OptionalLong size)
-    throws IOException
+    final long size)
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "path");
-    Objects.requireNonNull(size, "size");
-    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name, size);
+    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.of(size));
   }
 }

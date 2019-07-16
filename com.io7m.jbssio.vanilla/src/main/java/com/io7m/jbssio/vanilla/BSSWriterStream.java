@@ -120,7 +120,7 @@ final class BSSWriterStream implements BSSWriterSequentialType
   }
 
   @Override
-  public BSSWriterSequentialType createSubWriter(
+  public BSSWriterSequentialType createSubWriterBounded(
     final String inName,
     final long newSize)
   {

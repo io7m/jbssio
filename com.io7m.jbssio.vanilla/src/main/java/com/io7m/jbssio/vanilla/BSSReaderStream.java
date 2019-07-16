@@ -121,7 +121,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
-  public BSSReaderSequentialType createSubReader(
+  public BSSReaderSequentialType createSubReaderBounded(
     final String inName,
     final long newSize)
   {

@@ -30,9 +30,27 @@ public interface BSSReaderRandomAccessType extends BSSReaderType, BSSSeekableTyp
     throws IOException;
 
   @Override
-  BSSReaderRandomAccessType createSubReader(
+  BSSReaderRandomAccessType createSubReaderBounded(
     String name,
     long size)
+    throws IOException;
+
+  /**
+   * Create a new sub reader with the given {@code name}, starting at {@code offset} bytes from the
+   * start of the bounds of the current reader. If the current reader is bounded, the new sub reader
+   * will also be bounded.
+   *
+   * @param name   The new name
+   * @param offset The relative offset
+   *
+   * @return A new sub reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createSubReaderAt(
+    String name,
+    long offset)
     throws IOException;
 
   /**
@@ -48,7 +66,7 @@ public interface BSSReaderRandomAccessType extends BSSReaderType, BSSSeekableTyp
    * @throws IOException On I/O errors
    */
 
-  BSSReaderRandomAccessType createSubReader(
+  BSSReaderRandomAccessType createSubReaderAtBounded(
     String name,
     long offset,
     long size)

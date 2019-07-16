@@ -17,7 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
-import com.io7m.jranges.RangeHalfOpenL;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,7 +24,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
@@ -41,7 +39,7 @@ final class BSSWriterSeekableChannel
   private BSSWriterSeekableChannel(
     final BSSWriterSeekableChannel inParent,
     final URI inURI,
-    final Optional<RangeHalfOpenL> inParentRangeRelative,
+    final BSSRangeHalfOpen inParentRangeRelative,
     final String inName,
     final SeekableByteChannel inChannel,
     final ByteBuffer inBuffer,
@@ -65,7 +63,7 @@ final class BSSWriterSeekableChannel
     return new BSSWriterSeekableChannel(
       null,
       uri,
-      size.stream().mapToObj(s -> RangeHalfOpenL.of(0L, s)).findFirst(),
+      new BSSRangeHalfOpen(0L, size),
       name,
       channel,
       buffer,
@@ -102,7 +100,34 @@ final class BSSWriterSeekableChannel
   }
 
   @Override
-  public BSSWriterRandomAccessType createSubWriter(
+  public BSSWriterRandomAccessType createSubWriterAt(
+    final String inName,
+    final long offset)
+    throws IOException
+  {
+    Objects.requireNonNull(inName, "path");
+
+    this.checkNotClosed();
+
+    final var newName =
+      new StringBuilder(32)
+        .append(this.path())
+        .append('.')
+        .append(inName)
+        .toString();
+
+    return new BSSWriterSeekableChannel(
+      this,
+      this.uri,
+      this.createOffsetSubRange(offset),
+      newName,
+      this.channel,
+      this.writeBuffer,
+      () -> null);
+  }
+
+  @Override
+  public BSSWriterRandomAccessType createSubWriterAtBounded(
     final String inName,
     final long offset,
     final long size)
@@ -122,7 +147,7 @@ final class BSSWriterSeekableChannel
     return new BSSWriterSeekableChannel(
       this,
       this.uri,
-      Optional.of(this.createSubRange(offset, size)),
+      this.createSubRange(offset, size),
       newName,
       this.channel,
       this.writeBuffer,

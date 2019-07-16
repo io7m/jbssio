@@ -21,7 +21,6 @@ import com.io7m.jbssio.api.BSSWriterRandomAccessType;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
 import org.osgi.service.component.annotations.Component;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -50,7 +49,6 @@ public final class BSSWriters implements BSSWriterProviderType
     final URI uri,
     final OutputStream stream,
     final String name)
-    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(stream, "stream");
@@ -59,12 +57,11 @@ public final class BSSWriters implements BSSWriterProviderType
   }
 
   @Override
-  public BSSWriterSequentialType createWriterFromStream(
+  public BSSWriterSequentialType createWriterFromStreamBounded(
     final URI uri,
     final OutputStream stream,
     final String name,
     final long size)
-    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(stream, "stream");
@@ -77,7 +74,6 @@ public final class BSSWriters implements BSSWriterProviderType
     final URI uri,
     final ByteBuffer buffer,
     final String name)
-    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(buffer, "buffer");
@@ -89,9 +85,33 @@ public final class BSSWriters implements BSSWriterProviderType
   public BSSWriterRandomAccessType createWriterFromChannel(
     final URI uri,
     final SeekableByteChannel channel,
+    final String name)
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(channel, "channel");
+    Objects.requireNonNull(name, "name");
+    return BSSWriterSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.empty());
+  }
+
+  @Override
+  public BSSWriterRandomAccessType createWriterFromChannelBounded(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name,
+    final long size)
+  {
+    Objects.requireNonNull(uri, "uri");
+    Objects.requireNonNull(channel, "channel");
+    Objects.requireNonNull(name, "name");
+    return BSSWriterSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.of(size));
+  }
+
+  @Override
+  public BSSWriterRandomAccessType createWriterFromChannel(
+    final URI uri,
+    final SeekableByteChannel channel,
     final String name,
     final OptionalLong size)
-    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");

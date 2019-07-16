@@ -30,7 +30,7 @@ public interface BSSReaderSequentialType extends BSSReaderType
     throws IOException;
 
   @Override
-  BSSReaderSequentialType createSubReader(
+  BSSReaderSequentialType createSubReaderBounded(
     String name,
     long size)
     throws IOException;

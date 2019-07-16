@@ -31,13 +31,34 @@ public interface BSSWriterRandomAccessType extends BSSWriterType, BSSSeekableTyp
     throws IOException;
 
   @Override
-  default BSSWriterRandomAccessType createSubWriter(
+  default BSSWriterRandomAccessType createSubWriterBounded(
     final String name,
     final long size)
     throws IOException
   {
-    return this.createSubWriter(Objects.requireNonNull(name, "name"), 0L, size);
+    return this.createSubWriterAtBounded(
+      Objects.requireNonNull(name, "name"),
+      0L,
+      size);
   }
+
+  /**
+   * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
+   * to the current writer). If the current writer is bounded, the new sub writer will also be
+   * bounded.
+   *
+   * @param name   The new name
+   * @param offset The relative offset
+   *
+   * @return A new sub writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSWriterRandomAccessType createSubWriterAt(
+    String name,
+    long offset)
+    throws IOException;
 
   /**
    * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
@@ -52,7 +73,7 @@ public interface BSSWriterRandomAccessType extends BSSWriterType, BSSSeekableTyp
    * @throws IOException On I/O errors
    */
 
-  BSSWriterRandomAccessType createSubWriter(
+  BSSWriterRandomAccessType createSubWriterAtBounded(
     String name,
     long offset,
     long size)

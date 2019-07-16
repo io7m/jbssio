@@ -27,7 +27,7 @@ public interface BSSWriterSequentialType extends BSSWriterType
     String name);
 
   @Override
-  BSSWriterSequentialType createSubWriter(
+  BSSWriterSequentialType createSubWriterBounded(
     String name,
     long size);
 }

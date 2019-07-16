@@ -138,7 +138,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       Assertions.assertEquals(0L, reader.offsetCurrentRelative());
       LOG.debug("reader:    {}", reader);
 
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
         Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
         Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
@@ -175,7 +175,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
         Assertions.assertThrows(IOException.class, subReader::readU8);
       }
 
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
         Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
         Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
@@ -225,7 +225,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
         Assertions.assertEquals(2, subReader.readS8());
@@ -235,7 +235,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       }
 
       reader.seekTo(4L);
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
         Assertions.assertEquals(4, subReader.readS8());
         Assertions.assertEquals(5, subReader.readU8());
         Assertions.assertEquals(6, subReader.readS8());
@@ -245,7 +245,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       }
 
       reader.seekTo(0L);
-      try (var subReader = reader.createSubReader("s", 4L, 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 4L, 4L)) {
         Assertions.assertEquals(4, subReader.readS8());
         Assertions.assertEquals(5, subReader.readU8());
         Assertions.assertEquals(6, subReader.readS8());
@@ -267,7 +267,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      try (var subReader = reader.createSubReader("s", 4L)) {
+      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
         Assertions.assertEquals(2, subReader.readS8());
@@ -313,7 +313,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
       final var ex =
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-          reader.createSubReader("s", 5L);
+          reader.createSubReaderBounded("s", 5L);
         });
 
       LOG.debug("ex: ", ex);

@@ -21,13 +21,11 @@ import com.io7m.jbssio.api.BSSAddressableType;
 import com.io7m.jbssio.api.BSSCloseableType;
 import com.io7m.jbssio.api.BSSSeekableType;
 import com.io7m.jbssio.api.BSSSkippableType;
-import com.io7m.jranges.RangeHalfOpenL;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,7 +36,7 @@ abstract class BSSRandomAccess
 {
   protected final URI uri;
   protected final String path;
-  private final Optional<RangeHalfOpenL> parentRangeRelative;
+  private final BSSRangeHalfOpen parentRangeRelative;
   private final AtomicBoolean closed;
   private final BSSRandomAccess parent;
   private final Callable<Void> onClose;
@@ -46,7 +44,7 @@ abstract class BSSRandomAccess
 
   BSSRandomAccess(
     final BSSRandomAccess inParent,
-    final Optional<RangeHalfOpenL> inParentRangeRelative,
+    final BSSRangeHalfOpen inParentRangeRelative,
     final Callable<Void> inOnClose,
     final URI inURI,
     final String inPath)
@@ -64,27 +62,16 @@ abstract class BSSRandomAccess
 
     this.closed = new AtomicBoolean(false);
 
-    if (inParentRangeRelative.isEmpty()) {
+    if (inParentRangeRelative.isUpperUnbounded()) {
       this.checkAncestorsUnbounded();
     }
-  }
-
-  private static long optionalVisit(
-    final Optional<RangeHalfOpenL> optional,
-    final ObjToLongFunctionType<RangeHalfOpenL> f,
-    final long otherwise)
-  {
-    if (optional.isPresent()) {
-      return f.apply(optional.get());
-    }
-    return otherwise;
   }
 
   private void checkAncestorsUnbounded()
   {
     var currentNode = this;
     while (currentNode != null) {
-      if (currentNode.parentRangeRelative.isPresent()) {
+      if (currentNode.parentRangeRelative.isUpperUnbounded()) {
         throw new IllegalStateException(
           "All ancestors of an unbounded object must also be unbounded");
       }
@@ -98,22 +85,24 @@ abstract class BSSRandomAccess
     return this.absoluteStart() + relative;
   }
 
-  private RangeHalfOpenL toAbsoluteRange(
-    final RangeHalfOpenL relative)
+  private BSSRangeHalfOpen toAbsoluteRange(
+    final BSSRangeHalfOpen relative)
   {
     final var start = this.absoluteStart();
-    return RangeHalfOpenL.of(start + relative.lower(), start + relative.upper());
+    return new BSSRangeHalfOpen(
+      start + relative.lower(),
+      relative.upper()
+        .stream()
+        .map(x -> start + x)
+        .findFirst());
   }
 
   private long absoluteStart()
   {
-    var accumulated = optionalVisit(this.parentRangeRelative, RangeHalfOpenL::lower, 0L);
+    var accumulated = this.parentRangeRelative.lower();
     var currentParent = this.parent;
     while (currentParent != null) {
-      accumulated += optionalVisit(
-        currentParent.parentRangeRelative,
-        RangeHalfOpenL::lower,
-        0L) + currentParent.offsetRelative;
+      accumulated += currentParent.parentRangeRelative.lower() + currentParent.offsetRelative;
       currentParent = currentParent.parent;
     }
     return accumulated;
@@ -121,9 +110,10 @@ abstract class BSSRandomAccess
 
   private OptionalLong absoluteEnd()
   {
-    return this.parentRangeRelative
-      .map(rangeHalfOpenL -> OptionalLong.of(this.absoluteStart() + rangeHalfOpenL.interval()))
-      .orElseGet(OptionalLong::empty);
+    return this.parentRangeRelative.interval()
+      .stream()
+      .map(interval -> this.absoluteStart() + interval)
+      .findFirst();
   }
 
   final void checkHasBytesRemaining(
@@ -139,15 +129,14 @@ abstract class BSSRandomAccess
     }
   }
 
-  final RangeHalfOpenL createSubRange(
+  final BSSRangeHalfOpen createSubRange(
     final long offset,
     final long size)
   {
-    final var subRange = RangeHalfOpenL.of(offset, offset + size);
-    if (this.parentRangeRelative.isPresent()) {
-      final var container = this.parentRangeRelative.get();
+    final var subRange = new BSSRangeHalfOpen(offset, OptionalLong.of(offset + size));
+    if (!this.parentRangeRelative.isUpperUnbounded()) {
       BSSRanges.checkRangesCompatible(
-        container,
+        this.parentRangeRelative,
         subRange,
         this::toAbsoluteRange,
         (attributes) -> {
@@ -158,9 +147,15 @@ abstract class BSSRandomAccess
     return subRange;
   }
 
-  final Optional<RangeHalfOpenL> createSameSubRange()
+  final BSSRangeHalfOpen createOffsetSubRange(
+    final long offset)
   {
-    return this.parentRangeRelative.map(range -> RangeHalfOpenL.of(0L, range.interval()));
+    throw new UnsupportedOperationException();
+  }
+
+  final BSSRangeHalfOpen createSameSubRange()
+  {
+    return new BSSRangeHalfOpen(0L, this.parentRangeRelative.interval());
   }
 
   private IOException outOfBounds(
@@ -188,17 +183,11 @@ abstract class BSSRandomAccess
     }
     stringBuilder.append(lineSeparator);
 
-    if (this.parentRangeRelative.isPresent()) {
-      final var bounds = this.toAbsoluteRange(this.parentRangeRelative.get());
-
-      stringBuilder
-        .append("  Reader bounds: [absolute 0x")
-        .append(Long.toUnsignedString(bounds.lower(), 16))
-        .append(", 0x")
-        .append(Long.toUnsignedString(bounds.upper(), 16))
-        .append(")")
-        .append(lineSeparator);
-    }
+    final var bounds = this.toAbsoluteRange(this.parentRangeRelative);
+    stringBuilder
+      .append("  Reader bounds: absolute ")
+      .append(bounds)
+      .append(lineSeparator);
 
     stringBuilder
       .append("  Target offset: absolute 0x")
@@ -251,11 +240,8 @@ abstract class BSSRandomAccess
   {
     this.checkNotClosed();
 
-    if (this.parentRangeRelative.isPresent()) {
-      final var range = this.parentRangeRelative.get();
-      if (!range.includesValue(position)) {
-        throw this.outOfBounds(position, null, IOException::new);
-      }
+    if (!this.parentRangeRelative.includesValue(position)) {
+      throw this.outOfBounds(position, null, IOException::new);
     }
 
     this.offsetRelative = position;
@@ -286,11 +272,6 @@ abstract class BSSRandomAccess
       return parentRef.isClosed() || this.closed.get();
     }
     return this.closed.get();
-  }
-
-  final long offsetRelative()
-  {
-    return this.offsetRelative;
   }
 
   final void increaseOffsetRelative(final long amount)

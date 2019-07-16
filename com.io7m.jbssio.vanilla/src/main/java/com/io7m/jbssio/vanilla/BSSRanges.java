@@ -17,8 +17,6 @@
 
 package com.io7m.jbssio.vanilla;
 
-import com.io7m.jranges.RangeHalfOpenL;
-
 import java.util.Objects;
 
 final class BSSRanges
@@ -30,8 +28,8 @@ final class BSSRanges
 
   private static IllegalArgumentException makeException(
     final TransformToAbsoluteType transformToAbsolute,
-    final RangeHalfOpenL existingRange,
-    final RangeHalfOpenL targetRange,
+    final BSSRangeHalfOpen existingRange,
+    final BSSRangeHalfOpen targetRange,
     final OnIncompatibleListenerType listener)
   {
     final var lineSeparator =
@@ -63,55 +61,49 @@ final class BSSRanges
     listener.call(receiver);
 
     stringBuilder
-      .append("  Existing bounds: absolute [0x")
-      .append(Long.toUnsignedString(existingAbs.lower(), 16))
-      .append(", 0x")
-      .append(Long.toUnsignedString(existingAbs.upper(), 16))
-      .append(")")
+      .append("  Existing bounds: absolute ")
+      .append(existingAbs.toString())
       .append(lineSeparator);
 
     stringBuilder
-      .append("  Requested bounds: absolute [0x")
-      .append(Long.toUnsignedString(requestedAbs.lower(), 16))
-      .append(", 0x")
-      .append(Long.toUnsignedString(requestedAbs.upper(), 16))
-      .append(")")
+      .append("  Requested bounds: absolute ")
+      .append(requestedAbs.toString())
       .append(lineSeparator);
 
     throw new IllegalArgumentException(stringBuilder.toString());
   }
 
   public static void checkRangesCompatible(
-    final RangeHalfOpenL existingRange,
-    final RangeHalfOpenL targetRange,
+    final BSSRangeHalfOpen existingRange,
+    final BSSRangeHalfOpen targetRange,
     final TransformToAbsoluteType transformToAbsolute,
     final OnIncompatibleListenerType listener)
   {
     final var projected =
-      RangeHalfOpenL.of(
+      new BSSRangeHalfOpen(
         targetRange.lower() - existingRange.lower(),
-        targetRange.upper() - existingRange.lower());
+        targetRange.upper().stream().map(x -> x - existingRange.lower()).findFirst());
 
     if (!projected.isIncludedIn(existingRange)) {
       throw makeException(transformToAbsolute, existingRange, targetRange, listener);
     }
   }
 
-  public interface ExceptionAttributeReceiverType
+  interface ExceptionAttributeReceiverType
   {
     void addExceptionAttribute(
       String name,
       String value);
   }
 
-  public interface OnIncompatibleListenerType
+  interface OnIncompatibleListenerType
   {
     void call(ExceptionAttributeReceiverType receiver);
   }
 
-  public interface TransformToAbsoluteType
+  interface TransformToAbsoluteType
   {
-    RangeHalfOpenL transformToAbsolute(
-      RangeHalfOpenL range);
+    BSSRangeHalfOpen transformToAbsolute(
+      BSSRangeHalfOpen range);
   }
 }

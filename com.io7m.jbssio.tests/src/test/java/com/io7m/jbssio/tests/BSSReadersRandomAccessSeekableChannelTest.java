@@ -44,7 +44,7 @@ public final class BSSReadersRandomAccessSeekableChannelTest
     throws IOException
   {
     return new BSSReaders()
-      .createReaderFromSeekableChannel(URI.create("urn:fake"), channel, "a",
-                                       OptionalLong.of(channel.size()));
+      .createReaderFromChannel(URI.create("urn:fake"), channel, "a",
+                               OptionalLong.of(channel.size()));
   }
 }

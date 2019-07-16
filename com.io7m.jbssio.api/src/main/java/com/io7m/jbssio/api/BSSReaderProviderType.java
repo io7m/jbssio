@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.util.OptionalLong;
 
@@ -61,12 +60,38 @@ public interface BSSReaderProviderType
    * @throws IOException On I/O errors
    */
 
-  BSSReaderSequentialType createReaderFromStream(
+  BSSReaderSequentialType createReaderFromStreamBounded(
     URI uri,
     InputStream stream,
     String name,
     long size)
     throws IOException;
+
+  /**
+   * Create a new sequential reader from the given stream.
+   *
+   * @param uri    The URI of the stream
+   * @param stream The stream
+   * @param name   The name of the initial reader
+   * @param size   The maximum number of bytes that can be read
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSReaderSequentialType createReaderFromStream(
+    final URI uri,
+    final InputStream stream,
+    final String name,
+    final OptionalLong size)
+    throws IOException
+  {
+    if (size.isPresent()) {
+      return this.createReaderFromStreamBounded(uri, stream, name, size.getAsLong());
+    }
+    return this.createReaderFromStream(uri, stream, name);
+  }
 
   /**
    * Create a new random access reader from the given byte buffer.
@@ -87,11 +112,10 @@ public interface BSSReaderProviderType
     throws IOException;
 
   /**
-   * Create a new random access reader from the given file channel. Implementation are encouraged to
-   * use memory mapping for higher performance.
+   * Create a new random access reader from the given seekable byte channel.
    *
    * @param uri     The URI of the stream
-   * @param channel The file channel
+   * @param channel The channel
    * @param name    The name of the initial reader
    *
    * @return A new reader
@@ -99,9 +123,9 @@ public interface BSSReaderProviderType
    * @throws IOException On I/O errors
    */
 
-  BSSReaderRandomAccessType createReaderFromFileChannel(
+  BSSReaderRandomAccessType createReaderFromChannel(
     URI uri,
-    FileChannel channel,
+    SeekableByteChannel channel,
     String name)
     throws IOException;
 
@@ -118,10 +142,36 @@ public interface BSSReaderProviderType
    * @throws IOException On I/O errors
    */
 
-  BSSReaderRandomAccessType createReaderFromSeekableChannel(
+  BSSReaderRandomAccessType createReaderFromChannelBounded(
     URI uri,
     SeekableByteChannel channel,
     String name,
-    OptionalLong size)
+    long size)
     throws IOException;
+
+  /**
+   * Create a new random access reader from the given seekable byte channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial reader
+   * @param size    A limit on the number of bytes that can be read
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSReaderRandomAccessType createReaderFromChannel(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name,
+    final OptionalLong size)
+    throws IOException
+  {
+    if (size.isPresent()) {
+      return this.createReaderFromChannelBounded(uri, channel, name, size.getAsLong());
+    }
+    return this.createReaderFromChannel(uri, channel, name);
+  }
 }

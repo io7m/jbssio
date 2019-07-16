@@ -52,7 +52,7 @@ public interface BSSWriterType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws IOException              On I/O errors
    */
 
-  BSSWriterType createSubWriter(
+  BSSWriterType createSubWriterBounded(
     String name,
     long size)
     throws IOException;

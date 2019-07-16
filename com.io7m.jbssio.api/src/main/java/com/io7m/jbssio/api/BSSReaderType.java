@@ -52,7 +52,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws IOException              On I/O errors
    */
 
-  BSSReaderType createSubReader(
+  BSSReaderType createSubReaderBounded(
     String name,
     long size)
     throws IOException;

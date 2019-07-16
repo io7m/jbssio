@@ -132,7 +132,7 @@ public final class BSSWritersSequentialTest
   {
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
-      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 10L)) {
+      try (var writer = writers.createWriterFromStreamBounded(URI.create("urn:fake"), stream, "a", 10L)) {
         Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, writer.offsetCurrentRelative());
 
@@ -202,7 +202,7 @@ public final class BSSWritersSequentialTest
   {
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
-      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 5L)) {
+      try (var writer = writers.createWriterFromStreamBounded(URI.create("urn:fake"), stream, "a", 5L)) {
         Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, writer.offsetCurrentRelative());
 
@@ -232,11 +232,11 @@ public final class BSSWritersSequentialTest
   {
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
-      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 12L)) {
+      try (var writer = writers.createWriterFromStreamBounded(URI.create("urn:fake"), stream, "a", 12L)) {
         Assertions.assertEquals(OptionalLong.of(12L), writer.bytesRemaining());
         LOG.debug("writer: {}", writer);
 
-        try (var s = writer.createSubWriter("x", 4L)) {
+        try (var s = writer.createSubWriterBounded("x", 4L)) {
           Assertions.assertEquals(OptionalLong.of(4L), s.bytesRemaining());
 
           Assertions.assertEquals(0L, writer.offsetCurrentAbsolute());
@@ -265,7 +265,7 @@ public final class BSSWritersSequentialTest
           Assertions.assertEquals(4L, s.offsetCurrentRelative());
         }
 
-        try (var s = writer.createSubWriter("y", 4L)) {
+        try (var s = writer.createSubWriterBounded("y", 4L)) {
           Assertions.assertEquals(OptionalLong.of(4L), s.bytesRemaining());
 
           Assertions.assertEquals(4L + 0L, writer.offsetCurrentAbsolute());
@@ -294,7 +294,7 @@ public final class BSSWritersSequentialTest
           Assertions.assertEquals(4L, s.offsetCurrentRelative());
         }
 
-        try (var s = writer.createSubWriter("z", 4L)) {
+        try (var s = writer.createSubWriterBounded("z", 4L)) {
           Assertions.assertEquals(OptionalLong.of(4L), s.bytesRemaining());
 
           Assertions.assertEquals(8L + 0L, writer.offsetCurrentAbsolute());
@@ -338,11 +338,11 @@ public final class BSSWritersSequentialTest
   {
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
-      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 12L)) {
+      try (var writer = writers.createWriterFromStreamBounded(URI.create("urn:fake"), stream, "a", 12L)) {
         final var ex =
           Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> writer.createSubWriter("x", 13L));
+            () -> writer.createSubWriterBounded("x", 13L));
         LOG.debug("ex: ", ex);
       }
     }
@@ -354,12 +354,12 @@ public final class BSSWritersSequentialTest
   {
     final var writers = new BSSWriters();
     try (var stream = new ByteArrayOutputStream()) {
-      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a", 12L)) {
-        try (var s = writer.createSubWriter("y", 4L)) {
+      try (var writer = writers.createWriterFromStreamBounded(URI.create("urn:fake"), stream, "a", 12L)) {
+        try (var s = writer.createSubWriterBounded("y", 4L)) {
           final var ex =
             Assertions.assertThrows(
               IllegalArgumentException.class,
-              () -> s.createSubWriter("z", 5L));
+              () -> s.createSubWriterBounded("z", 5L));
           LOG.debug("ex: ", ex);
         }
       }

@@ -127,7 +127,7 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
 
     try (var channel = this.channelOf(data)) {
       try (var writer = this.writerOf(channel)) {
-        try (var s = writer.createSubWriter("a", 0L, 4L)) {
+        try (var s = writer.createSubWriterAtBounded("a", 0L, 4L)) {
           LOG.debug("s: {}", s);
           s.writeS8(0x1);
           s.writeS8(0x2);
@@ -135,7 +135,7 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
           s.writeS8(0x4);
           Assertions.assertThrows(IOException.class, () -> s.writeS8(0x5));
         }
-        try (var s = writer.createSubWriter("a", 4L, 4L)) {
+        try (var s = writer.createSubWriterAtBounded("a", 4L, 4L)) {
           LOG.debug("s: {}", s);
           s.writeS8(0x10);
           s.writeS8(0x20);
@@ -143,7 +143,7 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
           s.writeS8(0x40);
           Assertions.assertThrows(IOException.class, () -> s.writeS8(0x5));
         }
-        try (var s = writer.createSubWriter("a", 8L, 4L)) {
+        try (var s = writer.createSubWriterAtBounded("a", 8L, 4L)) {
           LOG.debug("s: {}", s);
           s.writeS8(0x11);
           s.writeS8(0x21);
@@ -172,7 +172,7 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
         final var ex =
           Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> writer.createSubWriter("x", 13L));
+            () -> writer.createSubWriterBounded("x", 13L));
         LOG.debug("ex: ", ex);
       }
     }
@@ -186,11 +186,11 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
 
     try (var channel = this.channelOf(data)) {
       try (var writer = this.writerOf(channel)) {
-        try (var s = writer.createSubWriter("y", 4L)) {
+        try (var s = writer.createSubWriterBounded("y", 4L)) {
           final var ex =
             Assertions.assertThrows(
               IllegalArgumentException.class,
-              () -> s.createSubWriter("z", 5L));
+              () -> s.createSubWriterBounded("z", 5L));
           LOG.debug("ex: ", ex);
         }
       }

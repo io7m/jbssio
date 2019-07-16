@@ -26,10 +26,10 @@ module com.io7m.jbssio.vanilla
 
   requires transitive com.io7m.jbssio.api;
 
-  requires com.io7m.jranges.core;
   requires org.apache.commons.io;
 
   provides com.io7m.jbssio.api.BSSReaderProviderType with com.io7m.jbssio.vanilla.BSSReaders;
+  provides com.io7m.jbssio.api.BSSWriterProviderType with com.io7m.jbssio.vanilla.BSSWriters;
 
   exports com.io7m.jbssio.vanilla;
 }

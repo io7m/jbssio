@@ -60,12 +60,38 @@ public interface BSSWriterProviderType
    * @throws IOException On I/O errors
    */
 
-  BSSWriterSequentialType createWriterFromStream(
+  BSSWriterSequentialType createWriterFromStreamBounded(
     URI uri,
     OutputStream stream,
     String name,
     long size)
     throws IOException;
+
+  /**
+   * Create a new sequential writer from the given stream.
+   *
+   * @param uri    The URI of the stream
+   * @param stream The stream
+   * @param name   The name of the initial writer
+   * @param size   The maximum number of bytes that can be written, if any
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSWriterSequentialType createWriterFromStream(
+    final URI uri,
+    final OutputStream stream,
+    final String name,
+    final OptionalLong size)
+    throws IOException
+  {
+    if (size.isPresent()) {
+      return this.createWriterFromStreamBounded(uri, stream, name, size.getAsLong());
+    }
+    return this.createWriterFromStream(uri, stream, name);
+  }
 
   /**
    * Create a new random access writer from the given byte buffer.
@@ -91,7 +117,6 @@ public interface BSSWriterProviderType
    * @param uri     The URI of the stream
    * @param channel The channel
    * @param name    The name of the initial writer
-   * @param size    A limit on the number of bytes that can be written
    *
    * @return A new writer
    *
@@ -101,7 +126,52 @@ public interface BSSWriterProviderType
   BSSWriterRandomAccessType createWriterFromChannel(
     URI uri,
     SeekableByteChannel channel,
-    String name,
-    OptionalLong size)
+    String name)
     throws IOException;
+
+  /**
+   * Create a new random access writer from the given channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial writer
+   * @param size    A limit on the number of bytes that can be written
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSWriterRandomAccessType createWriterFromChannelBounded(
+    URI uri,
+    SeekableByteChannel channel,
+    String name,
+    long size)
+    throws IOException;
+
+  /**
+   * Create a new random access writer from the given channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial writer
+   * @param size    A limit on the number of bytes that can be written
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSWriterRandomAccessType createWriterFromChannel(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name,
+    final OptionalLong size)
+    throws IOException
+  {
+    if (size.isPresent()) {
+      return this.createWriterFromChannelBounded(uri, channel, name, size.getAsLong());
+    }
+    return this.createWriterFromChannel(uri, channel, name);
+  }
 }

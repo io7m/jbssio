@@ -17,7 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
-import com.io7m.jranges.RangeHalfOpenL;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -25,15 +24,14 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-final class BSSReaderSeekableChannel extends BSSRandomAccess
-  implements BSSReaderRandomAccessType
+final class BSSReaderSeekableChannel
+  extends BSSRandomAccess implements BSSReaderRandomAccessType
 {
   private final SeekableByteChannel channel;
   private final ByteBuffer buffer;
@@ -41,7 +39,7 @@ final class BSSReaderSeekableChannel extends BSSRandomAccess
   private BSSReaderSeekableChannel(
     final BSSReaderSeekableChannel inParent,
     final URI inURI,
-    final Optional<RangeHalfOpenL> inRange,
+    final BSSRangeHalfOpen inRange,
     final String inName,
     final SeekableByteChannel inChannel,
     final ByteBuffer inBuffer,
@@ -66,7 +64,7 @@ final class BSSReaderSeekableChannel extends BSSRandomAccess
     return new BSSReaderSeekableChannel(
       null,
       uri,
-      size.stream().mapToObj(s -> RangeHalfOpenL.of(0L, s)).findFirst(),
+      new BSSRangeHalfOpen(0L, size),
       name,
       channel,
       buffer,
@@ -102,7 +100,7 @@ final class BSSReaderSeekableChannel extends BSSRandomAccess
   }
 
   @Override
-  public BSSReaderRandomAccessType createSubReader(
+  public BSSReaderRandomAccessType createSubReaderBounded(
     final String inName,
     final long size)
     throws IOException
@@ -120,7 +118,7 @@ final class BSSReaderSeekableChannel extends BSSRandomAccess
     return new BSSReaderSeekableChannel(
       this,
       this.uri,
-      Optional.of(this.createSubRange(0L, size)),
+      this.createSubRange(0L, size),
       newName,
       this.channel,
       this.buffer,
@@ -128,7 +126,33 @@ final class BSSReaderSeekableChannel extends BSSRandomAccess
   }
 
   @Override
-  public BSSReaderRandomAccessType createSubReader(
+  public BSSReaderRandomAccessType createSubReaderAt(
+    final String inName,
+    final long offset)
+    throws IOException
+  {
+    Objects.requireNonNull(inName, "path");
+    this.checkNotClosed();
+
+    final var newName =
+      new StringBuilder(32)
+        .append(this.path)
+        .append('.')
+        .append(inName)
+        .toString();
+
+    return new BSSReaderSeekableChannel(
+      this,
+      this.uri,
+      this.createOffsetSubRange(offset),
+      newName,
+      this.channel,
+      this.buffer,
+      () -> null);
+  }
+
+  @Override
+  public BSSReaderRandomAccessType createSubReaderAtBounded(
     final String inName,
     final long offset,
     final long size)
@@ -148,7 +172,7 @@ final class BSSReaderSeekableChannel extends BSSRandomAccess
     return new BSSReaderSeekableChannel(
       this,
       this.uri,
-      Optional.of(this.createSubRange(offset, size)),
+      this.createSubRange(offset, size),
       newName,
       this.channel,
       this.buffer,
