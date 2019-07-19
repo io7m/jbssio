@@ -202,7 +202,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(1);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(1);
     return (int) this.buffer.get(0);
   }
 
@@ -218,7 +219,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(1);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(1);
     return (int) this.buffer.get(0) & 0xff;
   }
 
@@ -235,7 +237,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(2);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(2);
     return (int) this.buffer.getShort(0);
   }
 
@@ -252,7 +255,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(2);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(2);
     return (int) this.buffer.getChar(0);
   }
 
@@ -269,7 +273,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(4);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(4);
     return (long) this.buffer.getInt(0);
   }
 
@@ -286,7 +291,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(4);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(4);
     return (long) this.buffer.getInt(0) & 0xffff_ffffL;
   }
 
@@ -303,7 +309,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(8);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(8);
     return this.buffer.getLong(0);
   }
 
@@ -320,7 +327,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(8);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(8);
     return this.buffer.getLong(0);
   }
 
@@ -337,7 +345,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(2);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(2);
     return (int) this.buffer.getShort(0);
   }
 
@@ -354,7 +363,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(2);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(2);
     return (int) this.buffer.getChar(0);
   }
 
@@ -371,7 +381,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(4);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(4);
     return (long) this.buffer.getInt(0);
   }
 
@@ -388,7 +399,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(4);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(4);
     return (long) this.buffer.getInt(0) & 0xffff_ffffL;
   }
 
@@ -405,7 +417,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(8);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(8);
     return this.buffer.getLong(0);
   }
 
@@ -422,7 +435,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(8);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(8);
     return this.buffer.getLong(0);
   }
 
@@ -439,7 +453,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(4);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(4);
     return this.buffer.getFloat(0);
   }
 
@@ -456,7 +471,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(4);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(4);
     return this.buffer.getFloat(0);
   }
 
@@ -473,7 +489,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(8);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(8);
     return this.buffer.getDouble(0);
   }
 
@@ -490,7 +507,8 @@ final class BSSReaderSeekableChannel
     this.buffer.limit(8);
     this.channel.position(position);
     this.channel.read(this.buffer);
-    this.buffer.flip();
+    this.buffer.position(0);
+    this.buffer.limit(8);
     return this.buffer.getDouble(0);
   }
 

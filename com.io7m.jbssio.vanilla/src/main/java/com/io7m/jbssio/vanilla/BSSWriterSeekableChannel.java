@@ -439,7 +439,7 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.writeInt((int) (b & 0xffff_ffffL), position, LITTLE_ENDIAN);
+    this.writeInt((int) (b & 0xffff_ffffL), position, BIG_ENDIAN);
   }
 
   @Override
