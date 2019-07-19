@@ -220,7 +220,7 @@ final class BSSWriterStream implements BSSWriterSequentialType
     this.checkNotClosed();
     this.checkHasBytesRemaining(skipSize, null);
 
-    try (var output = new BufferedOutputStream(this.stream)) {
+    try (var output = new BufferedOutputStream(new CloseShieldOutputStream(this.stream))) {
       for (var index = 0L; index < skipSize; ++index) {
         output.write(0x0);
       }

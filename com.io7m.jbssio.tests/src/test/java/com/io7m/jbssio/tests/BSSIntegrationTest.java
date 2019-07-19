@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -145,6 +146,45 @@ public final class BSSIntegrationTest
           logUnsigned(x3);
           Assertions.assertEquals(0xb0b0b0b0L, x3);
         }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOStrings()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    final var writers = new BSSWriters();
+    try (var stream = Files.newOutputStream(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
+      try (var writer = writers.createWriterFromStream(pathURI, stream, "root")) {
+        writer.writeU32BE(6L);
+        writer.writeBytes("Hello.".getBytes(US_ASCII));
+        writer.align(4);
+
+        writer.writeU32BE(6L);
+        writer.writeBytes("Hello.".getBytes(US_ASCII));
+        writer.align(4);
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+        final var len0 = reader.readU32BE();
+        final var bytes0 = new byte[(int) len0];
+        reader.readBytes(bytes0);
+        reader.align(4);
+        LOG.debug("{}", new String(bytes0, US_ASCII));
+
+        final var len1 = reader.readU32BE();
+        final var bytes1 = new byte[(int) len1];
+        reader.readBytes(bytes1);
+        reader.align(4);
+        LOG.debug("{}", new String(bytes1, US_ASCII));
       }
     }
   }
