@@ -322,7 +322,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  float readFBE()
+  float readF32BE()
     throws IOException, EOFException;
 
   /**
@@ -337,7 +337,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  float readFLE()
+  float readF32LE()
     throws IOException, EOFException;
 
   /**
@@ -352,7 +352,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  double readDBE()
+  double readD64BE()
     throws IOException, EOFException;
 
   /**
@@ -367,7 +367,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  double readDLE()
+  double readD64LE()
     throws IOException, EOFException;
 
   /**
@@ -669,7 +669,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  float readFBE(String name)
+  float readF32BE(String name)
     throws IOException, EOFException;
 
   /**
@@ -686,7 +686,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  float readFLE(String name)
+  float readF32LE(String name)
     throws IOException, EOFException;
 
   /**
@@ -703,7 +703,7 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  double readDBE(String name)
+  double readD64BE(String name)
     throws IOException, EOFException;
 
   /**
@@ -720,6 +720,6 @@ public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSS
    * @throws EOFException If EOF is reached
    */
 
-  double readDLE(String name)
+  double readD64LE(String name)
     throws IOException, EOFException;
 }

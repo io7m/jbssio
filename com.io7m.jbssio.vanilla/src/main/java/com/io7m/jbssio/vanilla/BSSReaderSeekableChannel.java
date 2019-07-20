@@ -628,28 +628,28 @@ final class BSSReaderSeekableChannel
   }
 
   @Override
-  public float readFBE(final String name)
+  public float readF32BE(final String name)
     throws IOException, EOFException
   {
     return this.readFBEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override
-  public float readFLE(final String name)
+  public float readF32LE(final String name)
     throws IOException, EOFException
   {
     return this.readFLEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override
-  public double readDBE(final String name)
+  public double readD64BE(final String name)
     throws IOException, EOFException
   {
     return this.readDBEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override
-  public double readDLE(final String name)
+  public double readD64LE(final String name)
     throws IOException, EOFException
   {
     return this.readDLEp(Objects.requireNonNull(name, "name"));
@@ -754,28 +754,28 @@ final class BSSReaderSeekableChannel
   }
 
   @Override
-  public float readFBE()
+  public float readF32BE()
     throws IOException, EOFException
   {
     return this.readFBEp(null);
   }
 
   @Override
-  public float readFLE()
+  public float readF32LE()
     throws IOException, EOFException
   {
     return this.readFLEp(null);
   }
 
   @Override
-  public double readDBE()
+  public double readD64BE()
     throws IOException, EOFException
   {
     return this.readDBEp(null);
   }
 
   @Override
-  public double readDLE()
+  public double readD64LE()
     throws IOException, EOFException
   {
     return this.readDLEp(null);

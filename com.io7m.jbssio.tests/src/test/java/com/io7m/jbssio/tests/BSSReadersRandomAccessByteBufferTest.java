@@ -768,7 +768,7 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
       Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
-      Assertions.assertEquals(1000.0, reader.readDBE());
+      Assertions.assertEquals(1000.0, reader.readD64BE());
       Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
@@ -783,7 +783,7 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
       Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
-      Assertions.assertEquals(1000.0, reader.readDLE());
+      Assertions.assertEquals(1000.0, reader.readD64LE());
       Assertions.assertEquals(24L, reader.bytesRemaining().getAsLong());
     }
   }
@@ -798,7 +798,7 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
       Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
-      Assertions.assertEquals(1000.0f, reader.readFBE());
+      Assertions.assertEquals(1000.0f, reader.readF32BE());
       Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }
@@ -813,7 +813,7 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
       Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
-      Assertions.assertEquals(1000.0f, reader.readFLE());
+      Assertions.assertEquals(1000.0f, reader.readF32LE());
       Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
     }
   }

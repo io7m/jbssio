@@ -16,7 +16,6 @@
 
 package com.io7m.jbssio.tests;
 
-import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.api.BSSReaderType;
 import com.io7m.jbssio.vanilla.BSSReaders;
 import com.io7m.jbssio.vanilla.BSSWriters;
@@ -311,10 +310,10 @@ public final class BSSIntegrationTest
 
     r.align(16);
     LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
-    Assertions.assertEquals(-1.401298464324817E-45, r.readFLE());
-    Assertions.assertEquals(3.4028235e+38f, r.readFLE());
-    Assertions.assertEquals(-4.9406564584124654e-324, r.readDLE());
-    Assertions.assertEquals(Double.MAX_VALUE, r.readDLE());
+    Assertions.assertEquals(-1.401298464324817E-45, r.readF32LE());
+    Assertions.assertEquals(3.4028235e+38f, r.readF32LE());
+    Assertions.assertEquals(-4.9406564584124654e-324, r.readD64LE());
+    Assertions.assertEquals(Double.MAX_VALUE, r.readD64LE());
 
     r.align(16);
     LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
@@ -360,10 +359,10 @@ public final class BSSIntegrationTest
 
     r.align(16);
     LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
-    Assertions.assertEquals(-1.401298464324817E-45, r.readFBE());
-    Assertions.assertEquals(3.4028235e+38f, r.readFBE());
-    Assertions.assertEquals(-4.9406564584124654e-324, r.readDBE());
-    Assertions.assertEquals(Double.MAX_VALUE, r.readDBE());
+    Assertions.assertEquals(-1.401298464324817E-45, r.readF32BE());
+    Assertions.assertEquals(3.4028235e+38f, r.readF32BE());
+    Assertions.assertEquals(-4.9406564584124654e-324, r.readD64BE());
+    Assertions.assertEquals(Double.MAX_VALUE, r.readD64BE());
 
     r.align(16);
     LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
