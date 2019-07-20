@@ -178,8 +178,8 @@ final class BSSWriterSeekableChannel
 
     this.channel.position(position);
     this.writeBuffer.position(0);
-    this.writeBuffer.put(0, (byte) b);
     this.writeBuffer.limit(1);
+    this.writeBuffer.put(0, (byte) b);
     this.writeAll();
   }
 
@@ -203,8 +203,8 @@ final class BSSWriterSeekableChannel
 
     this.channel.position(position);
     this.writeBuffer.position(0);
-    this.writeBuffer.put(0, (byte) (b & 0xff));
     this.writeBuffer.limit(1);
+    this.writeBuffer.put(0, (byte) (b & 0xff));
     this.writeAll();
   }
 
@@ -249,8 +249,8 @@ final class BSSWriterSeekableChannel
     this.channel.position(position);
     this.writeBuffer.position(0);
     this.writeBuffer.order(order);
-    this.writeBuffer.putShort(0, b);
     this.writeBuffer.limit(2);
+    this.writeBuffer.putShort(0, b);
     this.writeAll();
   }
 
@@ -263,8 +263,8 @@ final class BSSWriterSeekableChannel
     this.channel.position(position);
     this.writeBuffer.position(0);
     this.writeBuffer.order(order);
-    this.writeBuffer.putChar(0, (char) (b & 0xffff));
     this.writeBuffer.limit(2);
+    this.writeBuffer.putChar(0, (char) (b & 0xffff));
     this.writeAll();
   }
 
@@ -389,8 +389,8 @@ final class BSSWriterSeekableChannel
     this.channel.position(position);
     this.writeBuffer.position(0);
     this.writeBuffer.order(order);
-    this.writeBuffer.putInt(0, b);
     this.writeBuffer.limit(4);
+    this.writeBuffer.putInt(0, b);
     this.writeAll();
   }
 
@@ -515,8 +515,8 @@ final class BSSWriterSeekableChannel
     this.channel.position(position);
     this.writeBuffer.position(0);
     this.writeBuffer.order(order);
-    this.writeBuffer.putLong(0, b);
     this.writeBuffer.limit(8);
+    this.writeBuffer.putLong(0, b);
     this.writeAll();
   }
 
@@ -688,5 +688,123 @@ final class BSSWriterSeekableChannel
     throws IOException
   {
     this.writeBytesP(null, buffer, offset, length);
+  }
+
+  private void writeF64(
+    final String name,
+    final ByteOrder order,
+    final double x)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 8L);
+    final var position = this.offsetCurrentAbsolute();
+    this.increaseOffsetRelative(8L);
+    this.writeDouble(x, position, order);
+  }
+
+  private void writeF32(
+    final String name,
+    final ByteOrder order,
+    final double x)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 4L);
+    final var position = this.offsetCurrentAbsolute();
+    this.increaseOffsetRelative(4L);
+    this.writeFloat(x, position, order);
+  }
+
+  private void writeDouble(
+    final double x,
+    final long position,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.channel.position(position);
+    this.writeBuffer.position(0);
+    this.writeBuffer.order(order);
+    this.writeBuffer.limit(8);
+    this.writeBuffer.putDouble(0, x);
+    this.writeAll();
+  }
+
+  private void writeFloat(
+    final double x,
+    final long position,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.channel.position(position);
+    this.writeBuffer.position(0);
+    this.writeBuffer.order(order);
+    this.writeBuffer.limit(4);
+    this.writeBuffer.putFloat(0, (float) x);
+    this.writeAll();
+  }
+
+  @Override
+  public void writeF64BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF64(Objects.requireNonNull(name, "name"), BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF64BE(final double b)
+    throws IOException
+  {
+    this.writeF64(null, BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF32BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF32(Objects.requireNonNull(name, "name"), BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF32BE(final double b)
+    throws IOException
+  {
+    this.writeF32(null, BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF64LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF64(Objects.requireNonNull(name, "name"), LITTLE_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF64LE(final double b)
+    throws IOException
+  {
+    this.writeF64(null, LITTLE_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF32LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF32(Objects.requireNonNull(name, "name"), LITTLE_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF32LE(final double b)
+    throws IOException
+  {
+    this.writeF32(null, LITTLE_ENDIAN, b);
   }
 }

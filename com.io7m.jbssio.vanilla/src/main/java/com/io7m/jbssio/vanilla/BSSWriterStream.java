@@ -705,6 +705,70 @@ final class BSSWriterStream implements BSSWriterSequentialType
   }
 
   @Override
+  public void writeF64BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF64BE(final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF32BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF32BE(final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF64LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF64LE(final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF32LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
+  public void writeF32LE(final double b)
+    throws IOException
+  {
+    throw new AssertionError("Unimplemented code");
+  }
+
+  @Override
   public String toString()
   {
     return String.format(

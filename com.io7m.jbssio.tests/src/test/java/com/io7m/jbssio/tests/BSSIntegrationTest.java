@@ -16,14 +16,18 @@
 
 package com.io7m.jbssio.tests;
 
+import com.io7m.jbssio.api.BSSReaderRandomAccessType;
+import com.io7m.jbssio.api.BSSReaderType;
 import com.io7m.jbssio.vanilla.BSSReaders;
 import com.io7m.jbssio.vanilla.BSSWriters;
+import org.apache.commons.io.HexDump;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -188,6 +192,190 @@ public final class BSSIntegrationTest
       }
     }
   }
+
+  @Test
+  public void testBasicIOSpecimenStream()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOSpecimenChannel()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newByteChannel(path, READ)) {
+      try (var reader = readers.createReaderFromChannel(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOSpecimenByteBuffer()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = FileChannel.open(path, READ)) {
+      final var map = stream.map(FileChannel.MapMode.READ_ONLY, 0L, stream.size());
+      try (var reader = readers.createReaderFromByteBuffer(pathURI, map, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  private static void checkSpecimenLE(final BSSReaderType r)
+    throws IOException
+  {
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Byte.MIN_VALUE, r.readS8());
+    Assertions.assertEquals(Byte.MAX_VALUE, r.readS8());
+    Assertions.assertEquals(0, r.readU8());
+    Assertions.assertEquals(0xff, r.readU8());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Short.MIN_VALUE, r.readS16LE());
+    Assertions.assertEquals(Short.MAX_VALUE, r.readS16LE());
+    Assertions.assertEquals(0, r.readU16LE());
+    Assertions.assertEquals(0xffff, r.readU16LE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Integer.MIN_VALUE, r.readS32LE());
+    Assertions.assertEquals(Integer.MAX_VALUE, r.readS32LE());
+    Assertions.assertEquals(0, r.readU32LE());
+    Assertions.assertEquals(0xffff_ffffL, r.readU32LE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Long.MIN_VALUE, r.readS64LE());
+    Assertions.assertEquals(Long.MAX_VALUE, r.readS64LE());
+    Assertions.assertEquals(0L, r.readU64LE());
+    Assertions.assertEquals(0xffff_ffff_ffff_ffffL, r.readU64LE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(-1.401298464324817E-45, r.readFLE());
+    Assertions.assertEquals(3.4028235e+38f, r.readFLE());
+    Assertions.assertEquals(-4.9406564584124654e-324, r.readDLE());
+    Assertions.assertEquals(Double.MAX_VALUE, r.readDLE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    final var received = new byte[8];
+    final var expected = new byte[]{0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x7f};
+    r.readBytes(received);
+
+    HexDump.dump(received, 0L, System.out, 0);
+    HexDump.dump(expected, 0L, System.out, 0);
+    Assertions.assertArrayEquals(expected, received);
+  }
+
+  private static void checkSpecimenBE(final BSSReaderType r)
+    throws IOException
+  {
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    r.align(16);
+    Assertions.assertEquals(Byte.MIN_VALUE, r.readS8());
+    Assertions.assertEquals(Byte.MAX_VALUE, r.readS8());
+    Assertions.assertEquals(0, r.readU8());
+    Assertions.assertEquals(0xff, r.readU8());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Short.MIN_VALUE, r.readS16BE());
+    Assertions.assertEquals(Short.MAX_VALUE, r.readS16BE());
+    Assertions.assertEquals(0, r.readU16BE());
+    Assertions.assertEquals(0xffff, r.readU16BE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Integer.MIN_VALUE, r.readS32BE());
+    Assertions.assertEquals(Integer.MAX_VALUE, r.readS32BE());
+    Assertions.assertEquals(0, r.readU32BE());
+    Assertions.assertEquals(0xffff_ffffL, r.readU32BE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(Long.MIN_VALUE, r.readS64BE());
+    Assertions.assertEquals(Long.MAX_VALUE, r.readS64BE());
+    Assertions.assertEquals(0L, r.readU64BE());
+    Assertions.assertEquals(0xffff_ffff_ffff_ffffL, r.readU64BE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    Assertions.assertEquals(-1.401298464324817E-45, r.readFBE());
+    Assertions.assertEquals(3.4028235e+38f, r.readFBE());
+    Assertions.assertEquals(-4.9406564584124654e-324, r.readDBE());
+    Assertions.assertEquals(Double.MAX_VALUE, r.readDBE());
+
+    r.align(16);
+    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    final var received = new byte[8];
+    final var expected = new byte[]{0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x7f};
+    r.readBytes(received);
+
+    HexDump.dump(received, 0L, System.out, 0);
+    HexDump.dump(expected, 0L, System.out, 0);
+    Assertions.assertArrayEquals(expected, received);
+  }
+
 
   private static void logUnsigned(final long x)
   {

@@ -198,6 +198,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
+    this.map.position(0);
     return (int) this.map.get(Math.toIntExact(position));
   }
 
@@ -208,6 +209,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
+    this.map.position(0);
     return (int) this.map.get(Math.toIntExact(position)) & 0xff;
   }
 
@@ -219,6 +221,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return (int) this.map.getShort(Math.toIntExact(position));
   }
 
@@ -230,6 +233,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return (int) this.map.getChar(Math.toIntExact(position));
   }
 
@@ -241,6 +245,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return (long) this.map.getInt(Math.toIntExact(position));
   }
 
@@ -252,6 +257,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return (long) (this.map.getInt(Math.toIntExact(position))) & 0xffff_ffffL;
   }
 
@@ -263,6 +269,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return this.map.getLong(Math.toIntExact(position));
   }
 
@@ -274,6 +281,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return this.map.getLong(Math.toIntExact(position));
   }
 
@@ -285,6 +293,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return (int) this.map.getShort(Math.toIntExact(position));
   }
 
@@ -296,6 +305,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return (int) this.map.getChar(Math.toIntExact(position));
   }
 
@@ -307,6 +317,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return (long) this.map.getInt(Math.toIntExact(position));
   }
 
@@ -318,6 +329,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return (long) (this.map.getInt(Math.toIntExact(position))) & 0xffff_ffffL;
   }
 
@@ -329,6 +341,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return this.map.getLong(Math.toIntExact(position));
   }
 
@@ -340,6 +353,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return this.map.getLong(Math.toIntExact(position));
   }
 
@@ -351,6 +365,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return this.map.getFloat(Math.toIntExact(position));
   }
 
@@ -362,6 +377,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return this.map.getFloat(Math.toIntExact(position));
   }
 
@@ -373,6 +389,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.position(0);
     return this.map.getDouble(Math.toIntExact(position));
   }
 
@@ -385,6 +402,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.position(0);
     return this.map.getDouble(Math.toIntExact(position));
   }
 
@@ -398,6 +416,8 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.checkNotClosed();
     final var llong = Integer.toUnsignedLong(length);
     this.checkHasBytesRemaining(name, llong);
+    final var position = this.offsetCurrentAbsolute();
+    this.map.position(Math.toIntExact(position));
     this.map.get(buffer, offset, length);
     this.increaseOffsetRelative(llong);
     return length;

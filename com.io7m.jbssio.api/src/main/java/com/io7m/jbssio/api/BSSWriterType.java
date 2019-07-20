@@ -580,4 +580,140 @@ public interface BSSWriterType extends BSSCloseableType, BSSAddressableType, BSS
     int offset,
     int length)
     throws IOException;
+  
+  /**
+   * Write a named 64-bit big-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF64BE(
+    String name,
+    double b)
+    throws IOException;
+
+  /**
+   * Write a 64-bit big-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF64BE(
+    double b)
+    throws IOException;
+
+  /**
+   * Write a named 32-bit big-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF32BE(
+    String name,
+    double b)
+    throws IOException;
+
+  /**
+   * Write a 32-bit big-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF32BE(
+    double b)
+    throws IOException;
+
+  /**
+   * Write a named 64-bit little-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF64LE(
+    String name,
+    double b)
+    throws IOException;
+
+  /**
+   * Write a 64-bit little-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF64LE(
+    double b)
+    throws IOException;
+
+  /**
+   * Write a named 32-bit little-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param name The name of the value
+   * @param b    The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF32LE(
+    String name,
+    double b)
+    throws IOException;
+
+  /**
+   * Write a 32-bit little-endian floating-point value.
+   *
+   * The writer will not be allowed to writer beyond the specified limit.
+   *
+   * @param b The value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or write beyond the
+   *                      writer's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  void writeF32LE(
+    double b)
+    throws IOException;
 }
