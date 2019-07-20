@@ -26,6 +26,9 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
+import static java.nio.ByteOrder.BIG_ENDIAN;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
 final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRandomAccessType
 {
   private final ByteBuffer map;
@@ -216,7 +219,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
     this.map.putShort(longPositionTo2GBLimitedByteBufferPosition(position), (short) b);
   }
 
@@ -229,7 +232,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
     this.map.putChar(longPositionTo2GBLimitedByteBufferPosition(position), (char) (b & 0xffff));
   }
 
@@ -242,7 +245,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
     this.map.putShort(longPositionTo2GBLimitedByteBufferPosition(position), (short) b);
   }
 
@@ -255,7 +258,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
     this.map.putChar(longPositionTo2GBLimitedByteBufferPosition(position), (char) (b & 0xffff));
   }
 
@@ -332,7 +335,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
     this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) b);
   }
 
@@ -345,7 +348,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
     this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) (b & 0xffff_ffffL));
   }
 
@@ -358,7 +361,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
     this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) b);
   }
 
@@ -371,7 +374,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
     this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) (b & 0xffff_ffffL));
   }
 
@@ -448,7 +451,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
     this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
@@ -461,7 +464,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.map.order(ByteOrder.LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
     this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
@@ -474,7 +477,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
     this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
@@ -487,7 +490,7 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.map.order(ByteOrder.BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
     this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
@@ -609,20 +612,48 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.writeBytesP(null, buffer, offset, length);
   }
 
+  private void writeF64p(
+    final String name,
+    final double b,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 8L);
+    final var position = this.offsetCurrentAbsolute();
+    this.increaseOffsetRelative(8L);
+    this.map.order(order);
+    this.map.putDouble(longPositionTo2GBLimitedByteBufferPosition(position), b);
+  }
+
+  private void writeF32p(
+    final String name,
+    final double b,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 4L);
+    final var position = this.offsetCurrentAbsolute();
+    this.increaseOffsetRelative(4L);
+    this.map.order(order);
+    this.map.putFloat(longPositionTo2GBLimitedByteBufferPosition(position), (float) b);
+  }
+
   @Override
   public void writeF64BE(
     final String name,
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
   }
 
   @Override
   public void writeF64BE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(null, b, BIG_ENDIAN);
   }
 
   @Override
@@ -631,14 +662,14 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
   }
 
   @Override
   public void writeF32BE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(null, b, BIG_ENDIAN);
   }
 
   @Override
@@ -647,14 +678,14 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
   }
 
   @Override
   public void writeF64LE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(null, b, LITTLE_ENDIAN);
   }
 
   @Override
@@ -663,13 +694,13 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
   }
 
   @Override
   public void writeF32LE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(null, b, LITTLE_ENDIAN);
   }
 }

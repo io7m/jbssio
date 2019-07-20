@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -704,20 +705,46 @@ final class BSSWriterStream implements BSSWriterSequentialType
     this.writeBytesP(null, buffer, offset, length);
   }
 
+  private void writeF64p(
+    final String name,
+    final double b,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(8L, name);
+    this.buffer8w.order(order);
+    this.buffer8w.putDouble(0, b);
+    this.stream.write(this.buffer8);
+  }
+
+  private void writeF32p(
+    final String name,
+    final double b,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(4L, name);
+    this.buffer4w.order(order);
+    this.buffer4w.putFloat(0, (float) b);
+    this.stream.write(this.buffer4);
+  }
+
   @Override
   public void writeF64BE(
     final String name,
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
   }
 
   @Override
   public void writeF64BE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(null, b, BIG_ENDIAN);
   }
 
   @Override
@@ -726,14 +753,14 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
   }
 
   @Override
   public void writeF32BE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(null, b, BIG_ENDIAN);
   }
 
   @Override
@@ -742,14 +769,14 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
   }
 
   @Override
   public void writeF64LE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF64p(null, b, LITTLE_ENDIAN);
   }
 
   @Override
@@ -758,14 +785,14 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
   }
 
   @Override
   public void writeF32LE(final double b)
     throws IOException
   {
-    throw new AssertionError("Unimplemented code");
+    this.writeF32p(null, b, LITTLE_ENDIAN);
   }
 
   @Override

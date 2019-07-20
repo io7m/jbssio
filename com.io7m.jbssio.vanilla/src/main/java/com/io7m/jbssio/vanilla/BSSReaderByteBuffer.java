@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
@@ -58,24 +57,10 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
       () -> null);
   }
 
-  static BSSReaderRandomAccessType createFromFileChannel(
-    final URI uri,
-    final FileChannel channel,
-    final String name)
-    throws IOException
+  private static int longPositionTo2GBLimitedByteBufferPosition(
+    final long position)
   {
-    final var size = channel.size();
-    final var map = channel.map(FileChannel.MapMode.READ_ONLY, 0L, size);
-    return new BSSReaderByteBuffer(
-      null,
-      uri,
-      new BSSRangeHalfOpen(0L, OptionalLong.of(size)),
-      name,
-      map,
-      () -> {
-        channel.close();
-        return null;
-      });
+    return Math.toIntExact(position);
   }
 
   @Override
@@ -199,7 +184,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
     this.map.position(0);
-    return (int) this.map.get(Math.toIntExact(position));
+    return (int) this.map.get(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private int readU8p(final String name)
@@ -210,7 +195,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
     this.map.position(0);
-    return (int) this.map.get(Math.toIntExact(position)) & 0xff;
+    return (int) this.map.get(longPositionTo2GBLimitedByteBufferPosition(position)) & 0xff;
   }
 
   private int readS16LEp(final String name)
@@ -222,7 +207,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getShort(Math.toIntExact(position));
+    return (int) this.map.getShort(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private int readU16LEp(final String name)
@@ -234,7 +219,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getChar(Math.toIntExact(position));
+    return (int) this.map.getChar(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private long readS32LEp(final String name)
@@ -246,7 +231,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (long) this.map.getInt(Math.toIntExact(position));
+    return (long) this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private long readU32LEp(final String name)
@@ -258,7 +243,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (long) (this.map.getInt(Math.toIntExact(position))) & 0xffff_ffffL;
+    return (long) (this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(position))) & 0xffff_ffffL;
   }
 
   private long readS64LEp(final String name)
@@ -270,7 +255,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return this.map.getLong(Math.toIntExact(position));
+    return this.map.getLong(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private long readU64LEp(final String name)
@@ -282,7 +267,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return this.map.getLong(Math.toIntExact(position));
+    return this.map.getLong(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private int readS16BEp(final String name)
@@ -294,7 +279,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getShort(Math.toIntExact(position));
+    return (int) this.map.getShort(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private int readU16BEp(final String name)
@@ -306,7 +291,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getChar(Math.toIntExact(position));
+    return (int) this.map.getChar(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private long readS32BEp(final String name)
@@ -318,7 +303,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (long) this.map.getInt(Math.toIntExact(position));
+    return (long) this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private long readU32BEp(final String name)
@@ -330,7 +315,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (long) (this.map.getInt(Math.toIntExact(position))) & 0xffff_ffffL;
+    return (long) (this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(position))) & 0xffff_ffffL;
   }
 
   private long readS64BEp(final String name)
@@ -342,7 +327,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return this.map.getLong(Math.toIntExact(position));
+    return this.map.getLong(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private long readU64BEp(final String name)
@@ -354,7 +339,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return this.map.getLong(Math.toIntExact(position));
+    return this.map.getLong(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private float readFBEp(final String name)
@@ -366,7 +351,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return this.map.getFloat(Math.toIntExact(position));
+    return this.map.getFloat(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private float readFLEp(final String name)
@@ -378,7 +363,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return this.map.getFloat(Math.toIntExact(position));
+    return this.map.getFloat(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private double readDBEp(final String name)
@@ -390,9 +375,8 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return this.map.getDouble(Math.toIntExact(position));
+    return this.map.getDouble(longPositionTo2GBLimitedByteBufferPosition(position));
   }
-
 
   private double readDLEp(final String name)
     throws IOException, EOFException
@@ -403,7 +387,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     this.increaseOffsetRelative(8L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return this.map.getDouble(Math.toIntExact(position));
+    return this.map.getDouble(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private int readBytesp(
@@ -417,7 +401,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
     final var llong = Integer.toUnsignedLong(length);
     this.checkHasBytesRemaining(name, llong);
     final var position = this.offsetCurrentAbsolute();
-    this.map.position(Math.toIntExact(position));
+    this.map.position(longPositionTo2GBLimitedByteBufferPosition(position));
     this.map.get(buffer, offset, length);
     this.increaseOffsetRelative(llong);
     return length;
