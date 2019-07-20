@@ -87,7 +87,7 @@ try (var channel = Files.newByteChannel(path, READ)) {
   try (var reader = readers.createReaderFromChannel(pathURI, channel, "root")) {
 
     // Create a reader that is permitted to read [0, 8) relative to "reader"
-    try (var sr = reader.createSubReaderBounded("head", 8L)) {
+    try (var sr = reader.createSubReaderAtBounded("head", 0L, 8L)) {
       var x = sr.readS32BE();
       var y = sr.readS32BE();
     }
@@ -125,7 +125,7 @@ try (var channel = Files.newByteChannel(path, WRITE, CREATE)) {
   try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
 
     // Create a writer that is permitted to read [0, 8) relative to "writer"
-    try (var sw = writer.createSubWriterBounded("head", 8L)) {
+    try (var sw = writer.createSubWriterAtBounded("head", 0L, 8L)) {
       sw.writeS32BE(0x10203040L);
       sw.writeS32BE(0x50607080L);
     }
