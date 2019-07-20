@@ -38,7 +38,7 @@
     when errors occur. For example:
   </p>
 
-  <pre><![CDATA[
+  <pre class="code"><![CDATA[
 java.io.IOException: Out of bounds.
   Reader URI: file://tmp/example.data
   Reader path: header.info:size
