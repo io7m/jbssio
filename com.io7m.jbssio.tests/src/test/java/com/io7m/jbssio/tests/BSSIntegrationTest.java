@@ -306,7 +306,64 @@ public final class BSSIntegrationTest
   }
 
   @Test
+  public void testBasicIOSpecimenChannelOffset()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newByteChannel(path, READ)) {
+      try (var reader = readers.createReaderFromChannel(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderAt("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
   public void testBasicIOSpecimenByteBuffer()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = FileChannel.open(path, READ)) {
+      final var map = stream.map(FileChannel.MapMode.READ_ONLY, 0L, stream.size());
+      try (var reader = readers.createReaderFromByteBuffer(pathURI, map, "root")) {
+        try (var r = reader.createSubReader("BE")) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderAt("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOSpecimenByteBufferBounded()
     throws IOException
   {
     final var path = Files.createTempFile("bss-integration-", ".dat");
@@ -449,6 +506,37 @@ public final class BSSIntegrationTest
   }
 
   @Test
+  public void testBasicIOSpecimenWriteChannelOffset()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    final var writers = new BSSWriters();
+    try (var stream = Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+      stream.truncate(256L);
+      try (var w = writers.createWriterFromChannelBounded(pathURI, stream, "root", 256L)) {
+        try (var q = w.createSubWriterAt("sub", 0L)) {
+          writeSpecimen(q);
+        }
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
   public void testBasicIOSpecimenWriteByteBuffer()
     throws IOException
   {
@@ -462,6 +550,38 @@ public final class BSSIntegrationTest
       final var map = stream.map(FileChannel.MapMode.READ_WRITE, 0L, 256L);
       try (var w = writers.createWriterFromByteBuffer(pathURI, map, "root")) {
         writeSpecimen(w);
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOSpecimenWriteByteBufferOffset()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    final var writers = new BSSWriters();
+    try (var stream = FileChannel.open(path, READ, WRITE, TRUNCATE_EXISTING, CREATE)) {
+      stream.truncate(256L);
+      final var map = stream.map(FileChannel.MapMode.READ_WRITE, 0L, 256L);
+      try (var w = writers.createWriterFromByteBuffer(pathURI, map, "root")) {
+        try (var q = w.createSubWriterAt("sub", 0L)) {
+          writeSpecimen(q);
+        }
       }
     }
 

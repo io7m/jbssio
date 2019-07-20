@@ -150,7 +150,7 @@ abstract class BSSRandomAccess
   final BSSRangeHalfOpen createOffsetSubRange(
     final long offset)
   {
-    throw new UnsupportedOperationException();
+    return new BSSRangeHalfOpen(offset, this.parentRangeRelative.interval());
   }
 
   final BSSRangeHalfOpen createSameSubRange()
