@@ -222,6 +222,34 @@ public final class BSSIntegrationTest
   }
 
   @Test
+  public void testBasicIOSpecimenStreamBounded()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStreamBounded(pathURI, stream, "root", 256L)) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
   public void testBasicIOSpecimenChannel()
     throws IOException
   {
@@ -239,6 +267,34 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newByteChannel(path, READ)) {
       try (var reader = readers.createReaderFromChannel(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOSpecimenChannelBounded()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
+      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+        input.transferTo(output);
+        output.flush();
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newByteChannel(path, READ)) {
+      try (var reader = readers.createReaderFromChannelBounded(pathURI, stream, "root", 256L)) {
         try (var r = reader.createSubReaderBounded("BE", 128L)) {
           checkSpecimenBE(r);
         }
@@ -307,6 +363,34 @@ public final class BSSIntegrationTest
   }
 
   @Test
+  public void testBasicIOSpecimenWriteStreamBounded()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    final var writers = new BSSWriters();
+    try (var stream = Files.newOutputStream(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+      try (var w = writers.createWriterFromStreamBounded(pathURI, stream, "root", 256L)) {
+        writeSpecimen(w);
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
   public void testBasicIOSpecimenWriteChannel()
     throws IOException
   {
@@ -318,6 +402,35 @@ public final class BSSIntegrationTest
     try (var stream = Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
       stream.truncate(256L);
       try (var w = writers.createWriterFromChannel(pathURI, stream, "root")) {
+        writeSpecimen(w);
+      }
+    }
+
+    final var readers = new BSSReaders();
+    try (var stream = Files.newInputStream(path, READ)) {
+      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+          checkSpecimenBE(r);
+        }
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+          checkSpecimenLE(r);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testBasicIOSpecimenWriteChannelBounded()
+    throws IOException
+  {
+    final var path = Files.createTempFile("bss-integration-", ".dat");
+    LOG.debug("path: {}", path);
+    final var pathURI = path.toUri();
+
+    final var writers = new BSSWriters();
+    try (var stream = Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+      stream.truncate(256L);
+      try (var w = writers.createWriterFromChannelBounded(pathURI, stream, "root", 256L)) {
         writeSpecimen(w);
       }
     }
