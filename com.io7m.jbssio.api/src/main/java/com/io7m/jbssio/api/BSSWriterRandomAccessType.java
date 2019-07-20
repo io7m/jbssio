@@ -17,7 +17,6 @@
 package com.io7m.jbssio.api;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * A random access writer.
@@ -26,53 +25,12 @@ import java.util.Objects;
 public interface BSSWriterRandomAccessType extends BSSWriterType, BSSSeekableType
 {
   @Override
-  BSSWriterRandomAccessType createSubWriter(
-    String name)
-    throws IOException;
-
-  @Override
-  default BSSWriterRandomAccessType createSubWriterBounded(
-    final String name,
-    final long size)
-    throws IOException
-  {
-    return this.createSubWriterAtBounded(
-      Objects.requireNonNull(name, "name"),
-      0L,
-      size);
-  }
-
-  /**
-   * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
-   * to the current writer). If the current writer is bounded, the new sub writer will also be
-   * bounded.
-   *
-   * @param name   The new name
-   * @param offset The relative offset
-   *
-   * @return A new sub writer
-   *
-   * @throws IOException On I/O errors
-   */
-
   BSSWriterRandomAccessType createSubWriterAt(
     String name,
     long offset)
     throws IOException;
 
-  /**
-   * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
-   * to the current writer) and maximum length {@code size}.
-   *
-   * @param name   The new name
-   * @param offset The relative offset
-   * @param size   The maximum number of bytes
-   *
-   * @return A new sub writer
-   *
-   * @throws IOException On I/O errors
-   */
-
+  @Override
   BSSWriterRandomAccessType createSubWriterAtBounded(
     String name,
     long offset,

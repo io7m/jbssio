@@ -25,13 +25,15 @@ import java.io.IOException;
 public interface BSSReaderSequentialType extends BSSReaderType
 {
   @Override
-  BSSReaderSequentialType createSubReader(
-    String name)
+  BSSReaderSequentialType createSubReaderAt(
+    String name,
+    long offset)
     throws IOException;
 
   @Override
-  BSSReaderSequentialType createSubReaderBounded(
+  BSSReaderSequentialType createSubReaderAtBounded(
     String name,
+    long offset,
     long size)
     throws IOException;
 }

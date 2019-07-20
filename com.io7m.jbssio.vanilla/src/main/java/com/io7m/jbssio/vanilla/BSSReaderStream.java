@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,72 +103,10 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
-  public BSSReaderSequentialType createSubReader(
-    final String inName)
-  {
-    Objects.requireNonNull(inName, "inName");
-
-    final var wrappedStream =
-      new CountingInputStream(new CloseShieldInputStream(this.stream));
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSReaderStream(this, this.uri, newName, wrappedStream, this.size);
-  }
-
-  @Override
-  public BSSReaderSequentialType createSubReaderBounded(
-    final String inName,
-    final long newSize)
-  {
-    Objects.requireNonNull(inName, "inName");
-
-    this.size.ifPresent(currentSize -> {
-      if (Long.compareUnsigned(newSize, currentSize) > 0) {
-        final var lineSeparator = System.lineSeparator();
-        throw new IllegalArgumentException(
-          new StringBuilder(128)
-            .append("Sub-reader bounds cannot exceed the bounds of this reader.")
-            .append(lineSeparator)
-            .append("  Reader URI: ")
-            .append(this.uri)
-            .append(lineSeparator)
-            .append("  Reader path: ")
-            .append(this.path)
-            .append(lineSeparator)
-            .append("  Reader size limit: ")
-            .append(Long.toUnsignedString(currentSize))
-            .append(lineSeparator)
-            .append("  Requested size limit: ")
-            .append(Long.toUnsignedString(newSize))
-            .toString());
-      }
-    });
-
-    final var boundedStream =
-      new BoundedInputStream(new CloseShieldInputStream(this.stream), newSize);
-    final var wrappedStream =
-      new CountingInputStream(boundedStream);
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSReaderStream(this, this.uri, newName, wrappedStream, OptionalLong.of(newSize));
-  }
-
-  @Override
   public void skip(final long skipSize)
     throws IOException, EOFException
   {
+    this.checkLimit(null, skipSize);
     final var r = this.stream.skip(skipSize);
     this.checkNotShortRead(null, skipSize, r);
   }
@@ -202,59 +141,53 @@ final class BSSReaderStream implements BSSReaderSequentialType
     throws IOException
   {
     if (expected != received) {
-      final var lineSeparator = System.lineSeparator();
-      final var stringBuilder = new StringBuilder(128);
-
-      stringBuilder
-        .append("Short read.")
-        .append(lineSeparator)
-        .append("  Reader URI: ")
-        .append(this.uri())
-        .append(lineSeparator);
-
-      stringBuilder
-        .append("  Reader path: ")
-        .append(this.path());
-
+      final var attributes = new HashMap<String, String>(4);
+      attributes.put("Expected (Octets)", Long.toUnsignedString(expected));
+      attributes.put("Received (Octets)", Long.toUnsignedString(received));
       if (name != null) {
-        stringBuilder
-          .append(":")
-          .append(name);
+        attributes.put("Field", name);
       }
-      stringBuilder.append(lineSeparator);
-
-      stringBuilder
-        .append("  Offset: 0x")
-        .append(Long.toUnsignedString(this.offsetCurrentAbsolute(), 16))
-        .append(lineSeparator);
-
-      stringBuilder
-        .append("  Expected: ")
-        .append(expected)
-        .append(" octets")
-        .append(lineSeparator);
-
-      stringBuilder
-        .append("  Received: ")
-        .append(received)
-        .append(" octets")
-        .append(lineSeparator);
-
-      throw new IOException(stringBuilder.toString());
+      throw BSSExceptions.createIO(
+        this,
+        "Short read.",
+        attributes);
     }
   }
 
   private int readS8p(final String name)
     throws IOException
   {
+    this.checkLimit(name, 1L);
     final var r = this.stream.read();
     checkEOF(r);
     return (int) (byte) r;
   }
 
+  private void checkLimit(
+    final String name,
+    final long requested)
+    throws EOFException
+  {
+    if (this.size.isPresent()) {
+      final var sizeLimit = this.size.getAsLong();
+      if (Long.compareUnsigned(this.stream.getByteCount() + requested, sizeLimit) > 0) {
+        final var attributes = new HashMap<String, String>(4);
+        attributes.put("Requested", Long.toUnsignedString(requested));
+        if (name != null) {
+          attributes.put("Field", name);
+        }
+        throw BSSExceptions.createEOF(
+          this,
+          "Attempting to read bytes would exceed the reader size limit.",
+          attributes);
+      }
+    }
+  }
+
   private int readU8p(final String name)
     throws IOException
   {
+    this.checkLimit(name, 1L);
     final var r = this.stream.read();
     checkEOF(r);
     return r & 0xff;
@@ -263,6 +196,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private int readS16LEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
     this.checkNotShortRead(name, 2L, (long) r);
@@ -273,6 +207,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private int readU16LEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
     this.checkNotShortRead(name, 2L, (long) r);
@@ -283,6 +218,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readS32LEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
     this.checkNotShortRead(name, 4L, (long) r);
@@ -293,6 +229,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readU32LEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
     this.checkNotShortRead(name, 4L, (long) r);
@@ -303,6 +240,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readS64LEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
     this.checkNotShortRead(name, 8L, (long) r);
@@ -313,6 +251,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readU64LEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
     this.checkNotShortRead(name, 8L, (long) r);
@@ -323,6 +262,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private int readS16BEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
     this.checkNotShortRead(name, 2L, (long) r);
@@ -333,6 +273,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private int readU16BEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
     this.checkNotShortRead(name, 2L, (long) r);
@@ -343,6 +284,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readS32BEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
     this.checkNotShortRead(name, 4L, (long) r);
@@ -353,6 +295,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readU32BEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
     this.checkNotShortRead(name, 4L, (long) r);
@@ -363,6 +306,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readS64BEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
     this.checkNotShortRead(name, 8L, (long) r);
@@ -373,6 +317,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private long readU64BEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
     this.checkNotShortRead(name, 8L, (long) r);
@@ -383,6 +328,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private float readFBEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
     this.checkNotShortRead(name, 4L, (long) r);
@@ -393,6 +339,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private float readFLEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
     this.checkNotShortRead(name, 4L, (long) r);
@@ -403,6 +350,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private double readDBEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
     this.checkNotShortRead(name, 8L, (long) r);
@@ -413,6 +361,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private double readDLEp(final String name)
     throws IOException
   {
+    this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
     this.checkNotShortRead(name, 8L, (long) r);
@@ -680,6 +629,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final int length)
     throws IOException, EOFException
   {
+    this.checkLimit(Objects.requireNonNull(name, "name"), Integer.toUnsignedLong(length));
     final var r = this.stream.read(buffer, offset, length);
     checkEOF(r);
     return r;
@@ -692,6 +642,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final int length)
     throws IOException, EOFException
   {
+    this.checkLimit(null, Integer.toUnsignedLong(length));
     final var r = this.stream.read(buffer, offset, length);
     checkEOF(r);
     return r;
@@ -750,5 +701,89 @@ final class BSSReaderStream implements BSSReaderSequentialType
       return parentRef.isClosed() || this.closed.get();
     }
     return this.closed.get();
+  }
+
+  @Override
+  public BSSReaderSequentialType createSubReaderAt(
+    final String name,
+    final long targetOffset)
+    throws IOException
+  {
+    Objects.requireNonNull(name, "name");
+
+    final var streamPosition = this.stream.getByteCount();
+    final var seek = targetOffset - streamPosition;
+    if (seek < 0L) {
+      throw this.streamPositionExceeded(targetOffset);
+    }
+
+    this.skip(seek);
+
+    final var newStream =
+      new CountingInputStream(new CloseShieldInputStream(this.stream));
+
+    final var newName =
+      new StringBuilder(this.path.length() + name.length() + 2)
+        .append(this.path)
+        .append(".")
+        .append(name)
+        .toString();
+
+    return new BSSReaderStream(this, this.uri, newName, newStream, this.size);
+  }
+
+  private EOFException streamPositionExceeded(
+    final long targetOffset)
+  {
+    final var attributes = new HashMap<String, String>(4);
+    attributes.put("Target Offset (Relative)", "0x" + Long.toUnsignedString(targetOffset, 16));
+    return BSSExceptions.createEOF(
+      this,
+      "Stream position has already exceeded the specified offset.",
+      attributes);
+  }
+
+  @Override
+  public BSSReaderSequentialType createSubReaderAtBounded(
+    final String name,
+    final long targetOffset,
+    final long newSize)
+    throws IOException
+  {
+    Objects.requireNonNull(name, "name");
+
+    final var streamPosition = this.stream.getByteCount();
+
+    if (this.size.isPresent()) {
+      final var currentSize = this.size.getAsLong();
+      if (Long.compareUnsigned(newSize, currentSize) > 0) {
+        final var attributes = new HashMap<String, String>(4);
+        attributes.put("Size limit", Long.toUnsignedString(currentSize));
+        attributes.put("Requested size limit", Long.toUnsignedString(newSize));
+        throw BSSExceptions.createIO(
+          this,
+          "Sub-reader bounds cannot exceed the bounds of this reader.",
+          attributes);
+      }
+    }
+
+    final var seek = targetOffset - streamPosition;
+    if (seek < 0L) {
+      throw this.streamPositionExceeded(targetOffset);
+    }
+
+    this.skip(seek);
+
+    final var newStream =
+      new CountingInputStream(new CloseShieldInputStream(this.stream));
+
+    final var newName =
+      new StringBuilder(this.path.length() + name.length() + 2)
+        .append(this.path)
+        .append(".")
+        .append(name)
+        .toString();
+
+    return new BSSReaderStream(this, this.uri, newName, newStream, OptionalLong.of(newSize));
   }
 }

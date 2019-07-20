@@ -16,6 +16,8 @@
 
 package com.io7m.jbssio.api;
 
+import java.io.IOException;
+
 /**
  * The type of purely sequential writers.
  */
@@ -23,11 +25,15 @@ package com.io7m.jbssio.api;
 public interface BSSWriterSequentialType extends BSSWriterType
 {
   @Override
-  BSSWriterSequentialType createSubWriter(
-    String name);
+  BSSWriterSequentialType createSubWriterAt(
+    String name,
+    long offset)
+    throws IOException;
 
   @Override
-  BSSWriterSequentialType createSubWriterBounded(
+  BSSWriterSequentialType createSubWriterAtBounded(
     String name,
-    long size);
+    long offset,
+    long size)
+    throws IOException;
 }
