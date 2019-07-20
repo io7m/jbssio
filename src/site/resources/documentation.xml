@@ -50,7 +50,7 @@ java.io.IOException: Out of bounds.
   <p>
     The above message clearly indicates that the code that was attempting
     to read the <tt>size</tt> field, of the <tt>info</tt> member of the
-    <tt>header</tt> structure ended up trying to read more data than the
+    <tt>header</tt> structure, ended up trying to read more data than the
     <i>reader</i> was configured to allow: The <i>reader</i> was specified
     to be allowed to read within the bounds <tt>[0x0, 0x10)</tt> but the code
     tried to read beyond these bounds. Note that <i>readers</i> and <i>writers</i>
