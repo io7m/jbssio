@@ -64,31 +64,6 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
   }
 
   @Override
-  public BSSReaderRandomAccessType createSubReader(
-    final String inName)
-    throws IOException
-  {
-    Objects.requireNonNull(inName, "path");
-
-    this.checkNotClosed();
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSReaderByteBuffer(
-      this,
-      this.uri,
-      this.createSameSubRange(),
-      newName,
-      this.map,
-      () -> null);
-  }
-
-  @Override
   public BSSReaderRandomAccessType createSubReaderAtBounded(
     final String inName,
     final long offset,
@@ -109,31 +84,6 @@ final class BSSReaderByteBuffer extends BSSRandomAccess implements BSSReaderRand
       this,
       this.uri,
       this.createSubRange(offset, size),
-      newName,
-      this.map,
-      () -> null);
-  }
-
-  @Override
-  public BSSReaderRandomAccessType createSubReaderBounded(
-    final String inName,
-    final long size)
-    throws IOException
-  {
-    Objects.requireNonNull(inName, "path");
-    this.checkNotClosed();
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSReaderByteBuffer(
-      this,
-      this.uri,
-      this.createSubRange(0L, size),
       newName,
       this.map,
       () -> null);

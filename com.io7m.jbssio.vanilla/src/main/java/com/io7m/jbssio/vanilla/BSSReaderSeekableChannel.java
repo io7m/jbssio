@@ -75,57 +75,6 @@ final class BSSReaderSeekableChannel
   }
 
   @Override
-  public BSSReaderRandomAccessType createSubReader(
-    final String inName)
-    throws IOException
-  {
-    Objects.requireNonNull(inName, "path");
-    this.checkNotClosed();
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSReaderSeekableChannel(
-      this,
-      this.uri,
-      this.createSameSubRange(),
-      newName,
-      this.channel,
-      this.buffer,
-      () -> null);
-  }
-
-  @Override
-  public BSSReaderRandomAccessType createSubReaderBounded(
-    final String inName,
-    final long size)
-    throws IOException
-  {
-    Objects.requireNonNull(inName, "path");
-    this.checkNotClosed();
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSReaderSeekableChannel(
-      this,
-      this.uri,
-      this.createSubRange(0L, size),
-      newName,
-      this.channel,
-      this.buffer,
-      () -> null);
-  }
-
-  @Override
   public BSSReaderRandomAccessType createSubReaderAt(
     final String inName,
     final long offset)

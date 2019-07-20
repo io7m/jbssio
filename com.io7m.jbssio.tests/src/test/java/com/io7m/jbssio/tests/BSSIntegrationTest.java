@@ -67,7 +67,7 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var channel = Files.newByteChannel(path, READ)) {
       try (var reader = readers.createReaderFromChannel(pathURI, channel, "root")) {
-        try (var sr = reader.createSubReaderBounded("head", 8L)) {
+        try (var sr = reader.createSubReaderAtBounded("head", 0L, 8L)) {
           final var x0 = sr.readU32BE();
           logUnsigned(x0);
           Assertions.assertEquals(0x10203040L, x0);
@@ -124,7 +124,7 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var sr = reader.createSubReaderBounded("head", 8L)) {
+        try (var sr = reader.createSubReaderAtBounded("head", 0L, 8L)) {
           final var x0 = sr.readU32BE();
           logUnsigned(x0);
           Assertions.assertEquals(0x10203040L, x0);
@@ -133,7 +133,7 @@ public final class BSSIntegrationTest
           logUnsigned(x1);
           Assertions.assertEquals(0x50607080L, x1);
         }
-        try (var sr = reader.createSubReaderBounded("body", 16L)) {
+        try (var sr = reader.createSubReaderAt("body", 8L)) {
           final var x0 = sr.readU32BE();
           logUnsigned(x0);
           Assertions.assertEquals(0x90909090L, x0);
@@ -211,10 +211,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("BE", 0L, 128L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -239,10 +239,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStreamBounded(pathURI, stream, "root", 256L)) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("BE", 0L, 128L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -267,7 +267,7 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newByteChannel(path, READ)) {
       try (var reader = readers.createReaderFromChannel(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
         try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
@@ -295,7 +295,7 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newByteChannel(path, READ)) {
       try (var reader = readers.createReaderFromChannelBounded(pathURI, stream, "root", 256L)) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
         try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
@@ -352,10 +352,10 @@ public final class BSSIntegrationTest
     try (var stream = FileChannel.open(path, READ)) {
       final var map = stream.map(FileChannel.MapMode.READ_ONLY, 0L, stream.size());
       try (var reader = readers.createReaderFromByteBuffer(pathURI, map, "root")) {
-        try (var r = reader.createSubReader("BE")) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAt("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -381,7 +381,7 @@ public final class BSSIntegrationTest
     try (var stream = FileChannel.open(path, READ)) {
       final var map = stream.map(FileChannel.MapMode.READ_ONLY, 0L, stream.size());
       try (var reader = readers.createReaderFromByteBuffer(pathURI, map, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
         try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
@@ -409,10 +409,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -437,10 +437,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -466,10 +466,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -495,10 +495,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -526,10 +526,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -556,10 +556,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -588,10 +588,10 @@ public final class BSSIntegrationTest
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
       try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderBounded("BE", 128L)) {
+        try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderBounded("LE", 128L)) {
+        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
           checkSpecimenLE(r);
         }
       }

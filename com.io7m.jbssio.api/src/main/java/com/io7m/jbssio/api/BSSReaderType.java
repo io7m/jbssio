@@ -30,30 +30,39 @@ import java.io.IOException;
 public interface BSSReaderType extends BSSCloseableType, BSSAddressableType, BSSSkippableType
 {
   /**
-   * @param name The path of the new reader
+   * Create a new sub reader with the given {@code name}, starting at {@code offset} bytes from the
+   * start of the bounds of the current reader. If the current reader is bounded, the new sub reader
+   * will also be bounded.
    *
-   * @return A new reader
+   * @param name   The new name
+   * @param offset The relative offset
+   *
+   * @return A new sub reader
    *
    * @throws IOException On I/O errors
    */
 
-  BSSReaderType createSubReader(
-    String name)
+  BSSReaderType createSubReaderAt(
+    String name,
+    long offset)
     throws IOException;
 
   /**
-   * @param name The path of the new reader
-   * @param size A limit on the number of bytes that can be read
+   * Create a new sub reader with the given {@code name}, starting at {@code offset} bytes from the
+   * start of the bounds of the current reader, limited to {@code size} bytes.
    *
-   * @return A new reader that can read at most {@code size} bytes
+   * @param name   The new name
+   * @param offset The relative offset
+   * @param size   The maximum number of bytes
    *
-   * @throws IllegalArgumentException If the number of bytes exceeds the limit of the current
-   *                                  reader
-   * @throws IOException              On I/O errors
+   * @return A new sub reader
+   *
+   * @throws IOException On I/O errors
    */
 
-  BSSReaderType createSubReaderBounded(
+  BSSReaderType createSubReaderAtBounded(
     String name,
+    long offset,
     long size)
     throws IOException;
 

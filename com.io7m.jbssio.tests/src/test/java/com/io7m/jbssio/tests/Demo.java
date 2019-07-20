@@ -65,7 +65,7 @@ public final class Demo
     final var readers = new BSSReaders();
     try (var channel = Files.newByteChannel(path, READ)) {
       try (var reader = readers.createReaderFromChannel(pathURI, channel, "root")) {
-        try (var sr = reader.createSubReaderBounded("head", 8L)) {
+        try (var sr = reader.createSubReaderAtBounded("head", 0L,8L)) {
           LOG.debug("{}: 0x{}", sr.path(), Integer.toUnsignedString((int) sr.readS32BE(), 16));
           LOG.debug("{}: 0x{}", sr.path(), Integer.toUnsignedString((int) sr.readS32BE(), 16));
         }

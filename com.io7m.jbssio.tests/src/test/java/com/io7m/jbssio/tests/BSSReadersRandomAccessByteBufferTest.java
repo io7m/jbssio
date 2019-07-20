@@ -56,9 +56,9 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      try (var s0 = reader.createSubReader("x")) {
-        try (var s1 = s0.createSubReader("y")) {
-          try (var s2 = s1.createSubReader("z")) {
+      try (var s0 = reader.createSubReaderAt("x", 0L)) {
+        try (var s1 = s0.createSubReaderAt("y", 0L)) {
+          try (var s2 = s1.createSubReaderAt("z", 0L)) {
             Assertions.assertEquals("a.x.y.z", s2.path());
           }
           Assertions.assertEquals("a.x.y", s1.path());
@@ -85,7 +85,7 @@ public final class BSSReadersRandomAccessByteBufferTest
       Assertions.assertEquals(0L, reader.offsetCurrentRelative());
       LOG.debug("reader:    {}", reader);
 
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
         Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
@@ -122,7 +122,7 @@ public final class BSSReadersRandomAccessByteBufferTest
         Assertions.assertThrows(IOException.class, subReader::readU8);
       }
 
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
         Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
@@ -176,7 +176,7 @@ public final class BSSReadersRandomAccessByteBufferTest
       reader.seekTo(0L);
       LOG.debug("reader: {}", reader);
 
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
         Assertions.assertEquals(2, subReader.readS8());
@@ -188,7 +188,7 @@ public final class BSSReadersRandomAccessByteBufferTest
       reader.seekTo(4L);
       LOG.debug("reader: {}", reader);
 
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(4, subReader.readS8());
         Assertions.assertEquals(5, subReader.readU8());
         Assertions.assertEquals(6, subReader.readS8());
@@ -200,7 +200,7 @@ public final class BSSReadersRandomAccessByteBufferTest
       reader.seekTo(8L);
       LOG.debug("reader: {}", reader);
 
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(8, subReader.readS8());
         Assertions.assertEquals(9, subReader.readU8());
         Assertions.assertEquals(10, subReader.readS8());
@@ -283,7 +283,7 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L,4L)) {
         reader.seekTo(4L);
         subReader.seekTo(0L);
         Assertions.assertEquals(4L, subReader.offsetCurrentAbsolute());
@@ -340,7 +340,7 @@ public final class BSSReadersRandomAccessByteBufferTest
     final var readers = new BSSReaders();
     final var stream = ByteBuffer.wrap(data);
     try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), stream, "a")) {
-      try (var subReader = reader.createSubReaderBounded("s", 4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s",  0L,4L)) {
         LOG.debug("reader:    {}", reader);
         LOG.debug("subReader: {}", subReader);
         Assertions.assertEquals(0, subReader.readS8());
@@ -407,7 +407,7 @@ public final class BSSReadersRandomAccessByteBufferTest
 
       final var ex =
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-          reader.createSubReaderBounded("s", 5L);
+          reader.createSubReaderAtBounded("s", 0L,5L);
         });
 
       LOG.debug("ex: ", ex);
