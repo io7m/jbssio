@@ -25,11 +25,11 @@ import com.io7m.jbssio.api.BSSSkippableType;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 abstract class BSSRandomAccess
   implements BSSSeekableType, BSSSkippableType, BSSAddressableType, BSSCloseableType
@@ -124,7 +124,7 @@ abstract class BSSRandomAccess
     final var remainingOpt = this.bytesRemaining();
     if (remainingOpt.isPresent()) {
       if (want > remainingOpt.getAsLong()) {
-        throw this.outOfBounds(this.offsetRelative + want, name, IOException::new);
+        throw this.outOfBounds(name, this.offsetRelative + want);
       }
     }
   }
@@ -153,52 +153,19 @@ abstract class BSSRandomAccess
     return new BSSRangeHalfOpen(offset, this.parentRangeRelative.interval());
   }
 
-  final BSSRangeHalfOpen createSameSubRange()
-  {
-    return new BSSRangeHalfOpen(0L, this.parentRangeRelative.interval());
-  }
-
   private IOException outOfBounds(
-    final long targetPosition,
     final String name,
-    final Function<String, IOException> exceptionSupplier)
+    final long targetPosition)
   {
-    final var lineSeparator = System.lineSeparator();
-    final var stringBuilder = new StringBuilder(128);
-
-    stringBuilder
-      .append("Out of bounds.")
-      .append(lineSeparator)
-      .append("  Reader URI: ")
-      .append(this.uri())
-      .append(lineSeparator);
-
-    stringBuilder
-      .append("  Reader path: ")
-      .append(this.path());
-
-    if (name != null) {
-      stringBuilder.append(":")
-        .append(name);
-    }
-    stringBuilder.append(lineSeparator);
-
     final var bounds = this.toAbsoluteRange(this.parentRangeRelative);
-    stringBuilder
-      .append("  Reader bounds: absolute ")
-      .append(bounds)
-      .append(lineSeparator);
-
-    stringBuilder
-      .append("  Target offset: absolute 0x")
-      .append(Long.toUnsignedString(targetPosition, 16))
-      .append(lineSeparator);
-
-    stringBuilder
-      .append("  Offset: absolute 0x")
-      .append(Long.toUnsignedString(this.offsetCurrentAbsolute(), 16));
-
-    return exceptionSupplier.apply(stringBuilder.toString());
+    final var attributes = new HashMap<String, String>(4);
+    attributes.put("Target Offset (Absolute)", "0x" + Long.toUnsignedString(targetPosition, 16));
+    attributes.put("Bounds (Relative)", this.parentRangeRelative.toString());
+    attributes.put("Bounds (Absolute)", bounds.toString());
+    if (name != null) {
+      attributes.put("Field", name);
+    }
+    return BSSExceptions.createIO(this, "Out of bounds.", attributes);
   }
 
   @Override
@@ -241,7 +208,7 @@ abstract class BSSRandomAccess
     this.checkNotClosed();
 
     if (!this.parentRangeRelative.includesValue(position)) {
-      throw this.outOfBounds(position, null, IOException::new);
+      throw this.outOfBounds(null, position);
     }
 
     this.offsetRelative = position;
@@ -301,10 +268,5 @@ abstract class BSSRandomAccess
   public final String path()
   {
     return this.path;
-  }
-
-  interface ObjToLongFunctionType<T>
-  {
-    long apply(T t);
   }
 }

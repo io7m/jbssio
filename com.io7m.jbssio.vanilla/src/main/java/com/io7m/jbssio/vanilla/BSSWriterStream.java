@@ -27,10 +27,10 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -85,133 +85,20 @@ final class BSSWriterStream implements BSSWriterSequentialType
     return new BSSWriterStream(null, uri, inName, wrappedStream, 0L, inSize);
   }
 
-  private long absoluteOf(
-    final long position)
-  {
-    final var writerParent = this.parent;
-    if (writerParent == null) {
-      return position;
-    }
-    return writerParent.absoluteOf(0L) + position;
-  }
-
-  @Override
-  public BSSWriterSequentialType createSubWriter(
-    final String inName)
-  {
-    Objects.requireNonNull(inName, "inName");
-
-    final var wrappedStream =
-      new CountingOutputStream(new CloseShieldOutputStream(this.stream));
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSWriterStream(
-      this,
-      this.uri,
-      newName,
-      wrappedStream,
-      this.stream.getByteCount(),
-      this.size);
-  }
-
-  @Override
-  public BSSWriterSequentialType createSubWriterBounded(
-    final String inName,
-    final long newSize)
-  {
-    Objects.requireNonNull(inName, "inName");
-
-    final var currentStart = this.stream.getByteCount();
-    this.size.ifPresent(actualSize -> {
-      if (newSize > actualSize) {
-        final var lineSeparator = System.lineSeparator();
-        throw new IllegalArgumentException(
-          new StringBuilder(128)
-            .append("Sub-writer bounds cannot exceed the bounds of this writer.")
-            .append(lineSeparator)
-            .append("  Writer URI: ")
-            .append(this.uri)
-            .append(lineSeparator)
-            .append("  Writer path: ")
-            .append(this.path)
-            .append(lineSeparator)
-            .append("  Writer bounds: absolute [0x")
-            .append(Long.toUnsignedString(this.absoluteOf(this.start), 16))
-            .append(", 0x")
-            .append(Long.toUnsignedString(this.absoluteOf(actualSize), 16))
-            .append(")")
-            .append(lineSeparator)
-            .append("  Requested bounds: absolute [0x")
-            .append(Long.toUnsignedString(this.absoluteOf(currentStart), 16))
-            .append(", 0x")
-            .append(Long.toUnsignedString(this.absoluteOf(newSize), 16))
-            .append(")")
-            .append(lineSeparator)
-            .toString());
-      }
-    });
-
-    final var wrappedStream =
-      new CountingOutputStream(new CloseShieldOutputStream(this.stream));
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path)
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSWriterStream(
-      this,
-      this.uri,
-      newName,
-      wrappedStream,
-      currentStart,
-      OptionalLong.of(newSize));
-  }
-
   private IOException outOfBounds(
-    final long targetPosition,
     final String name,
-    final Function<String, IOException> exceptionSupplier)
+    final long targetPosition)
   {
-    final var lineSeparator = System.lineSeparator();
-    final var builder = new StringBuilder(128);
-
-    builder.append("Out of bounds.")
-      .append(lineSeparator)
-      .append("  Writer URI: ")
-      .append(this.uri())
-      .append(lineSeparator);
-
-    builder.append("  Writer path: ").append(this.path());
+    final var attributes = new HashMap<String, String>(4);
     if (name != null) {
-      builder.append(":");
-      builder.append(name);
+      attributes.put("Field", name);
     }
-    builder.append(lineSeparator);
-
-    this.size.ifPresent(
-      actualSize ->
-        builder.append("  Writer bounds: absolute [0x")
-          .append(Long.toUnsignedString(this.start, 16))
-          .append(", 0x")
-          .append(Long.toUnsignedString(actualSize, 16))
-          .append(")")
-          .append(lineSeparator)
-    );
-
-    builder
-      .append("  Offset: absolute 0x")
-      .append(Long.toUnsignedString(targetPosition, 16));
-
-    return exceptionSupplier.apply(builder.toString());
+    attributes.put("Target Offset (Absolute)", "0x" + Long.toUnsignedString(targetPosition, 16));
+    if (this.size.isPresent()) {
+      final var bounds = new BSSRangeHalfOpen(this.start, this.size);
+      attributes.put("Bounds (Absolute)", bounds.toString());
+    }
+    return BSSExceptions.createIO(this, "Out of bounds.", attributes);
   }
 
   @Override
@@ -238,7 +125,7 @@ final class BSSWriterStream implements BSSWriterSequentialType
       final var sizeLimit = this.size.getAsLong();
       final var targetPosition = this.stream.getByteCount() + count;
       if (targetPosition > sizeLimit) {
-        throw this.outOfBounds(targetPosition, name, IOException::new);
+        throw this.outOfBounds(name, targetPosition);
       }
     }
   }
@@ -851,5 +738,101 @@ final class BSSWriterStream implements BSSWriterSequentialType
       return parentRef.isClosed() || this.closed.get();
     }
     return this.closed.get();
+  }
+
+  @Override
+  public BSSWriterSequentialType createSubWriterAt(
+    final String name,
+    final long targetOffset)
+    throws IOException
+  {
+    Objects.requireNonNull(name, "name");
+
+    final var streamPosition = this.stream.getByteCount();
+    final var seek = targetOffset - streamPosition;
+    if (seek < 0L) {
+      throw this.streamPositionExceeded(targetOffset);
+    }
+
+    this.skip(seek);
+
+    final var newStream =
+      new CountingOutputStream(new CloseShieldOutputStream(this.stream));
+
+    final var newName =
+      new StringBuilder(this.path.length() + name.length() + 2)
+        .append(this.path)
+        .append(".")
+        .append(name)
+        .toString();
+
+    return new BSSWriterStream(
+      this,
+      this.uri,
+      newName,
+      newStream,
+      this.stream.getByteCount(),
+      this.size);
+  }
+
+  private EOFException streamPositionExceeded(
+    final long targetOffset)
+  {
+    final var attributes = new HashMap<String, String>(4);
+    attributes.put("Target Offset (Relative)", "0x" + Long.toUnsignedString(targetOffset, 16));
+    return BSSExceptions.createEOF(
+      this,
+      "Stream position has already exceeded the specified offset.",
+      attributes);
+  }
+
+  @Override
+  public BSSWriterSequentialType createSubWriterAtBounded(
+    final String name,
+    final long targetOffset,
+    final long newSize)
+    throws IOException
+  {
+    Objects.requireNonNull(name, "name");
+
+    final var streamPosition = this.stream.getByteCount();
+
+    if (this.size.isPresent()) {
+      final var currentSize = this.size.getAsLong();
+      if (Long.compareUnsigned(newSize, currentSize) > 0) {
+        final var attributes = new HashMap<String, String>(4);
+        attributes.put("Size limit", Long.toUnsignedString(currentSize));
+        attributes.put("Requested size limit", Long.toUnsignedString(newSize));
+        throw BSSExceptions.createIO(
+          this,
+          "Sub-writer bounds cannot exceed the bounds of this writer.",
+          attributes);
+      }
+    }
+
+    final var seek = targetOffset - streamPosition;
+    if (seek < 0L) {
+      throw this.streamPositionExceeded(targetOffset);
+    }
+
+    this.skip(seek);
+
+    final var newStream =
+      new CountingOutputStream(new CloseShieldOutputStream(this.stream));
+
+    final var newName =
+      new StringBuilder(this.path.length() + name.length() + 2)
+        .append(this.path)
+        .append(".")
+        .append(name)
+        .toString();
+
+    return new BSSWriterStream(
+      this,
+      this.uri,
+      newName,
+      newStream,
+      this.stream.getByteCount(),
+      OptionalLong.of(newSize));
   }
 }

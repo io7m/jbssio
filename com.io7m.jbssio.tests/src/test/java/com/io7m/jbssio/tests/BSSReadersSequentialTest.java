@@ -296,10 +296,12 @@ public final class BSSReadersSequentialTest
         LOG.debug("reader:    {}", reader);
 
         final var ex =
-          Assertions.assertThrows(IllegalArgumentException.class, () -> {
+          Assertions.assertThrows(IOException.class, () -> {
             reader.createSubReaderAtBounded("s", 0L,5L);
           });
-        Assertions.assertTrue(ex.getMessage().contains("Reader size limit: 4"));
+
+        LOG.debug("ex: ", ex);
+        Assertions.assertTrue(ex.getMessage().contains("Size limit           : 4"));
       }
     }
   }

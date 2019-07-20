@@ -51,7 +51,7 @@ public final class BSSIntegrationTest
     final var writers = new BSSWriters();
     try (var channel = Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
       try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
-        try (var sw = writer.createSubWriterBounded("head", 8L)) {
+        try (var sw = writer.createSubWriterAtBounded("head", 0L, 8L)) {
           sw.writeU32BE(0x10203040L);
           sw.writeU32BE(0x50607080L);
         }
@@ -108,11 +108,11 @@ public final class BSSIntegrationTest
     final var writers = new BSSWriters();
     try (var stream = Files.newOutputStream(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
       try (var writer = writers.createWriterFromStream(pathURI, stream, "root")) {
-        try (var sw = writer.createSubWriterBounded("head", 8L)) {
+        try (var sw = writer.createSubWriterAtBounded("head", 0L, 8L)) {
           sw.writeU32BE(0x10203040L);
           sw.writeU32BE(0x50607080L);
         }
-        try (var sw = writer.createSubWriterBounded("body", 16L)) {
+        try (var sw = writer.createSubWriterAtBounded("body", 8L, 16L)) {
           sw.writeU32BE(0x90909090L);
           sw.writeU32BE(0x80808080L);
           sw.writeU32BE(0xa0a0a0a0L);

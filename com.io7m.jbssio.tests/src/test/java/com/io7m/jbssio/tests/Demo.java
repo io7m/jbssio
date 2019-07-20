@@ -49,7 +49,7 @@ public final class Demo
     final var writers = new BSSWriters();
     try (var channel = Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
       try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
-        try (var sw = writer.createSubWriterBounded("head", 8L)) {
+        try (var sw = writer.createSubWriterAtBounded("head", 0L,8L)) {
           sw.writeS32BE(0x10203040L);
           sw.writeS32BE(0x50607080L);
         }

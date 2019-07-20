@@ -65,31 +65,6 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
   }
 
   @Override
-  public BSSWriterRandomAccessType createSubWriter(
-    final String inName)
-    throws IOException
-  {
-    Objects.requireNonNull(inName, "path");
-
-    this.checkNotClosed();
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path())
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSWriterByteBuffer(
-      this,
-      this.uri,
-      this.createSameSubRange(),
-      newName,
-      this.map,
-      () -> null);
-  }
-
-  @Override
   public BSSWriterRandomAccessType createSubWriterAt(
     final String inName,
     final long offset)

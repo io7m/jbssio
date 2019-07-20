@@ -47,7 +47,7 @@ public final class DemoSpecimen
     final var writers = new BSSWriters();
     try (var channel = Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
       try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
-        try (var w = writer.createSubWriterBounded("BE", 128L)) {
+        try (var w = writer.createSubWriterAtBounded("BE",  0L,128L)) {
           w.align(16);
           w.writeS8(Byte.MIN_VALUE);
           w.writeS8(Byte.MAX_VALUE);

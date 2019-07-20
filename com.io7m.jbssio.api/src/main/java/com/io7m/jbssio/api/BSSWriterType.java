@@ -30,30 +30,39 @@ import java.io.IOException;
 public interface BSSWriterType extends BSSCloseableType, BSSAddressableType, BSSSkippableType
 {
   /**
-   * @param name The path of the new writer
+   * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
+   * to the current writer). If the current writer is bounded, the new sub writer will also be
+   * bounded.
    *
-   * @return A new writer
+   * @param name   The new name
+   * @param offset The relative offset
+   *
+   * @return A new sub writer
    *
    * @throws IOException On I/O errors
    */
 
-  BSSWriterType createSubWriter(
-    String name)
+  BSSWriterType createSubWriterAt(
+    String name,
+    long offset)
     throws IOException;
 
   /**
-   * @param name The path of the new writer
-   * @param size A limit on the number of bytes that can be written
+   * Create a new sub writer with the given {@code name}, using the given {@code offset} (relative
+   * to the current writer) and maximum length {@code size}.
    *
-   * @return A new writer that can write at most {@code size} bytes
+   * @param name   The new name
+   * @param offset The relative offset
+   * @param size   The maximum number of bytes
    *
-   * @throws IllegalArgumentException If the number of bytes exceeds the limit of the current
-   *                                  writer
-   * @throws IOException              On I/O errors
+   * @return A new sub writer
+   *
+   * @throws IOException On I/O errors
    */
 
-  BSSWriterType createSubWriterBounded(
+  BSSWriterType createSubWriterAtBounded(
     String name,
+    long offset,
     long size)
     throws IOException;
 
@@ -580,7 +589,7 @@ public interface BSSWriterType extends BSSCloseableType, BSSAddressableType, BSS
     int offset,
     int length)
     throws IOException;
-  
+
   /**
    * Write a named 64-bit big-endian floating-point value.
    *

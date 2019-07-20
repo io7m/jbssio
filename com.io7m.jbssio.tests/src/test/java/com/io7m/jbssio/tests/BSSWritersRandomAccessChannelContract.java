@@ -87,7 +87,7 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
     final var writer = this.writerOf(stream);
     Assertions.assertFalse(writer.isClosed());
 
-    final var s = writer.createSubWriter("x");
+    final var s = writer.createSubWriterAt("x", 0L);
     writer.close();
     Assertions.assertTrue(writer.isClosed());
     Assertions.assertThrows(IOException.class, () -> writer.seekTo(1L));
@@ -106,9 +106,9 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var writer = this.writerOf(stream)) {
-      try (var s0 = writer.createSubWriter("x")) {
-        try (var s1 = s0.createSubWriter("y")) {
-          try (var s2 = s1.createSubWriter("z")) {
+      try (var s0 = writer.createSubWriterAt("x", 0L)) {
+        try (var s1 = s0.createSubWriterAt("y", 0L)) {
+          try (var s2 = s1.createSubWriterAt("z", 0L)) {
             Assertions.assertEquals("a.x.y.z", s2.path());
           }
           Assertions.assertEquals("a.x.y", s1.path());
@@ -172,7 +172,7 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
         final var ex =
           Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> writer.createSubWriterBounded("x", 13L));
+            () -> writer.createSubWriterAtBounded("x", 0L, 13L));
         LOG.debug("ex: ", ex);
       }
     }
@@ -186,11 +186,11 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
 
     try (var channel = this.channelOf(data)) {
       try (var writer = this.writerOf(channel)) {
-        try (var s = writer.createSubWriterBounded("y", 4L)) {
+        try (var s = writer.createSubWriterAtBounded("y", 0L,4L)) {
           final var ex =
             Assertions.assertThrows(
               IllegalArgumentException.class,
-              () -> s.createSubWriterBounded("z", 5L));
+              () -> s.createSubWriterAtBounded("z", 0L, 5L));
           LOG.debug("ex: ", ex);
         }
       }

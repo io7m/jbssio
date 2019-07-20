@@ -74,32 +74,6 @@ final class BSSWriterSeekableChannel
   }
 
   @Override
-  public BSSWriterRandomAccessType createSubWriter(
-    final String inName)
-    throws IOException
-  {
-    Objects.requireNonNull(inName, "path");
-
-    this.checkNotClosed();
-
-    final var newName =
-      new StringBuilder(32)
-        .append(this.path())
-        .append('.')
-        .append(inName)
-        .toString();
-
-    return new BSSWriterSeekableChannel(
-      this,
-      this.uri,
-      this.createSameSubRange(),
-      newName,
-      this.channel,
-      this.writeBuffer,
-      () -> null);
-  }
-
-  @Override
   public BSSWriterRandomAccessType createSubWriterAt(
     final String inName,
     final long offset)
