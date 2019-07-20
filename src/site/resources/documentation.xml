@@ -2,5 +2,143 @@
 
 <div xmlns="http://www.w3.org/1999/xhtml">
   <h3>User documentation</h3>
-  <p>No documentation is currently available.</p>
+
+  <h4>Overview</h4>
+
+  <p>
+    The <tt>jbssio</tt> package provides imperative <i>reader</i> and <i>writer</i>
+    abstractions. Readers and writers may be <i>sequential</i>, meaning that
+    they encapsulate a <i>stream</i> in which only forward seeking is allowed,
+    or <i>random access</i>, meaning that they encapsulate a resource that
+    allows for arbitrary forwards and backwards seeking. The API attempts, as
+    much as is possible, to present a common API for both <i>sequential</i>
+    and <i>random access</i> so that code using <i>readers</i> and <i>writers</i>
+    can potentially be agnostic of the seekability of the underlying resources.
+    Current implementations can encapsulate:
+  </p>
+
+  <ul>
+    <li><tt>java.io.OutputStream</tt></li>
+    <li><tt>java.io.InputStream</tt></li>
+    <li><tt>java.nio.channels.SeekableByteChannel</tt></li>
+    <li><tt>java.nio.ByteBuffer</tt></li>
+  </ul>
+
+  <p>
+    <i>Readers</i> and <i>writers</i> are explicitly <i>nested</i>: All
+    offsets/positions of <i>readers</i> and <i>writers</i> are given relative
+    to their <i>parent</i>. A <i>reader</i> or <i>writer</i> with no parent
+    effectively works with <i>absolute</i> positions within an encapsulated
+    resource. <i>Readers</i> and <i>writers</i> may be given explicit <i>bounds</i>
+    to limit the region of the resource from which they may read or write.
+    Bounds, combined with nesting, allow for very easy-to-understand code
+    when parsing complex binary structures. Individual <i>readers</i> and
+    <i>writers</i> are assigned names as they are created, and these names are
+    appended together during nesting to construct detailed diagnostic messages
+    when errors occur. For example:
+  </p>
+
+  <pre><![CDATA[
+java.io.IOException: Out of bounds.
+  Reader URI: file://tmp/example.data
+  Reader path: header.info:size
+  Reader bounds: absolute [0x0, 0x10)
+  Target offset: absolute 0x16
+  Offset: absolute 0x0
+]]></pre>
+
+  <p>
+    The above message clearly indicates that the code that was attempting
+    to read the <tt>size</tt> field, of the <tt>info</tt> member of the
+    <tt>header</tt> structure ended up trying to read more data than the
+    <i>reader</i> was configured to allow: The <i>reader</i> was specified
+    to be allowed to read within the bounds <tt>[0x0, 0x10)</tt> but the code
+    tried to read beyond these bounds. Note that <i>readers</i> and <i>writers</i>
+    do <i>not</i> know anything about the actual binary structures being parsed;
+    the programmer specifies names that correspond to the structures that the
+    programmer is trying to parse, and the <i>reader</i> and <i>writer</i>
+    implementations use these names in an attempt to construct useful
+    diagnostics.
+  </p>
+
+  <p>
+    <i>Readers</i> and <i>writers</i> operate on their underlying resources
+    using simple, explicit read/write methods. For example, the <tt>readU32BE</tt>
+    method defined for <i>readers</i> reads a single, unsigned, big-endian,
+    32-bit integer from the current position. Methods exist for all of the
+    common machine types. Additionally, <i>readers</i> and <i>writers</i>
+    contain convenient methods for aligning data, and for reading arbitrary byte
+    sequences. Calls to <i>reader</i> or <i>writer</i> methods advance the
+    current position of the <i>reader</i> or <i>writer</i>.
+  </p>
+
+  <h4>Reading Data</h4>
+  <p>
+    Retrieve a <tt>BSSReaderType</tt> and use it to read data:
+  </p>
+
+  <pre class="code"><![CDATA[final var readers =
+  ServiceLoader.load(BSSReaderProviderType.class)
+    .findFirst()
+    .orElseThrow(() -> new IllegalStateException("No reader service available"));
+
+try (var channel = Files.newByteChannel(path, READ)) {
+  // Create an unbounded reader that will read from the start of the channel
+  try (var reader = readers.createReaderFromChannel(pathURI, channel, "root")) {
+
+    // Create a reader that is permitted to read [0, 8) relative to "reader"
+    try (var sr = reader.createSubReaderBounded("head", 8L)) {
+      var x = sr.readS32BE();
+      var y = sr.readS32BE();
+    }
+
+    // Create a reader that is permitted to read [8, 16) relative to "reader"
+    try (var sr = reader.createSubReaderAtBounded("body", 8L, 16L)) {
+      var a = sr.readS32BE();
+      var b = sr.readS32BE();
+      var c = sr.readS32BE();
+      var d = sr.readS32BE();
+    }
+  }
+}
+]]></pre>
+
+  <p>
+    Using <tt>ServiceLoader</tt> is <i>not</i> required: The
+    various providers in the <tt>jbssio</tt> package can
+    be used via <tt>ServiceLoader</tt>, via OSGi declarative
+    services, or simply instantiated manually. See the JavaDoc.
+  </p>
+
+  <h4>Writing Data</h4>
+  <p>
+    Retrieve a <tt>BSSWriterType</tt> and use it to write data:
+  </p>
+
+  <pre class="code"><![CDATA[final var readers =
+  ServiceLoader.load(BSSWriterProviderType.class)
+    .findFirst()
+    .orElseThrow(() -> new IllegalStateException("No writer service available"));
+
+try (var channel = Files.newByteChannel(path, WRITE, CREATE)) {
+  // Create an unbounded writer that will write from the start of the channel
+  try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
+
+    // Create a writer that is permitted to read [0, 8) relative to "writer"
+    try (var sw = writer.createSubWriterBounded("head", 8L)) {
+      sw.writeS32BE(0x10203040L);
+      sw.writeS32BE(0x50607080L);
+    }
+
+    // Create a writer that is permitted to read [8, 16) relative to "writer"
+    try (var sw = writer.createSubWriterAtBounded("body", 8L, 16L)) {
+      sw.writeS32BE(0x90909090L);
+      sw.writeS32BE(0x80808080L);
+      sw.writeS32BE(0xa0a0a0a0L);
+      sw.writeS32BE(0xb0b0b0b0L);
+    }
+  }
+}
+]]></pre>
+
 </div>
