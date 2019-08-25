@@ -124,13 +124,13 @@ try (var channel = Files.newByteChannel(path, WRITE, CREATE)) {
   // Create an unbounded writer that will write from the start of the channel
   try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
 
-    // Create a writer that is permitted to read [0, 8) relative to "writer"
+    // Create a writer that is permitted to write [0, 8) relative to "writer"
     try (var sw = writer.createSubWriterAtBounded("head", 0L, 8L)) {
       sw.writeS32BE(0x10203040L);
       sw.writeS32BE(0x50607080L);
     }
 
-    // Create a writer that is permitted to read [8, 16) relative to "writer"
+    // Create a writer that is permitted to write [8, 16) relative to "writer"
     try (var sw = writer.createSubWriterAtBounded("body", 8L, 16L)) {
       sw.writeS32BE(0x90909090L);
       sw.writeS32BE(0x80808080L);
