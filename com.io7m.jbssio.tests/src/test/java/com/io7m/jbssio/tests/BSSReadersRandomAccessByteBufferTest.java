@@ -16,6 +16,7 @@
 
 package com.io7m.jbssio.tests;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.vanilla.BSSReaders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -815,6 +816,66 @@ public final class BSSReadersRandomAccessByteBufferTest
       Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(1000.0f, reader.readF32LE());
       Assertions.assertEquals(28L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16BE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16BE(), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16LE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16LE(), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16BE("x"), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var reader = readers.createReaderFromByteBuffer(URI.create("urn:fake"), data, "a")) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16LE("x"), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
     }
   }
 

@@ -25,6 +25,10 @@
     </dependency>
 
     <dependency>
+      <groupId>com.io7m.ieee754b16</groupId>
+      <artifactId>com.io7m.ieee754b16.core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>

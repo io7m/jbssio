@@ -16,12 +16,8 @@
 
 package com.io7m.jbssio.tests;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.vanilla.BSSReaders;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -29,10 +25,15 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.OptionalLong;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class BSSReadersSequentialTest
 {
-  private static final Logger LOG = LoggerFactory.getLogger(BSSReadersSequentialTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(
+    BSSReadersSequentialTest.class);
 
   private static void checkExceptionMessageContains(
     final Exception e,
@@ -50,7 +51,10 @@ public final class BSSReadersSequentialTest
   {
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(new byte[0])) {
-      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
+      try (var reader = readers.createReaderFromStream(
+        URI.create("urn:fake"),
+        stream,
+        "a")) {
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentRelative());
         Assertions.assertEquals(OptionalLong.empty(), reader.bytesRemaining());
@@ -69,7 +73,10 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
+      try (var reader = readers.createReaderFromStream(
+        URI.create("urn:fake"),
+        stream,
+        "a")) {
         try (var s0 = reader.createSubReader("x")) {
           try (var s1 = s0.createSubReader("y")) {
             try (var s2 = s1.createSubReader("z")) {
@@ -90,7 +97,10 @@ public final class BSSReadersSequentialTest
   {
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(new byte[0])) {
-      final var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a");
+      final var reader = readers.createReaderFromStream(
+        URI.create("urn:fake"),
+        stream,
+        "a");
       Assertions.assertFalse(reader.isClosed());
       reader.close();
       Assertions.assertTrue(reader.isClosed());
@@ -109,13 +119,18 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
+      try (var reader = readers.createReaderFromStream(
+        URI.create("urn:fake"),
+        stream,
+        "a")) {
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentRelative());
         LOG.debug("reader:    {}", reader);
 
         try (var subReader = reader.createSubReaderBounded("s", 4L)) {
-          Assertions.assertEquals(OptionalLong.of(4L), subReader.bytesRemaining());
+          Assertions.assertEquals(
+            OptionalLong.of(4L),
+            subReader.bytesRemaining());
 
           Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
           Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
@@ -154,7 +169,9 @@ public final class BSSReadersSequentialTest
         }
 
         try (var subReader = reader.createSubReader("s")) {
-          Assertions.assertEquals(OptionalLong.empty(), subReader.bytesRemaining());
+          Assertions.assertEquals(
+            OptionalLong.empty(),
+            subReader.bytesRemaining());
 
           Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
           Assertions.assertEquals(4L, subReader.offsetCurrentAbsolute());
@@ -190,7 +207,9 @@ public final class BSSReadersSequentialTest
         }
 
         try (var subReader = reader.createSubReaderBounded("s", 4L)) {
-          Assertions.assertEquals(OptionalLong.of(4L), subReader.bytesRemaining());
+          Assertions.assertEquals(
+            OptionalLong.of(4L),
+            subReader.bytesRemaining());
 
           Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
           Assertions.assertEquals(8L, subReader.offsetCurrentAbsolute());
@@ -242,7 +261,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 4L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 4L)) {
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentRelative());
         LOG.debug("reader:    {}", reader);
@@ -253,7 +273,8 @@ public final class BSSReadersSequentialTest
           });
 
         LOG.debug("ex: ", ex);
-        Assertions.assertTrue(ex.getMessage().contains("Size limit           : 4"));
+        Assertions.assertTrue(ex.getMessage().contains(
+          "Size limit           : 4"));
       }
     }
   }
@@ -266,7 +287,10 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
+      try (var reader = readers.createReaderFromStream(
+        URI.create("urn:fake"),
+        stream,
+        "a")) {
         reader.skip(4L);
         reader.skip(4L);
         reader.skip(4L);
@@ -284,7 +308,10 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
+      try (var reader = readers.createReaderFromStream(
+        URI.create("urn:fake"),
+        stream,
+        "a")) {
         reader.skip(1L);
         Assertions.assertEquals(1L, reader.offsetCurrentAbsolute());
         Assertions.assertEquals(1L, reader.offsetCurrentRelative());
@@ -322,7 +349,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 0L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 0L)) {
         Assertions.assertThrows(IOException.class, reader::readS16BE);
         Assertions.assertThrows(IOException.class, reader::readS16LE);
         Assertions.assertThrows(IOException.class, reader::readS32BE);
@@ -349,7 +377,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 1L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 1L)) {
         checkExceptionMessageContains(Assertions.assertThrows(
           IOException.class,
           () -> reader.readS16BE("q")), "q");
@@ -367,7 +396,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8());
         Assertions.assertEquals(Byte.MAX_VALUE, reader.readS8());
       }
@@ -384,7 +414,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE());
         Assertions.assertEquals(Short.MAX_VALUE, reader.readS16LE());
       }
@@ -401,7 +432,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE());
         Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32LE());
       }
@@ -418,7 +450,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE());
         Assertions.assertEquals(Long.MAX_VALUE, reader.readS64LE());
       }
@@ -435,7 +468,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE());
         Assertions.assertEquals(Short.MAX_VALUE, reader.readS16BE());
       }
@@ -452,7 +486,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE());
         Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32BE());
       }
@@ -469,7 +504,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE());
         Assertions.assertEquals(Long.MAX_VALUE, reader.readS64BE());
       }
@@ -486,7 +522,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0, reader.readU8());
         Assertions.assertEquals(0xff, reader.readU8());
       }
@@ -503,7 +540,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0, reader.readU16LE());
         Assertions.assertEquals(0xffff, reader.readU16LE());
       }
@@ -520,7 +558,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU32LE());
         Assertions.assertEquals(0xffff_ffffL, reader.readU32LE());
       }
@@ -537,7 +576,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU64LE());
         Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64LE());
       }
@@ -554,7 +594,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0, reader.readU16BE());
         Assertions.assertEquals(0xffff, reader.readU16BE());
       }
@@ -571,7 +612,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU32BE());
         Assertions.assertEquals(0xffff_ffffL, reader.readU32BE());
       }
@@ -588,7 +630,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU64BE());
         Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64BE());
       }
@@ -604,7 +647,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0, reader.readD64BE());
       }
     }
@@ -619,7 +663,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0, reader.readD64LE());
       }
     }
@@ -634,7 +679,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0f, reader.readF32BE());
       }
     }
@@ -649,7 +695,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0f, reader.readF32LE());
       }
     }
@@ -664,10 +711,13 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(16, reader.readBytes(buffer, 0, buffer.length));
         Assertions.assertEquals(16, reader.readBytes(buffer));
-        Assertions.assertThrows(EOFException.class, () -> reader.readBytes(buffer));
+        Assertions.assertThrows(
+          EOFException.class,
+          () -> reader.readBytes(buffer));
       }
     }
   }
@@ -682,7 +732,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Byte.MIN_VALUE, reader.readS8("q"));
         Assertions.assertEquals(Byte.MAX_VALUE, reader.readS8("q"));
       }
@@ -699,7 +750,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Short.MIN_VALUE, reader.readS16LE("q"));
         Assertions.assertEquals(Short.MAX_VALUE, reader.readS16LE("q"));
       }
@@ -716,7 +768,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32LE("q"));
         Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32LE("q"));
       }
@@ -733,7 +786,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Long.MIN_VALUE, reader.readS64LE("q"));
         Assertions.assertEquals(Long.MAX_VALUE, reader.readS64LE("q"));
       }
@@ -750,7 +804,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Short.MIN_VALUE, reader.readS16BE("q"));
         Assertions.assertEquals(Short.MAX_VALUE, reader.readS16BE("q"));
       }
@@ -767,7 +822,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Integer.MIN_VALUE, reader.readS32BE("q"));
         Assertions.assertEquals(Integer.MAX_VALUE, reader.readS32BE("q"));
       }
@@ -784,7 +840,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(Long.MIN_VALUE, reader.readS64BE("q"));
         Assertions.assertEquals(Long.MAX_VALUE, reader.readS64BE("q"));
       }
@@ -801,7 +858,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0, reader.readU8("q"));
         Assertions.assertEquals(0xff, reader.readU8("q"));
       }
@@ -818,7 +876,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0, reader.readU16LE("q"));
         Assertions.assertEquals(0xffff, reader.readU16LE("q"));
       }
@@ -835,7 +894,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU32LE("q"));
         Assertions.assertEquals(0xffff_ffffL, reader.readU32LE("q"));
       }
@@ -852,7 +912,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU64LE("q"));
         Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64LE("q"));
       }
@@ -869,7 +930,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0, reader.readU16BE("q"));
         Assertions.assertEquals(0xffff, reader.readU16BE("q"));
       }
@@ -886,7 +948,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU32BE("q"));
         Assertions.assertEquals(0xffff_ffffL, reader.readU32BE("q"));
       }
@@ -903,7 +966,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(0L, reader.readU64BE("q"));
         Assertions.assertEquals(0xffff_ffff_ffff_ffffL, reader.readU64BE("q"));
       }
@@ -919,7 +983,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0, reader.readD64BE("q"));
       }
     }
@@ -934,7 +999,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0, reader.readD64LE("q"));
       }
     }
@@ -949,7 +1015,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0f, reader.readF32BE("q"));
       }
     }
@@ -964,7 +1031,8 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1000.0f, reader.readF32LE("q"));
       }
     }
@@ -979,10 +1047,82 @@ public final class BSSReadersSequentialTest
 
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data.array())) {
-      try (var reader = readers.createReaderFromStreamBounded(URI.create("urn:fake"), stream, "a", 32L)) {
-        Assertions.assertEquals(16, reader.readBytes("q", buffer, 0, buffer.length));
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(
+          16,
+          reader.readBytes("q",
+                           buffer,
+                           0,
+                           buffer.length));
         Assertions.assertEquals(16, reader.readBytes("q", buffer));
-        Assertions.assertThrows(EOFException.class, () -> reader.readBytes(buffer));
+        Assertions.assertThrows(
+          EOFException.class,
+          () -> reader.readBytes(buffer));
+      }
+    }
+  }
+
+  @Test
+  public void testReadF16BE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1.0f, reader.readF16BE(), 0.001);
+      }
+    }
+  }
+
+  @Test
+  public void testReadF16LE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1.0f, reader.readF16LE(), 0.001);
+      }
+    }
+  }
+
+  @Test
+  public void testReadF16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1.0f, reader.readF16BE("x"), 0.001);
+      }
+    }
+  }
+
+  @Test
+  public void testReadF16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+        Assertions.assertEquals(1.0f, reader.readF16LE("x"), 0.001);
       }
     }
   }

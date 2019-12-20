@@ -27,6 +27,70 @@ import java.io.IOException;
 public interface BSSReaderFloatType
 {
   /**
+   * Read a 16-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readF16BE()
+    throws IOException, EOFException;
+
+  /**
+   * Read a 16-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readF16LE()
+    throws IOException, EOFException;
+
+  /**
+   * Read a 16-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readF16BE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 16-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @param name The name of the value to be used in diagnostic messages
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  float readF16LE(String name)
+    throws IOException, EOFException;
+
+  /**
    * Read a 32-bit floating point, big-endian value.
    *
    * The reader will not be allowed to read beyond the specified limit.
@@ -56,35 +120,6 @@ public interface BSSReaderFloatType
   float readF32LE()
     throws IOException, EOFException;
 
-  /**
-   * Read a 64-bit floating point, big-endian value.
-   *
-   * The reader will not be allowed to read beyond the specified limit.
-   *
-   * @return The resulting integer value
-   *
-   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
-   *                      reader's limit
-   * @throws EOFException If EOF is reached
-   */
-
-  double readD64BE()
-    throws IOException, EOFException;
-
-  /**
-   * Read a 64-bit floating point, big-endian value.
-   *
-   * The reader will not be allowed to read beyond the specified limit.
-   *
-   * @return The resulting integer value
-   *
-   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
-   *                      reader's limit
-   * @throws EOFException If EOF is reached
-   */
-
-  double readD64LE()
-    throws IOException, EOFException;
 
   /**
    * Read a 32-bit floating point, big-endian value.
@@ -118,6 +153,36 @@ public interface BSSReaderFloatType
    */
 
   float readF32LE(String name)
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  double readD64BE()
+    throws IOException, EOFException;
+
+  /**
+   * Read a 64-bit floating point, big-endian value.
+   *
+   * The reader will not be allowed to read beyond the specified limit.
+   *
+   * @return The resulting integer value
+   *
+   * @throws IOException  On I/O errors, or if an attempt is made to seek or read beyond the
+   *                      reader's limit
+   * @throws EOFException If EOF is reached
+   */
+
+  double readD64LE()
     throws IOException, EOFException;
 
   /**

@@ -26,8 +26,9 @@ module com.io7m.jbssio.vanilla
 
   requires transitive com.io7m.jbssio.api;
 
-  requires org.slf4j;
+  requires com.io7m.ieee754b16.core;
   requires org.apache.commons.io;
+  requires org.slf4j;
 
   provides com.io7m.jbssio.api.BSSReaderProviderType with com.io7m.jbssio.vanilla.BSSReaders;
   provides com.io7m.jbssio.api.BSSWriterProviderType with com.io7m.jbssio.vanilla.BSSWriters;

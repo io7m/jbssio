@@ -16,6 +16,7 @@
 
 package com.io7m.jbssio.tests;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -1141,6 +1142,66 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       Assertions.assertThrows(
         IOException.class,
         () -> reader.readBytes("q", buffer));
+    }
+  }
+
+  @Test
+  public void testReadF16BE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16BE(), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16BENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.BIG_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16BE("q"), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16LE()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16LE(), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
+    }
+  }
+
+  @Test
+  public void testReadF16LENamed()
+    throws Exception
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var channel = this.channelOf(data.array());
+    try (var reader = this.readerOf(channel)) {
+      Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
+      Assertions.assertEquals(1.0, reader.readF16LE("q"), 0.001);
+      Assertions.assertEquals(30L, reader.bytesRemaining().getAsLong());
     }
   }
 }

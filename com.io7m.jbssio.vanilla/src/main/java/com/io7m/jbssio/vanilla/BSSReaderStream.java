@@ -16,6 +16,7 @@
 
 package com.io7m.jbssio.vanilla;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
 import java.io.EOFException;
 import java.io.IOException;
@@ -338,7 +339,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     return this.buffer8w.getLong(0);
   }
 
-  private float readFBEp(final String name)
+  private float readF32BEp(final String name)
     throws IOException
   {
     this.checkLimit(name, 4L);
@@ -349,7 +350,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     return this.buffer4w.getFloat(0);
   }
 
-  private float readFLEp(final String name)
+  private float readF32LEp(final String name)
     throws IOException
   {
     this.checkLimit(name, 4L);
@@ -360,7 +361,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     return this.buffer4w.getFloat(0);
   }
 
-  private double readDBEp(final String name)
+  private double readD64BEp(final String name)
     throws IOException
   {
     this.checkLimit(name, 8L);
@@ -371,7 +372,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     return this.buffer8w.getDouble(0);
   }
 
-  private double readDLEp(final String name)
+  private double readD64LEp(final String name)
     throws IOException
   {
     this.checkLimit(name, 8L);
@@ -380,6 +381,28 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkNotShortRead(name, 8L, (long) r);
     this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
     return this.buffer8w.getDouble(0);
+  }
+
+  private float readF16BEp(final String name)
+    throws IOException
+  {
+    this.checkLimit(name, 2L);
+    final var r = this.stream.read(this.buffer2, 0, 2);
+    checkEOF(r);
+    this.checkNotShortRead(name, 2L, (long) r);
+    this.buffer2w.order(ByteOrder.BIG_ENDIAN);
+    return Binary16.unpackFloat(this.buffer2w.getChar(0));
+  }
+
+  private float readF16LEp(final String name)
+    throws IOException
+  {
+    this.checkLimit(name, 2L);
+    final var r = this.stream.read(this.buffer2, 0, 2);
+    checkEOF(r);
+    this.checkNotShortRead(name, 2L, (long) r);
+    this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
+    return Binary16.unpackFloat(this.buffer2w.getChar(0));
   }
 
   @Override
@@ -481,31 +504,59 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
+  public float readF16BE()
+    throws IOException, EOFException
+  {
+    return this.readF16BEp(null);
+  }
+
+  @Override
+  public float readF16LE()
+    throws IOException, EOFException
+  {
+    return this.readF16LEp(null);
+  }
+
+  @Override
+  public float readF16BE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readF16BEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
+  public float readF16LE(final String name)
+    throws IOException, EOFException
+  {
+    return this.readF16LEp(Objects.requireNonNull(name, "name"));
+  }
+
+  @Override
   public float readF32BE()
     throws IOException, EOFException
   {
-    return this.readFBEp(null);
+    return this.readF32BEp(null);
   }
 
   @Override
   public float readF32LE()
     throws IOException, EOFException
   {
-    return this.readFLEp(null);
+    return this.readF32LEp(null);
   }
 
   @Override
   public double readD64BE()
     throws IOException, EOFException
   {
-    return this.readDBEp(null);
+    return this.readD64BEp(null);
   }
 
   @Override
   public double readD64LE()
     throws IOException, EOFException
   {
-    return this.readDLEp(null);
+    return this.readD64LEp(null);
   }
 
   @Override
@@ -610,28 +661,28 @@ final class BSSReaderStream implements BSSReaderSequentialType
   public float readF32BE(final String name)
     throws IOException, EOFException
   {
-    return this.readFBEp(Objects.requireNonNull(name, "name"));
+    return this.readF32BEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override
   public float readF32LE(final String name)
     throws IOException, EOFException
   {
-    return this.readFLEp(Objects.requireNonNull(name, "name"));
+    return this.readF32LEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override
   public double readD64BE(final String name)
     throws IOException, EOFException
   {
-    return this.readDBEp(Objects.requireNonNull(name, "name"));
+    return this.readD64BEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override
   public double readD64LE(final String name)
     throws IOException, EOFException
   {
-    return this.readDLEp(Objects.requireNonNull(name, "name"));
+    return this.readD64LEp(Objects.requireNonNull(name, "name"));
   }
 
   @Override

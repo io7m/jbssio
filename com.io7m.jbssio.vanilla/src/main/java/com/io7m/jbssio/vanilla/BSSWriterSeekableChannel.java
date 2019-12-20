@@ -16,6 +16,7 @@
 
 package com.io7m.jbssio.vanilla;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
 import java.io.IOException;
 import java.net.URI;
@@ -708,6 +709,25 @@ final class BSSWriterSeekableChannel
     this.writeFloat(x, position, order);
   }
 
+  private void writeF16(
+    final String name,
+    final ByteOrder order,
+    final double x)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(name, 2L);
+    final var position = this.offsetCurrentAbsolute();
+    this.increaseOffsetRelative(2L);
+
+    this.channel.position(position);
+    this.writeBuffer.position(0);
+    this.writeBuffer.order(order);
+    this.writeBuffer.limit(2);
+    this.writeBuffer.putChar(0, Binary16.packDouble(x));
+    this.writeAll();
+  }
+
   private void writeDouble(
     final double x,
     final long position,
@@ -750,6 +770,38 @@ final class BSSWriterSeekableChannel
     throws IOException
   {
     this.writeF64(null, BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF16BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF16(Objects.requireNonNull(name, "name"), BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF16BE(final double b)
+    throws IOException
+  {
+    this.writeF16(null, BIG_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF16LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF16(Objects.requireNonNull(name, "name"), LITTLE_ENDIAN, b);
+  }
+
+  @Override
+  public void writeF16LE(final double b)
+    throws IOException
+  {
+    this.writeF16(null, LITTLE_ENDIAN, b);
   }
 
   @Override

@@ -16,6 +16,7 @@
 
 package com.io7m.jbssio.vanilla;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
@@ -624,6 +625,19 @@ final class BSSWriterStream implements BSSWriterSequentialType
     this.stream.write(this.buffer4);
   }
 
+  private void writeF16p(
+    final String name,
+    final double b,
+    final ByteOrder order)
+    throws IOException
+  {
+    this.checkNotClosed();
+    this.checkHasBytesRemaining(2L, name);
+    this.buffer2w.order(order);
+    this.buffer2w.putChar(0, Binary16.packDouble(b));
+    this.stream.write(this.buffer2);
+  }
+
   @Override
   public void writeF64BE(
     final String name,
@@ -638,6 +652,38 @@ final class BSSWriterStream implements BSSWriterSequentialType
     throws IOException
   {
     this.writeF64p(null, b, BIG_ENDIAN);
+  }
+
+  @Override
+  public void writeF16BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF16p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
+  }
+
+  @Override
+  public void writeF16BE(final double b)
+    throws IOException
+  {
+    this.writeF16p(null, b, BIG_ENDIAN);
+  }
+
+  @Override
+  public void writeF16LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF16p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
+  }
+
+  @Override
+  public void writeF16LE(final double b)
+    throws IOException
+  {
+    this.writeF16p(null, b, LITTLE_ENDIAN);
   }
 
   @Override
