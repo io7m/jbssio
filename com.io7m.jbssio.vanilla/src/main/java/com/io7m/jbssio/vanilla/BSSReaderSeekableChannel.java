@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -46,10 +45,9 @@ final class BSSReaderSeekableChannel
     final String inName,
     final SeekableByteChannel inChannel,
     final ByteBuffer inBuffer,
-    final Callable<Void> inOnClose,
-    final Consumer<? extends BSSReaderRandomAccessType> inOnUserClose)
+    final Callable<Void> inOnClose)
   {
-    super(inParent, inRange, inOnClose, inURI, inName, inOnUserClose);
+    super(inParent, inRange, inOnClose, inURI, inName);
 
     this.channel =
       Objects.requireNonNull(inChannel, "channel");
@@ -57,18 +55,11 @@ final class BSSReaderSeekableChannel
       Objects.requireNonNull(inBuffer, "buffer");
   }
 
-  @Override
-  public Optional<BSSReaderRandomAccessType> parentReader()
-  {
-    return Optional.ofNullable((BSSReaderRandomAccessType) super.parent());
-  }
-
   static BSSReaderRandomAccessType createFromChannel(
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
-    final OptionalLong size,
-    final Consumer<? extends BSSReaderRandomAccessType> inOnUserClose)
+    final OptionalLong size)
   {
     final var buffer = ByteBuffer.allocateDirect(8);
 
@@ -82,8 +73,13 @@ final class BSSReaderSeekableChannel
       () -> {
         channel.close();
         return null;
-      },
-      inOnUserClose);
+      });
+  }
+
+  @Override
+  public Optional<BSSReaderRandomAccessType> parentReader()
+  {
+    return Optional.ofNullable((BSSReaderRandomAccessType) super.parent());
   }
 
   @Override
@@ -109,8 +105,7 @@ final class BSSReaderSeekableChannel
       newName,
       this.channel,
       this.buffer,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override
@@ -138,8 +133,7 @@ final class BSSReaderSeekableChannel
       newName,
       this.channel,
       this.buffer,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override

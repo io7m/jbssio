@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,21 +47,14 @@ abstract class BSSRandomAccess<T>
   private final AtomicBoolean closed;
   private final BSSRandomAccess<T> parent;
   private final Callable<Void> onClose;
-  private final Consumer<? extends T> onUserClose;
   private long offsetRelative;
-
-  protected Consumer<? extends T> onUserClose()
-  {
-    return this.onUserClose;
-  }
 
   BSSRandomAccess(
     final BSSRandomAccess<T> inParent,
     final BSSRangeHalfOpen inParentRangeRelative,
     final Callable<Void> inOnClose,
     final URI inURI,
-    final String inPath,
-    final Consumer<? extends T> inOnUserClose)
+    final String inPath)
   {
     this.parent = inParent;
 
@@ -74,8 +66,6 @@ abstract class BSSRandomAccess<T>
       Objects.requireNonNull(inURI, "uri");
     this.path =
       Objects.requireNonNull(inPath, "path");
-    this.onUserClose =
-      Objects.requireNonNull(inOnUserClose, "inOnUserClose");
 
     this.closed = new AtomicBoolean(false);
 
@@ -267,14 +257,6 @@ abstract class BSSRandomAccess<T>
     throws IOException
   {
     if (!this.isClosed()) {
-      try {
-        @SuppressWarnings("unchecked") final Consumer<BSSRandomAccess<T>> f =
-          (Consumer<BSSRandomAccess<T>>) this.onUserClose;
-        f.accept(this);
-      } catch (final Exception e) {
-        LOG.error("ignored exception raised by on-close method: ", e);
-      }
-
       try {
         this.onClose.call();
       } catch (final IOException e) {

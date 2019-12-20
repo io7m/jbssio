@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.io.input.CountingInputStream;
@@ -46,7 +45,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
   private final CountingInputStream stream;
   private final AtomicBoolean closed;
   private final OptionalLong size;
-  private final Consumer<BSSReaderSequentialType> onClose;
   private final byte[] buffer8;
   private final byte[] buffer4;
   private final byte[] buffer2;
@@ -60,8 +58,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final URI inURI,
     final String inName,
     final CountingInputStream inStream,
-    final OptionalLong inSize,
-    final Consumer<BSSReaderSequentialType> inOnClose)
+    final OptionalLong inSize)
   {
     this.parent = inParent;
 
@@ -73,8 +70,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
       Objects.requireNonNull(inStream, "inStream");
     this.size =
       Objects.requireNonNull(inSize, "inSize");
-    this.onClose =
-      Objects.requireNonNull(inOnClose, "onClose");
 
     this.closed = new AtomicBoolean(false);
 
@@ -90,8 +85,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final URI uri,
     final InputStream inStream,
     final String inName,
-    final OptionalLong inSize,
-    final Consumer<BSSReaderSequentialType> inOnClose)
+    final OptionalLong inSize)
   {
     Objects.requireNonNull(inStream, "stream");
 
@@ -103,7 +97,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     }
 
     final var wrappedStream = new CountingInputStream(boundedStream);
-    return new BSSReaderStream(null, uri, inName, wrappedStream, inSize, inOnClose);
+    return new BSSReaderStream(null, uri, inName, wrappedStream, inSize);
   }
 
   private static void checkEOF(final int r)
@@ -755,11 +749,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
     throws IOException
   {
     if (this.closed.compareAndSet(false, true)) {
-      try {
-        this.onClose.accept(this);
-      } catch (final Exception e) {
-        LOG.error("ignored exception raised by close handler: ", e);
-      }
       this.stream.close();
     }
   }
@@ -801,8 +790,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
       this.uri,
       newName,
       newStream,
-      this.size,
-      this.onClose);
+      this.size);
   }
 
   @Override
@@ -841,7 +829,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
       this.uri,
       newName,
       newStream,
-      OptionalLong.of(newSize),
-      this.onClose);
+      OptionalLong.of(newSize));
   }
 }

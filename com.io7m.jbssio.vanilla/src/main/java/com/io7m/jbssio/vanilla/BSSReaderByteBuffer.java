@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessType>
   implements BSSReaderRandomAccessType
@@ -41,10 +40,9 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     final BSSRangeHalfOpen inRangeRelative,
     final String inName,
     final ByteBuffer inMap,
-    final Callable<Void> inOnClose,
-    final Consumer<? extends BSSReaderRandomAccessType> inOnUserClose)
+    final Callable<Void> inOnClose)
   {
-    super(inParent, inRangeRelative, inOnClose, inURI, inName, inOnUserClose);
+    super(inParent, inRangeRelative, inOnClose, inURI, inName);
     this.map =
       Objects.requireNonNull(inMap, "map");
     this.physicalBounds =
@@ -54,8 +52,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
   static BSSReaderRandomAccessType createFromByteBuffer(
     final URI uri,
     final ByteBuffer buffer,
-    final String name,
-    final Consumer<? extends BSSReaderRandomAccessType> inOnUserClose)
+    final String name)
   {
     return new BSSReaderByteBuffer(
       null,
@@ -65,8 +62,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
         OptionalLong.of(Integer.toUnsignedLong(buffer.capacity()))),
       name,
       buffer,
-      () -> null,
-      inOnUserClose);
+      () -> null);
   }
 
   private static int longPositionTo2GBLimitedByteBufferPosition(
@@ -98,8 +94,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
       this.createSubRange(offset, size),
       newName,
       this.map,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override
@@ -130,8 +125,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
       this.createOffsetSubRange(offset),
       newName,
       this.map,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override

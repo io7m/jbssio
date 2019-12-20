@@ -25,14 +25,13 @@ import java.nio.ByteOrder;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 final class BSSWriterByteBuffer
-  extends BSSRandomAccess<BSSWriterRandomAccessType> implements
-  BSSWriterRandomAccessType
+  extends BSSRandomAccess<BSSWriterRandomAccessType>
+  implements BSSWriterRandomAccessType
 {
   private final ByteBuffer map;
   private final BSSRangeHalfOpen physicalBounds;
@@ -43,16 +42,14 @@ final class BSSWriterByteBuffer
     final BSSRangeHalfOpen inParentRangeRelative,
     final String inName,
     final ByteBuffer inMap,
-    final Callable<Void> inOnClose,
-    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
+    final Callable<Void> inOnClose)
   {
     super(
       inParent,
       inParentRangeRelative,
       inOnClose,
       inURI,
-      inName,
-      inOnUserClose);
+      inName);
 
     this.map =
       Objects.requireNonNull(inMap, "map");
@@ -63,8 +60,7 @@ final class BSSWriterByteBuffer
   static BSSWriterRandomAccessType createFromByteBuffer(
     final URI uri,
     final ByteBuffer buffer,
-    final String name,
-    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
+    final String name)
   {
     return new BSSWriterByteBuffer(
       null,
@@ -74,7 +70,7 @@ final class BSSWriterByteBuffer
         OptionalLong.of(Integer.toUnsignedLong(buffer.capacity()))),
       name,
       buffer,
-      () -> null, inOnUserClose);
+      () -> null);
   }
 
   private static int longPositionTo2GBLimitedByteBufferPosition(final long position)
@@ -105,8 +101,7 @@ final class BSSWriterByteBuffer
       this.createOffsetSubRange(offset),
       newName,
       this.map,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override
@@ -133,8 +128,7 @@ final class BSSWriterByteBuffer
       this.createSubRange(offset, size),
       newName,
       this.map,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override

@@ -26,13 +26,13 @@ import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 final class BSSWriterSeekableChannel
-  extends BSSRandomAccess<BSSWriterRandomAccessType> implements BSSWriterRandomAccessType
+  extends BSSRandomAccess<BSSWriterRandomAccessType> implements
+  BSSWriterRandomAccessType
 {
   /**
    * Seekable byte channels are assumed to be growable, for writers, and
@@ -53,10 +53,9 @@ final class BSSWriterSeekableChannel
     final String inName,
     final SeekableByteChannel inChannel,
     final ByteBuffer inBuffer,
-    final Callable<Void> inOnClose,
-    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
+    final Callable<Void> inOnClose)
   {
-    super(inParent, inParentRangeRelative, inOnClose, inURI, inName, inOnUserClose);
+    super(inParent, inParentRangeRelative, inOnClose, inURI, inName);
 
     this.channel =
       Objects.requireNonNull(inChannel, "channel");
@@ -68,8 +67,7 @@ final class BSSWriterSeekableChannel
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
-    final OptionalLong size,
-    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
+    final OptionalLong size)
   {
     final var buffer = ByteBuffer.allocateDirect(8);
     return new BSSWriterSeekableChannel(
@@ -82,8 +80,7 @@ final class BSSWriterSeekableChannel
       () -> {
         channel.close();
         return null;
-      },
-      inOnUserClose);
+      });
   }
 
   @Override
@@ -110,8 +107,7 @@ final class BSSWriterSeekableChannel
       newName,
       this.channel,
       this.writeBuffer,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override
@@ -139,8 +135,7 @@ final class BSSWriterSeekableChannel
       newName,
       this.channel,
       this.writeBuffer,
-      () -> null,
-      this.onUserClose());
+      () -> null);
   }
 
   @Override

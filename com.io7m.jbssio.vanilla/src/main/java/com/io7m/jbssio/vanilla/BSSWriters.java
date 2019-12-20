@@ -77,13 +77,7 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(buffer, "buffer");
     Objects.requireNonNull(name, "name");
-    return BSSWriterByteBuffer.createFromByteBuffer(
-      uri,
-      buffer,
-      name,
-      writer -> {
-
-      });
+    return BSSWriterByteBuffer.createFromByteBuffer(uri, buffer, name);
   }
 
   @Override
@@ -96,13 +90,7 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "name");
     return BSSWriterSeekableChannel.createFromChannel(
-      uri,
-      channel,
-      name,
-      OptionalLong.empty(),
-      writer -> {
-
-      });
+      uri, channel, name, OptionalLong.empty());
   }
 
   @Override
@@ -116,13 +104,7 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "name");
     return BSSWriterSeekableChannel.createFromChannel(
-      uri,
-      channel,
-      name,
-      OptionalLong.of(size),
-      writer -> {
-
-      });
+      uri, channel, name, OptionalLong.of(size));
   }
 
   @Override
@@ -137,12 +119,6 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(size, "size");
     return BSSWriterSeekableChannel.createFromChannel(
-      uri,
-      channel,
-      name,
-      size,
-      writer -> {
-
-      });
+      uri, channel, name, size);
   }
 }

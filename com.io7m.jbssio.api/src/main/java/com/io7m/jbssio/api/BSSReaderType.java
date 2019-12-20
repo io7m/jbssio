@@ -38,6 +38,4 @@ public interface BSSReaderType
    */
 
   Optional<? extends BSSReaderType> parentReader();
-
-
 }
