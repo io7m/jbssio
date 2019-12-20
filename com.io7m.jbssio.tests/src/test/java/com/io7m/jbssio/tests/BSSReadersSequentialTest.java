@@ -70,9 +70,9 @@ public final class BSSReadersSequentialTest
     final var readers = new BSSReaders();
     try (var stream = new ByteArrayInputStream(data)) {
       try (var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a")) {
-        try (var s0 = reader.createSubReaderAt("x", 0L)) {
-          try (var s1 = s0.createSubReaderAt("y", 0L)) {
-            try (var s2 = s1.createSubReaderAt("z", 0L)) {
+        try (var s0 = reader.createSubReader("x")) {
+          try (var s1 = s0.createSubReader("y")) {
+            try (var s2 = s1.createSubReader("z")) {
               Assertions.assertEquals("a.x.y.z", s2.path());
             }
             Assertions.assertEquals("a.x.y", s1.path());
@@ -99,54 +99,6 @@ public final class BSSReadersSequentialTest
   }
 
   @Test
-  public void testSubreaderTooLate()
-    throws Exception
-  {
-    final var readers = new BSSReaders();
-    try (var stream = new ByteArrayInputStream(new byte[32])) {
-      final var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a");
-
-      try (var r = reader.createSubReaderAt("x", 0L)) {
-
-      }
-      try (var r = reader.createSubReaderAt("x", 4L)) {
-
-      }
-
-      final var ex = Assertions.assertThrows(IOException.class, () -> {
-        reader.createSubReaderAt("x", 0L);
-      });
-
-      LOG.debug("ex: ", ex);
-      Assertions.assertTrue(ex.getMessage().contains("already exceeded the specified offset"));
-    }
-  }
-
-  @Test
-  public void testSubreaderTooLateBounded()
-    throws Exception
-  {
-    final var readers = new BSSReaders();
-    try (var stream = new ByteArrayInputStream(new byte[32])) {
-      final var reader = readers.createReaderFromStream(URI.create("urn:fake"), stream, "a");
-
-      try (var r = reader.createSubReaderAt("x", 0L)) {
-
-      }
-      try (var r = reader.createSubReaderAt("x", 4L)) {
-
-      }
-
-      final var ex = Assertions.assertThrows(IOException.class, () -> {
-        reader.createSubReaderAtBounded("x", 0L, 4L);
-      });
-
-      LOG.debug("ex: ", ex);
-      Assertions.assertTrue(ex.getMessage().contains("already exceeded the specified offset"));
-    }
-  }
-
-  @Test
   public void testSeparateLimits()
     throws Exception
   {
@@ -162,7 +114,7 @@ public final class BSSReadersSequentialTest
         Assertions.assertEquals(0L, reader.offsetCurrentRelative());
         LOG.debug("reader:    {}", reader);
 
-        try (var subReader = reader.createSubReaderAtBounded("s", 0L,4L)) {
+        try (var subReader = reader.createSubReaderBounded("s", 4L)) {
           Assertions.assertEquals(OptionalLong.of(4L), subReader.bytesRemaining());
 
           Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
@@ -201,7 +153,7 @@ public final class BSSReadersSequentialTest
           Assertions.assertThrows(EOFException.class, subReader::readU8);
         }
 
-        try (var subReader = reader.createSubReaderAt("s", 4L)) {
+        try (var subReader = reader.createSubReader("s")) {
           Assertions.assertEquals(OptionalLong.empty(), subReader.bytesRemaining());
 
           Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
@@ -237,7 +189,7 @@ public final class BSSReadersSequentialTest
           LOG.debug("subReader: {}", subReader);
         }
 
-        try (var subReader = reader.createSubReaderAtBounded("s", 8L,4L)) {
+        try (var subReader = reader.createSubReaderBounded("s", 4L)) {
           Assertions.assertEquals(OptionalLong.of(4L), subReader.bytesRemaining());
 
           Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
@@ -297,7 +249,7 @@ public final class BSSReadersSequentialTest
 
         final var ex =
           Assertions.assertThrows(IOException.class, () -> {
-            reader.createSubReaderAtBounded("s", 0L,5L);
+            reader.createSubReaderBounded("s", 5L);
           });
 
         LOG.debug("ex: ", ex);

@@ -85,7 +85,11 @@ final class BSSRanges
         targetRange.upper().stream().map(x -> x - existingRange.lower()).findFirst());
 
     if (!projected.isIncludedIn(existingRange)) {
-      throw makeException(transformToAbsolute, existingRange, targetRange, listener);
+      throw makeException(
+        transformToAbsolute,
+        existingRange,
+        targetRange,
+        listener);
     }
   }
 

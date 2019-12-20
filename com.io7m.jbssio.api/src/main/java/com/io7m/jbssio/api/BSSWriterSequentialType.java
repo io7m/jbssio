@@ -36,4 +36,41 @@ public interface BSSWriterSequentialType extends BSSWriterType
     long offset,
     long size)
     throws IOException;
+
+  /**
+   * Pad the given output with {@code value} up to the given {@code offset}.
+   * If the position of the current stream is already at or beyond {@code offset},
+   * no data is written.
+   *
+   * @param offset The relative offset
+   * @param value  The pad value
+   *
+   * @return The number of bytes written
+   *
+   * @throws IOException On I/O errors
+   */
+
+  long padTo(
+    long offset,
+    byte value)
+    throws IOException;
+
+  /**
+   * Pad the given output with zeroes up to the given {@code offset}.
+   * If the position of the current stream is already at or beyond {@code offset},
+   * no data is written.
+   *
+   * @param offset The relative offset
+   *
+   * @return The number of bytes written
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default long padTo(
+    final long offset)
+    throws IOException
+  {
+    return this.padTo(offset, (byte) 0x0);
+  }
 }

@@ -17,15 +17,14 @@
 package com.io7m.jbssio.tests;
 
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channel;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 {
@@ -48,11 +47,13 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
   protected abstract BSSReaderRandomAccessType readerOf(T channel)
     throws IOException;
 
+  protected abstract BSSReaderRandomAccessType readerUnboundedOf(T channel)
+    throws IOException;
+
   @Test
   public void testEmptyStream()
     throws Exception
   {
-
     final var stream = this.channelOf(new byte[0]);
 
     try (var reader = this.readerOf(stream)) {
@@ -138,7 +139,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       Assertions.assertEquals(0L, reader.offsetCurrentRelative());
       LOG.debug("reader:    {}", reader);
 
-      try (var subReader = reader.createSubReaderAtBounded("s", 0L,4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
         Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
@@ -175,7 +176,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
         Assertions.assertThrows(IOException.class, subReader::readU8);
       }
 
-      try (var subReader = reader.createSubReaderAtBounded("s", 0L,4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(0L, subReader.offsetCurrentRelative());
         Assertions.assertEquals(0L, subReader.offsetCurrentAbsolute());
         Assertions.assertEquals(0L, reader.offsetCurrentAbsolute());
@@ -235,7 +236,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       }
 
       reader.seekTo(4L);
-      try (var subReader = reader.createSubReaderAtBounded("s", 0L,4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(4, subReader.readS8());
         Assertions.assertEquals(5, subReader.readU8());
         Assertions.assertEquals(6, subReader.readS8());
@@ -267,7 +268,7 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
-      try (var subReader = reader.createSubReaderAtBounded("s",  0L,4L)) {
+      try (var subReader = reader.createSubReaderAtBounded("s", 0L, 4L)) {
         Assertions.assertEquals(0, subReader.readS8());
         Assertions.assertEquals(1, subReader.readU8());
         Assertions.assertEquals(2, subReader.readS8());
@@ -317,7 +318,8 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
         });
 
       LOG.debug("ex: ", ex);
-      Assertions.assertTrue(ex.getMessage().contains("Requested bounds: absolute [0x0, 0x5)"));
+      Assertions.assertTrue(ex.getMessage().contains(
+        "Requested bounds: absolute [0x0, 0x5)"));
     }
   }
 
@@ -399,6 +401,32 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
 
     final var stream = this.channelOf(data);
     try (var reader = this.readerOf(stream)) {
+      Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
+      Assertions.assertThrows(IOException.class, reader::readS16BE);
+      Assertions.assertThrows(IOException.class, reader::readS16LE);
+      Assertions.assertThrows(IOException.class, reader::readS32BE);
+      Assertions.assertThrows(IOException.class, reader::readS32LE);
+      Assertions.assertThrows(IOException.class, reader::readS64BE);
+      Assertions.assertThrows(IOException.class, reader::readS64LE);
+      Assertions.assertThrows(IOException.class, reader::readS8);
+      Assertions.assertThrows(IOException.class, reader::readU16BE);
+      Assertions.assertThrows(IOException.class, reader::readU16LE);
+      Assertions.assertThrows(IOException.class, reader::readU32BE);
+      Assertions.assertThrows(IOException.class, reader::readU32LE);
+      Assertions.assertThrows(IOException.class, reader::readU64BE);
+      Assertions.assertThrows(IOException.class, reader::readU64LE);
+      Assertions.assertThrows(IOException.class, reader::readU8);
+    }
+  }
+
+  @Test
+  public void testReadShortUnbounded()
+    throws Exception
+  {
+    final var data = new byte[0];
+
+    final var stream = this.channelOf(data);
+    try (var reader = this.readerUnboundedOf(stream)) {
       Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
       Assertions.assertThrows(IOException.class, reader::readS16BE);
       Assertions.assertThrows(IOException.class, reader::readS16LE);
@@ -786,7 +814,9 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
       Assertions.assertEquals(16L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(16, reader.readBytes(buffer));
       Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
-      Assertions.assertThrows(IOException.class, () -> reader.readBytes(buffer));
+      Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readBytes(buffer));
     }
   }
 
@@ -1102,11 +1132,15 @@ public abstract class BSSReadersRandomAccessChannelContract<T extends Channel>
     final var channel = this.channelOf(data.array());
     try (var reader = this.readerOf(channel)) {
       Assertions.assertEquals(32L, reader.bytesRemaining().getAsLong());
-      Assertions.assertEquals(16, reader.readBytes("q", buffer, 0, buffer.length));
+      Assertions.assertEquals(
+        16,
+        reader.readBytes("q", buffer, 0, buffer.length));
       Assertions.assertEquals(16L, reader.bytesRemaining().getAsLong());
       Assertions.assertEquals(16, reader.readBytes("q", buffer));
       Assertions.assertEquals(0L, reader.bytesRemaining().getAsLong());
-      Assertions.assertThrows(IOException.class, () -> reader.readBytes("q", buffer));
+      Assertions.assertThrows(
+        IOException.class,
+        () -> reader.readBytes("q", buffer));
     }
   }
 }

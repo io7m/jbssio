@@ -60,7 +60,10 @@ public interface BSSSkippableType
 
   /**
    * @return The number of bytes remaining, if a limit is actually known or specified
+   *
+   * @throws IOException On I/O errors (fetching the bounds of an underlying data source/sink may require I/O)
    */
 
-  OptionalLong bytesRemaining();
+  OptionalLong bytesRemaining()
+    throws IOException;
 }

@@ -40,11 +40,21 @@ public final class BSSReadersRandomAccessSeekableChannelTest
   }
 
   @Override
-  protected BSSReaderRandomAccessType readerOf(final SeekableByteChannel channel)
+  protected BSSReaderRandomAccessType readerOf(
+    final SeekableByteChannel channel)
     throws IOException
   {
     return new BSSReaders()
       .createReaderFromChannel(URI.create("urn:fake"), channel, "a",
                                OptionalLong.of(channel.size()));
+  }
+
+  @Override
+  protected BSSReaderRandomAccessType readerUnboundedOf(
+    final SeekableByteChannel channel)
+    throws IOException
+  {
+    return new BSSReaders()
+      .createReaderFromChannel(URI.create("urn:fake"), channel, "a");
   }
 }

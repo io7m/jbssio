@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 
 /**
  * A provider of readers.
@@ -41,10 +42,57 @@ public interface BSSReaderProviderType
    * @throws IOException On I/O errors
    */
 
+  default BSSReaderSequentialType createReaderFromStream(
+    final URI uri,
+    final InputStream stream,
+    final String name)
+    throws IOException
+  {
+    return this.createReaderFromStream(uri, stream, name, reader -> {
+
+    });
+  }
+
+  /**
+   * Create a new sequential reader from the given stream.
+   *
+   * @param uri     The URI of the stream
+   * @param stream  The stream
+   * @param name    The name of the initial reader
+   * @param onClose A function called when the reader is closed
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
   BSSReaderSequentialType createReaderFromStream(
     URI uri,
     InputStream stream,
-    String name)
+    String name,
+    Consumer<BSSReaderSequentialType> onClose)
+    throws IOException;
+
+  /**
+   * Create a new sequential reader from the given stream.
+   *
+   * @param uri     The URI of the stream
+   * @param stream  The stream
+   * @param name    The name of the initial reader
+   * @param size    The maximum number of bytes that can be read
+   * @param onClose A function called when the reader is closed
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderSequentialType createReaderFromStreamBounded(
+    URI uri,
+    InputStream stream,
+    String name,
+    long size,
+    Consumer<BSSReaderSequentialType> onClose)
     throws IOException;
 
   /**
@@ -60,12 +108,22 @@ public interface BSSReaderProviderType
    * @throws IOException On I/O errors
    */
 
-  BSSReaderSequentialType createReaderFromStreamBounded(
-    URI uri,
-    InputStream stream,
-    String name,
-    long size)
-    throws IOException;
+  default BSSReaderSequentialType createReaderFromStreamBounded(
+    final URI uri,
+    final InputStream stream,
+    final String name,
+    final long size)
+    throws IOException
+  {
+    return this.createReaderFromStreamBounded(
+      uri,
+      stream,
+      name,
+      size,
+      reader -> {
+
+      });
+  }
 
   /**
    * Create a new sequential reader from the given stream.
@@ -88,66 +146,14 @@ public interface BSSReaderProviderType
     throws IOException
   {
     if (size.isPresent()) {
-      return this.createReaderFromStreamBounded(uri, stream, name, size.getAsLong());
+      return this.createReaderFromStreamBounded(
+        uri,
+        stream,
+        name,
+        size.getAsLong());
     }
     return this.createReaderFromStream(uri, stream, name);
   }
-
-  /**
-   * Create a new random access reader from the given byte buffer.
-   *
-   * @param uri    The URI of the stream
-   * @param buffer The buffer
-   * @param name   The name of the initial reader
-   *
-   * @return A new reader
-   *
-   * @throws IOException On I/O errors
-   */
-
-  BSSReaderRandomAccessType createReaderFromByteBuffer(
-    URI uri,
-    ByteBuffer buffer,
-    String name)
-    throws IOException;
-
-  /**
-   * Create a new random access reader from the given seekable byte channel.
-   *
-   * @param uri     The URI of the stream
-   * @param channel The channel
-   * @param name    The name of the initial reader
-   *
-   * @return A new reader
-   *
-   * @throws IOException On I/O errors
-   */
-
-  BSSReaderRandomAccessType createReaderFromChannel(
-    URI uri,
-    SeekableByteChannel channel,
-    String name)
-    throws IOException;
-
-  /**
-   * Create a new random access reader from the given seekable byte channel.
-   *
-   * @param uri     The URI of the stream
-   * @param channel The channel
-   * @param name    The name of the initial reader
-   * @param size    A limit on the number of bytes that can be read
-   *
-   * @return A new reader
-   *
-   * @throws IOException On I/O errors
-   */
-
-  BSSReaderRandomAccessType createReaderFromChannelBounded(
-    URI uri,
-    SeekableByteChannel channel,
-    String name,
-    long size)
-    throws IOException;
 
   /**
    * Create a new random access reader from the given seekable byte channel.
@@ -170,8 +176,149 @@ public interface BSSReaderProviderType
     throws IOException
   {
     if (size.isPresent()) {
-      return this.createReaderFromChannelBounded(uri, channel, name, size.getAsLong());
+      return this.createReaderFromChannelBounded(
+        uri,
+        channel,
+        name,
+        size.getAsLong());
     }
     return this.createReaderFromChannel(uri, channel, name);
   }
+
+  /**
+   * Create a new random access reader from the given byte buffer.
+   *
+   * @param uri     The URI of the stream
+   * @param buffer  The buffer
+   * @param name    The name of the initial reader
+   * @param onClose A function called when the reader is closed
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createReaderFromByteBuffer(
+    URI uri,
+    ByteBuffer buffer,
+    String name,
+    Consumer<BSSReaderRandomAccessType> onClose)
+    throws IOException;
+
+  /**
+   * Create a new random access reader from the given byte buffer.
+   *
+   * @param uri    The URI of the stream
+   * @param buffer The buffer
+   * @param name   The name of the initial reader
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSReaderRandomAccessType createReaderFromByteBuffer(
+    final URI uri,
+    final ByteBuffer buffer,
+    final String name)
+    throws IOException
+  {
+    return this.createReaderFromByteBuffer(uri, buffer, name, reader -> {
+
+    });
+  }
+
+  /**
+   * Create a new random access reader from the given seekable byte channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial reader
+   * @param onClose A function called when the reader is closed
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createReaderFromChannel(
+    URI uri,
+    SeekableByteChannel channel,
+    String name,
+    Consumer<BSSReaderRandomAccessType> onClose)
+    throws IOException;
+
+  /**
+   * Create a new random access reader from the given seekable byte channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial reader
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSReaderRandomAccessType createReaderFromChannel(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name)
+    throws IOException
+  {
+    return this.createReaderFromChannel(uri, channel, name, reader -> {
+
+    });
+  }
+
+  /**
+   * Create a new random access reader from the given seekable byte channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial reader
+   * @param size    A limit on the number of bytes that can be read
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSReaderRandomAccessType createReaderFromChannelBounded(
+    final URI uri,
+    final SeekableByteChannel channel,
+    final String name,
+    final long size)
+    throws IOException
+  {
+    return this.createReaderFromChannelBounded(
+      uri,
+      channel,
+      name,
+      size,
+      reader -> {
+      });
+  }
+
+  /**
+   * Create a new random access reader from the given seekable byte channel.
+   *
+   * @param uri     The URI of the stream
+   * @param channel The channel
+   * @param name    The name of the initial reader
+   * @param size    A limit on the number of bytes that can be read
+   * @param onClose A function called when the reader is closed
+   *
+   * @return A new reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderRandomAccessType createReaderFromChannelBounded(
+    URI uri,
+    SeekableByteChannel channel,
+    String name,
+    long size,
+    Consumer<BSSReaderRandomAccessType> onClose)
+    throws IOException;
 }

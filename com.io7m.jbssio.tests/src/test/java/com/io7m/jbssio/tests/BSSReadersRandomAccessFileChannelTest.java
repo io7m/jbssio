@@ -38,10 +38,20 @@ public final class BSSReadersRandomAccessFileChannelTest
   }
 
   @Override
-  protected BSSReaderRandomAccessType readerOf(final FileChannel channel)
+  protected BSSReaderRandomAccessType readerOf(
+    final FileChannel channel)
     throws IOException
   {
     return new BSSReaders()
       .createReaderFromChannelBounded(URI.create("urn:fake"), channel, "a", channel.size());
+  }
+
+  @Override
+  protected BSSReaderRandomAccessType readerUnboundedOf(
+    final FileChannel channel)
+    throws IOException
+  {
+    return new BSSReaders()
+      .createReaderFromChannel(URI.create("urn:fake"), channel, "a");
   }
 }

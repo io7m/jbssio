@@ -19,14 +19,13 @@ package com.io7m.jbssio.vanilla;
 import com.io7m.jbssio.api.BSSWriterProviderType;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
-import org.osgi.service.component.annotations.Component;
-
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * A default provider of writers.
@@ -78,7 +77,13 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(buffer, "buffer");
     Objects.requireNonNull(name, "name");
-    return BSSWriterByteBuffer.createFromByteBuffer(uri, buffer, name);
+    return BSSWriterByteBuffer.createFromByteBuffer(
+      uri,
+      buffer,
+      name,
+      writer -> {
+
+      });
   }
 
   @Override
@@ -90,7 +95,14 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "name");
-    return BSSWriterSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.empty());
+    return BSSWriterSeekableChannel.createFromChannel(
+      uri,
+      channel,
+      name,
+      OptionalLong.empty(),
+      writer -> {
+
+      });
   }
 
   @Override
@@ -103,7 +115,14 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "name");
-    return BSSWriterSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.of(size));
+    return BSSWriterSeekableChannel.createFromChannel(
+      uri,
+      channel,
+      name,
+      OptionalLong.of(size),
+      writer -> {
+
+      });
   }
 
   @Override
@@ -117,6 +136,13 @@ public final class BSSWriters implements BSSWriterProviderType
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(size, "size");
-    return BSSWriterSeekableChannel.createFromChannel(uri, channel, name, size);
+    return BSSWriterSeekableChannel.createFromChannel(
+      uri,
+      channel,
+      name,
+      size,
+      writer -> {
+
+      });
   }
 }

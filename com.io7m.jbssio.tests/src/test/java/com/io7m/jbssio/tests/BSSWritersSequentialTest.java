@@ -17,6 +17,7 @@
 package com.io7m.jbssio.tests;
 
 import com.io7m.jbssio.vanilla.BSSWriters;
+import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -623,6 +624,40 @@ public final class BSSWritersSequentialTest
         'C', 'C', 'C', 'C',
         'D', 'D', 'D', 'D'
       }, stream.toByteArray());
+    }
+  }
+
+  @Test
+  public void testPadTo()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        final var wrote = writer.padTo(8300L, (byte) 'z');
+        Assertions.assertEquals(8300L, wrote);
+      }
+
+      final var expected = new byte[8300];
+      Arrays.fill(expected, (byte) 'z');
+      Assertions.assertArrayEquals(expected, stream.toByteArray());
+    }
+  }
+
+  @Test
+  public void testPadToZero()
+    throws Exception
+  {
+    final var writers = new BSSWriters();
+    try (var stream = new ByteArrayOutputStream()) {
+      try (var writer = writers.createWriterFromStream(URI.create("urn:fake"), stream, "a")) {
+        final var wrote = writer.padTo(8300L);
+        Assertions.assertEquals(8300L, wrote);
+      }
+
+      final var expected = new byte[8300];
+      Arrays.fill(expected, (byte) 0);
+      Assertions.assertArrayEquals(expected, stream.toByteArray());
     }
   }
 }

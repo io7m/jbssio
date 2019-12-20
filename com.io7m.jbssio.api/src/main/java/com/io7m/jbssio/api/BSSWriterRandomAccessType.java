@@ -22,7 +22,8 @@ import java.io.IOException;
  * A random access writer.
  */
 
-public interface BSSWriterRandomAccessType extends BSSWriterType, BSSSeekableType
+public interface BSSWriterRandomAccessType extends BSSWriterType,
+  BSSSeekableType
 {
   @Override
   BSSWriterRandomAccessType createSubWriterAt(

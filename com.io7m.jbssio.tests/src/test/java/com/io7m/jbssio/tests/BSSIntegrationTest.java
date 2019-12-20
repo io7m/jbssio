@@ -49,8 +49,15 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var channel = Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
-      try (var writer = writers.createWriterFromChannel(pathURI, channel, "root")) {
+    try (var channel = Files.newByteChannel(
+      path,
+      CREATE,
+      WRITE,
+      TRUNCATE_EXISTING)) {
+      try (var writer = writers.createWriterFromChannel(
+        pathURI,
+        channel,
+        "root")) {
         try (var sw = writer.createSubWriterAtBounded("head", 0L, 8L)) {
           sw.writeU32BE(0x10203040L);
           sw.writeU32BE(0x50607080L);
@@ -66,7 +73,10 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var channel = Files.newByteChannel(path, READ)) {
-      try (var reader = readers.createReaderFromChannel(pathURI, channel, "root")) {
+      try (var reader = readers.createReaderFromChannel(
+        pathURI,
+        channel,
+        "root")) {
         try (var sr = reader.createSubReaderAtBounded("head", 0L, 8L)) {
           final var x0 = sr.readU32BE();
           logUnsigned(x0);
@@ -106,8 +116,15 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newOutputStream(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
-      try (var writer = writers.createWriterFromStream(pathURI, stream, "root")) {
+    try (var stream = Files.newOutputStream(
+      path,
+      CREATE,
+      WRITE,
+      TRUNCATE_EXISTING)) {
+      try (var writer = writers.createWriterFromStream(
+        pathURI,
+        stream,
+        "root")) {
         try (var sw = writer.createSubWriterAtBounded("head", 0L, 8L)) {
           sw.writeU32BE(0x10203040L);
           sw.writeU32BE(0x50607080L);
@@ -123,8 +140,11 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var sr = reader.createSubReaderAtBounded("head", 0L, 8L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var sr = reader.createSubReaderBounded("head", 8L)) {
           final var x0 = sr.readU32BE();
           logUnsigned(x0);
           Assertions.assertEquals(0x10203040L, x0);
@@ -133,7 +153,7 @@ public final class BSSIntegrationTest
           logUnsigned(x1);
           Assertions.assertEquals(0x50607080L, x1);
         }
-        try (var sr = reader.createSubReaderAt("body", 8L)) {
+        try (var sr = reader.createSubReader("body")) {
           final var x0 = sr.readU32BE();
           logUnsigned(x0);
           Assertions.assertEquals(0x90909090L, x0);
@@ -163,8 +183,15 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newOutputStream(path, CREATE, WRITE, TRUNCATE_EXISTING)) {
-      try (var writer = writers.createWriterFromStream(pathURI, stream, "root")) {
+    try (var stream = Files.newOutputStream(
+      path,
+      CREATE,
+      WRITE,
+      TRUNCATE_EXISTING)) {
+      try (var writer = writers.createWriterFromStream(
+        pathURI,
+        stream,
+        "root")) {
         writer.writeU32BE(6L);
         writer.writeBytes("Hello.".getBytes(US_ASCII));
         writer.align(4);
@@ -177,7 +204,10 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
         final var len0 = reader.readU32BE();
         final var bytes0 = new byte[(int) len0];
         reader.readBytes(bytes0);
@@ -202,7 +232,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -210,11 +244,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAtBounded("BE", 0L, 128L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -230,7 +267,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -238,11 +279,15 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStreamBounded(pathURI, stream, "root", 256L)) {
-        try (var r = reader.createSubReaderAtBounded("BE", 0L, 128L)) {
+      try (var reader = readers.createReaderFromStreamBounded(
+        pathURI,
+        stream,
+        "root",
+        256L)) {
+        try (var r = reader.createSubReaderBounded("BE", 128L)) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L, 128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -258,7 +303,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -266,7 +315,10 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newByteChannel(path, READ)) {
-      try (var reader = readers.createReaderFromChannel(pathURI, stream, "root")) {
+      try (var reader = readers.createReaderFromChannel(
+        pathURI,
+        stream,
+        "root")) {
         try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
@@ -286,7 +338,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -294,7 +350,11 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newByteChannel(path, READ)) {
-      try (var reader = readers.createReaderFromChannelBounded(pathURI, stream, "root", 256L)) {
+      try (var reader = readers.createReaderFromChannelBounded(
+        pathURI,
+        stream,
+        "root",
+        256L)) {
         try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
@@ -314,7 +374,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -322,7 +386,10 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newByteChannel(path, READ)) {
-      try (var reader = readers.createReaderFromChannel(pathURI, stream, "root")) {
+      try (var reader = readers.createReaderFromChannel(
+        pathURI,
+        stream,
+        "root")) {
         try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
@@ -342,7 +409,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -350,8 +421,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = FileChannel.open(path, READ)) {
-      final var map = stream.map(FileChannel.MapMode.READ_ONLY, 0L, stream.size());
-      try (var reader = readers.createReaderFromByteBuffer(pathURI, map, "root")) {
+      final var map = stream.map(
+        FileChannel.MapMode.READ_ONLY,
+        0L,
+        stream.size());
+      try (var reader = readers.createReaderFromByteBuffer(
+        pathURI,
+        map,
+        "root")) {
         try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
@@ -371,7 +448,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     try (var input = BSSIntegrationTest.class.getResourceAsStream("specimen.dat")) {
-      try (var output = Files.newOutputStream(path, TRUNCATE_EXISTING, WRITE, CREATE)) {
+      try (var output = Files.newOutputStream(
+        path,
+        TRUNCATE_EXISTING,
+        WRITE,
+        CREATE)) {
         input.transferTo(output);
         output.flush();
       }
@@ -379,8 +460,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = FileChannel.open(path, READ)) {
-      final var map = stream.map(FileChannel.MapMode.READ_ONLY, 0L, stream.size());
-      try (var reader = readers.createReaderFromByteBuffer(pathURI, map, "root")) {
+      final var map = stream.map(
+        FileChannel.MapMode.READ_ONLY,
+        0L,
+        stream.size());
+      try (var reader = readers.createReaderFromByteBuffer(
+        pathURI,
+        map,
+        "root")) {
         try (var r = reader.createSubReaderAt("BE", 0L)) {
           checkSpecimenBE(r);
         }
@@ -400,7 +487,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newOutputStream(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+    try (var stream = Files.newOutputStream(
+      path,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
       try (var w = writers.createWriterFromStream(pathURI, stream, "root")) {
         writeSpecimen(w);
       }
@@ -408,11 +499,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -428,19 +522,30 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newOutputStream(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
-      try (var w = writers.createWriterFromStreamBounded(pathURI, stream, "root", 256L)) {
+    try (var stream = Files.newOutputStream(
+      path,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
+      try (var w = writers.createWriterFromStreamBounded(
+        pathURI,
+        stream,
+        "root",
+        256L)) {
         writeSpecimen(w);
       }
     }
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -456,7 +561,11 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+    try (var stream = Files.newByteChannel(
+      path,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
       stream.truncate(256L);
       try (var w = writers.createWriterFromChannel(pathURI, stream, "root")) {
         writeSpecimen(w);
@@ -465,11 +574,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -485,20 +597,31 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+    try (var stream = Files.newByteChannel(
+      path,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
       stream.truncate(256L);
-      try (var w = writers.createWriterFromChannelBounded(pathURI, stream, "root", 256L)) {
+      try (var w = writers.createWriterFromChannelBounded(
+        pathURI,
+        stream,
+        "root",
+        256L)) {
         writeSpecimen(w);
       }
     }
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -514,9 +637,17 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+    try (var stream = Files.newByteChannel(
+      path,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
       stream.truncate(256L);
-      try (var w = writers.createWriterFromChannelBounded(pathURI, stream, "root", 256L)) {
+      try (var w = writers.createWriterFromChannelBounded(
+        pathURI,
+        stream,
+        "root",
+        256L)) {
         try (var q = w.createSubWriterAt("sub", 0L)) {
           writeSpecimen(q);
         }
@@ -525,11 +656,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -545,7 +679,12 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = FileChannel.open(path, READ, WRITE, TRUNCATE_EXISTING, CREATE)) {
+    try (var stream = FileChannel.open(
+      path,
+      READ,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
       stream.truncate(256L);
       final var map = stream.map(FileChannel.MapMode.READ_WRITE, 0L, 256L);
       try (var w = writers.createWriterFromByteBuffer(pathURI, map, "root")) {
@@ -555,11 +694,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -575,7 +717,12 @@ public final class BSSIntegrationTest
     final var pathURI = path.toUri();
 
     final var writers = new BSSWriters();
-    try (var stream = FileChannel.open(path, READ, WRITE, TRUNCATE_EXISTING, CREATE)) {
+    try (var stream = FileChannel.open(
+      path,
+      READ,
+      WRITE,
+      TRUNCATE_EXISTING,
+      CREATE)) {
       stream.truncate(256L);
       final var map = stream.map(FileChannel.MapMode.READ_WRITE, 0L, 256L);
       try (var w = writers.createWriterFromByteBuffer(pathURI, map, "root")) {
@@ -587,11 +734,14 @@ public final class BSSIntegrationTest
 
     final var readers = new BSSReaders();
     try (var stream = Files.newInputStream(path, READ)) {
-      try (var reader = readers.createReaderFromStream(pathURI, stream, "root")) {
-        try (var r = reader.createSubReaderAt("BE", 0L)) {
+      try (var reader = readers.createReaderFromStream(
+        pathURI,
+        stream,
+        "root")) {
+        try (var r = reader.createSubReader("BE")) {
           checkSpecimenBE(r);
         }
-        try (var r = reader.createSubReaderAtBounded("LE", 128L,128L)) {
+        try (var r = reader.createSubReaderBounded("LE", 128L)) {
           checkSpecimenLE(r);
         }
       }
@@ -633,7 +783,9 @@ public final class BSSIntegrationTest
     w.writeF64BE(Double.MAX_VALUE);
 
     w.align(16);
-    w.writeBytes("named", new byte[]{0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x7f});
+    w.writeBytes(
+      "named",
+      new byte[]{0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x7f});
 
     // LE
     w.align(16);
@@ -674,42 +826,54 @@ public final class BSSIntegrationTest
     throws IOException
   {
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Byte.MIN_VALUE, r.readS8("min"));
     Assertions.assertEquals(Byte.MAX_VALUE, r.readS8());
     Assertions.assertEquals(0, r.readU8("min"));
     Assertions.assertEquals(0xff, r.readU8());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Short.MIN_VALUE, r.readS16LE("min"));
     Assertions.assertEquals(Short.MAX_VALUE, r.readS16LE());
     Assertions.assertEquals(0, r.readU16LE("min"));
     Assertions.assertEquals(0xffff, r.readU16LE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Integer.MIN_VALUE, r.readS32LE("min"));
     Assertions.assertEquals(Integer.MAX_VALUE, r.readS32LE());
     Assertions.assertEquals(0, r.readU32LE("min"));
     Assertions.assertEquals(0xffff_ffffL, r.readU32LE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Long.MIN_VALUE, r.readS64LE("min"));
     Assertions.assertEquals(Long.MAX_VALUE, r.readS64LE());
     Assertions.assertEquals(0L, r.readU64LE("min"));
     Assertions.assertEquals(0xffff_ffff_ffff_ffffL, r.readU64LE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(-1.401298464324817E-45, r.readF32LE("min"));
     Assertions.assertEquals(3.4028235e+38f, r.readF32LE());
     Assertions.assertEquals(-4.9406564584124654e-324, r.readD64LE("min"));
     Assertions.assertEquals(Double.MAX_VALUE, r.readD64LE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     final var received = new byte[8];
     final var expected = new byte[]{0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x7f};
     r.readBytes("named", received);
@@ -722,7 +886,9 @@ public final class BSSIntegrationTest
   private static void checkSpecimenBE(final BSSReaderType r)
     throws IOException
   {
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     r.align(16);
     Assertions.assertEquals(Byte.MIN_VALUE, r.readS8("min"));
     Assertions.assertEquals(Byte.MAX_VALUE, r.readS8());
@@ -730,35 +896,45 @@ public final class BSSIntegrationTest
     Assertions.assertEquals(0xff, r.readU8());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Short.MIN_VALUE, r.readS16BE("min"));
     Assertions.assertEquals(Short.MAX_VALUE, r.readS16BE());
     Assertions.assertEquals(0, r.readU16BE("min"));
     Assertions.assertEquals(0xffff, r.readU16BE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Integer.MIN_VALUE, r.readS32BE("min"));
     Assertions.assertEquals(Integer.MAX_VALUE, r.readS32BE());
     Assertions.assertEquals(0, r.readU32BE("min"));
     Assertions.assertEquals(0xffff_ffffL, r.readU32BE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(Long.MIN_VALUE, r.readS64BE("min"));
     Assertions.assertEquals(Long.MAX_VALUE, r.readS64BE());
     Assertions.assertEquals(0L, r.readU64BE("min"));
     Assertions.assertEquals(0xffff_ffff_ffff_ffffL, r.readU64BE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     Assertions.assertEquals(-1.401298464324817E-45, r.readF32BE("min"));
     Assertions.assertEquals(3.4028235e+38f, r.readF32BE());
     Assertions.assertEquals(-4.9406564584124654e-324, r.readD64BE("min"));
     Assertions.assertEquals(Double.MAX_VALUE, r.readD64BE());
 
     r.align(16);
-    LOG.debug("offset: 0x{}", Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
+    LOG.debug(
+      "offset: 0x{}",
+      Long.toUnsignedString(r.offsetCurrentAbsolute(), 16));
     final var received = new byte[8];
     final var expected = new byte[]{0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x7f};
     r.readBytes(received);

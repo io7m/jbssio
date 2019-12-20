@@ -17,10 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSReaderSequentialType;
-import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.io.input.CountingInputStream;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,16 +25,27 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.io.input.CloseShieldInputStream;
+import org.apache.commons.io.input.CountingInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class BSSReaderStream implements BSSReaderSequentialType
 {
+  private static final Logger LOG =
+    LoggerFactory.getLogger(BSSReaderStream.class);
+
   private final BSSReaderStream parent;
   private final String path;
   private final CountingInputStream stream;
   private final AtomicBoolean closed;
   private final OptionalLong size;
+  private final Consumer<BSSReaderSequentialType> onClose;
   private final byte[] buffer8;
   private final byte[] buffer4;
   private final byte[] buffer2;
@@ -52,7 +59,8 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final URI inURI,
     final String inName,
     final CountingInputStream inStream,
-    final OptionalLong inSize)
+    final OptionalLong inSize,
+    final Consumer<BSSReaderSequentialType> inOnClose)
   {
     this.parent = inParent;
 
@@ -64,6 +72,8 @@ final class BSSReaderStream implements BSSReaderSequentialType
       Objects.requireNonNull(inStream, "inStream");
     this.size =
       Objects.requireNonNull(inSize, "inSize");
+    this.onClose =
+      Objects.requireNonNull(inOnClose, "onClose");
 
     this.closed = new AtomicBoolean(false);
 
@@ -79,7 +89,8 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final URI uri,
     final InputStream inStream,
     final String inName,
-    final OptionalLong inSize)
+    final OptionalLong inSize,
+    final Consumer<BSSReaderSequentialType> inOnClose)
   {
     Objects.requireNonNull(inStream, "stream");
 
@@ -91,7 +102,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     }
 
     final var wrappedStream = new CountingInputStream(boundedStream);
-    return new BSSReaderStream(null, uri, inName, wrappedStream, inSize);
+    return new BSSReaderStream(null, uri, inName, wrappedStream, inSize, inOnClose);
   }
 
   private static void checkEOF(final int r)
@@ -170,7 +181,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
   {
     if (this.size.isPresent()) {
       final var sizeLimit = this.size.getAsLong();
-      if (Long.compareUnsigned(this.stream.getByteCount() + requested, sizeLimit) > 0) {
+      if (Long.compareUnsigned(
+        this.stream.getByteCount() + requested,
+        sizeLimit) > 0) {
         final var attributes = new HashMap<String, String>(4);
         attributes.put("Requested", Long.toUnsignedString(requested));
         if (name != null) {
@@ -629,7 +642,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     final int length)
     throws IOException, EOFException
   {
-    this.checkLimit(Objects.requireNonNull(name, "name"), Integer.toUnsignedLong(length));
+    this.checkLimit(
+      Objects.requireNonNull(name, "name"),
+      Integer.toUnsignedLong(length));
     final var r = this.stream.read(buffer, offset, length);
     checkEOF(r);
     return r;
@@ -689,6 +704,11 @@ final class BSSReaderStream implements BSSReaderSequentialType
     throws IOException
   {
     if (this.closed.compareAndSet(false, true)) {
+      try {
+        this.onClose.accept(this);
+      } catch (final Exception e) {
+        LOG.error("ignored exception raised by close handler: ", e);
+      }
       this.stream.close();
     }
   }
@@ -704,20 +724,16 @@ final class BSSReaderStream implements BSSReaderSequentialType
   }
 
   @Override
-  public BSSReaderSequentialType createSubReaderAt(
-    final String name,
-    final long targetOffset)
+  public Optional<BSSReaderSequentialType> parentReader()
+  {
+    return Optional.ofNullable(this.parent);
+  }
+
+  @Override
+  public BSSReaderSequentialType createSubReader(final String name)
     throws IOException
   {
     Objects.requireNonNull(name, "name");
-
-    final var streamPosition = this.stream.getByteCount();
-    final var seek = targetOffset - streamPosition;
-    if (seek < 0L) {
-      throw this.streamPositionExceeded(targetOffset);
-    }
-
-    this.skip(seek);
 
     final var newStream =
       new CountingInputStream(new CloseShieldInputStream(this.stream));
@@ -729,30 +745,22 @@ final class BSSReaderStream implements BSSReaderSequentialType
         .append(name)
         .toString();
 
-    return new BSSReaderStream(this, this.uri, newName, newStream, this.size);
-  }
-
-  private EOFException streamPositionExceeded(
-    final long targetOffset)
-  {
-    final var attributes = new HashMap<String, String>(4);
-    attributes.put("Target Offset (Relative)", "0x" + Long.toUnsignedString(targetOffset, 16));
-    return BSSExceptions.createEOF(
+    return new BSSReaderStream(
       this,
-      "Stream position has already exceeded the specified offset.",
-      attributes);
+      this.uri,
+      newName,
+      newStream,
+      this.size,
+      this.onClose);
   }
 
   @Override
-  public BSSReaderSequentialType createSubReaderAtBounded(
+  public BSSReaderSequentialType createSubReaderBounded(
     final String name,
-    final long targetOffset,
     final long newSize)
     throws IOException
   {
     Objects.requireNonNull(name, "name");
-
-    final var streamPosition = this.stream.getByteCount();
 
     if (this.size.isPresent()) {
       final var currentSize = this.size.getAsLong();
@@ -767,13 +775,6 @@ final class BSSReaderStream implements BSSReaderSequentialType
       }
     }
 
-    final var seek = targetOffset - streamPosition;
-    if (seek < 0L) {
-      throw this.streamPositionExceeded(targetOffset);
-    }
-
-    this.skip(seek);
-
     final var newStream =
       new CountingInputStream(new CloseShieldInputStream(this.stream));
 
@@ -784,6 +785,12 @@ final class BSSReaderStream implements BSSReaderSequentialType
         .append(name)
         .toString();
 
-    return new BSSReaderStream(this, this.uri, newName, newStream, OptionalLong.of(newSize));
+    return new BSSReaderStream(
+      this,
+      this.uri,
+      newName,
+      newStream,
+      OptionalLong.of(newSize),
+      this.onClose);
   }
 }

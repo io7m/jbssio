@@ -19,14 +19,15 @@ package com.io7m.jbssio.vanilla;
 import com.io7m.jbssio.api.BSSReaderProviderType;
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
-import org.osgi.service.component.annotations.Component;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * A default provider of readers.
@@ -48,12 +49,19 @@ public final class BSSReaders implements BSSReaderProviderType
   public BSSReaderSequentialType createReaderFromStream(
     final URI uri,
     final InputStream stream,
-    final String name)
+    final String name,
+    final Consumer<BSSReaderSequentialType> onClose)
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(stream, "stream");
     Objects.requireNonNull(name, "path");
-    return BSSReaderStream.create(uri, stream, name, OptionalLong.empty());
+    Objects.requireNonNull(onClose, "onClose");
+    return BSSReaderStream.create(
+      uri,
+      stream,
+      name,
+      OptionalLong.empty(),
+      onClose);
   }
 
   @Override
@@ -61,36 +69,54 @@ public final class BSSReaders implements BSSReaderProviderType
     final URI uri,
     final InputStream stream,
     final String name,
-    final long size)
+    final long size,
+    final Consumer<BSSReaderSequentialType> onClose)
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(stream, "stream");
     Objects.requireNonNull(name, "path");
-    return BSSReaderStream.create(uri, stream, name, OptionalLong.of(size));
+    Objects.requireNonNull(onClose, "onClose");
+    return BSSReaderStream.create(
+      uri,
+      stream,
+      name,
+      OptionalLong.of(size),
+      onClose);
   }
 
   @Override
   public BSSReaderRandomAccessType createReaderFromByteBuffer(
     final URI uri,
     final ByteBuffer buffer,
-    final String name)
+    final String name,
+    final Consumer<BSSReaderRandomAccessType> onClose)
+    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(buffer, "buffer");
     Objects.requireNonNull(name, "path");
-    return BSSReaderByteBuffer.createFromByteBuffer(uri, buffer, name);
+    Objects.requireNonNull(onClose, "onClose");
+    return BSSReaderByteBuffer.createFromByteBuffer(uri, buffer, name, onClose);
   }
 
   @Override
   public BSSReaderRandomAccessType createReaderFromChannel(
     final URI uri,
     final SeekableByteChannel channel,
-    final String name)
+    final String name,
+    final Consumer<BSSReaderRandomAccessType> onClose)
+    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "path");
-    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.empty());
+    Objects.requireNonNull(onClose, "onClose");
+    return BSSReaderSeekableChannel.createFromChannel(
+      uri,
+      channel,
+      name,
+      OptionalLong.empty(),
+      onClose);
   }
 
   @Override
@@ -98,11 +124,19 @@ public final class BSSReaders implements BSSReaderProviderType
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
-    final long size)
+    final long size,
+    final Consumer<BSSReaderRandomAccessType> onClose)
+    throws IOException
   {
     Objects.requireNonNull(uri, "uri");
     Objects.requireNonNull(channel, "channel");
     Objects.requireNonNull(name, "path");
-    return BSSReaderSeekableChannel.createFromChannel(uri, channel, name, OptionalLong.of(size));
+    Objects.requireNonNull(onClose, "onClose");
+    return BSSReaderSeekableChannel.createFromChannel(
+      uri,
+      channel,
+      name,
+      OptionalLong.of(size),
+      onClose);
   }
 }

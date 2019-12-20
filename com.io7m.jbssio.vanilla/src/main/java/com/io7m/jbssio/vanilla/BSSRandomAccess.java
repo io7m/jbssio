@@ -21,7 +21,6 @@ import com.io7m.jbssio.api.BSSAddressableType;
 import com.io7m.jbssio.api.BSSCloseableType;
 import com.io7m.jbssio.api.BSSSeekableType;
 import com.io7m.jbssio.api.BSSSkippableType;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
@@ -30,24 +29,40 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-abstract class BSSRandomAccess
-  implements BSSSeekableType, BSSSkippableType, BSSAddressableType, BSSCloseableType
+abstract class BSSRandomAccess<T>
+  implements BSSSeekableType,
+  BSSSkippableType,
+  BSSAddressableType,
+  BSSCloseableType
 {
+  private static final Logger LOG =
+    LoggerFactory.getLogger(BSSRandomAccess.class);
+
   protected final URI uri;
   protected final String path;
   private final BSSRangeHalfOpen parentRangeRelative;
   private final AtomicBoolean closed;
-  private final BSSRandomAccess parent;
+  private final BSSRandomAccess<T> parent;
   private final Callable<Void> onClose;
+  private final Consumer<? extends T> onUserClose;
   private long offsetRelative;
 
+  protected Consumer<? extends T> onUserClose()
+  {
+    return this.onUserClose;
+  }
+
   BSSRandomAccess(
-    final BSSRandomAccess inParent,
+    final BSSRandomAccess<T> inParent,
     final BSSRangeHalfOpen inParentRangeRelative,
     final Callable<Void> inOnClose,
     final URI inURI,
-    final String inPath)
+    final String inPath,
+    final Consumer<? extends T> inOnUserClose)
   {
     this.parent = inParent;
 
@@ -59,12 +74,22 @@ abstract class BSSRandomAccess
       Objects.requireNonNull(inURI, "uri");
     this.path =
       Objects.requireNonNull(inPath, "path");
+    this.onUserClose =
+      Objects.requireNonNull(inOnUserClose, "inOnUserClose");
 
     this.closed = new AtomicBoolean(false);
 
     if (inParentRangeRelative.isUpperUnbounded()) {
       this.checkAncestorsUnbounded();
     }
+  }
+
+  protected abstract BSSRangeHalfOpen physicalSourceAbsoluteBounds()
+    throws IOException;
+
+  protected final BSSRandomAccess<T> parent()
+  {
+    return this.parent;
   }
 
   private void checkAncestorsUnbounded()
@@ -109,11 +134,23 @@ abstract class BSSRandomAccess
   }
 
   private OptionalLong absoluteEnd()
+    throws IOException
   {
-    return this.parentRangeRelative.interval()
-      .stream()
-      .map(interval -> this.absoluteStart() + interval)
-      .findFirst();
+    final var specStart =
+      this.absoluteStart();
+
+    final OptionalLong specUpper =
+      this.parentRangeRelative.interval()
+        .stream()
+        .map(interval -> specStart + interval)
+        .findFirst();
+
+    final var specBounds =
+      new BSSRangeHalfOpen(specStart, specUpper);
+    final BSSRangeHalfOpen physBounds =
+      this.physicalSourceAbsoluteBounds();
+
+    return BSSRangeHalfOpen.minimumUpperBoundOf(physBounds, specBounds);
   }
 
   final void checkHasBytesRemaining(
@@ -133,7 +170,9 @@ abstract class BSSRandomAccess
     final long offset,
     final long size)
   {
-    final var subRange = new BSSRangeHalfOpen(offset, OptionalLong.of(offset + size));
+    final var subRange = new BSSRangeHalfOpen(
+      offset,
+      OptionalLong.of(offset + size));
     if (!this.parentRangeRelative.isUpperUnbounded()) {
       BSSRanges.checkRangesCompatible(
         this.parentRangeRelative,
@@ -157,9 +196,17 @@ abstract class BSSRandomAccess
     final String name,
     final long targetPosition)
   {
-    final var bounds = this.toAbsoluteRange(this.parentRangeRelative);
+    BSSRangeHalfOpen bounds;
+    try {
+      bounds = this.physicalSourceAbsoluteBounds();
+    } catch (final IOException e) {
+      bounds = this.toAbsoluteRange(this.parentRangeRelative);
+    }
+
     final var attributes = new HashMap<String, String>(4);
-    attributes.put("Target Offset (Absolute)", "0x" + Long.toUnsignedString(targetPosition, 16));
+    attributes.put(
+      "Target Offset (Absolute)",
+      "0x" + Long.toUnsignedString(targetPosition, 16));
     attributes.put("Bounds (Relative)", this.parentRangeRelative.toString());
     attributes.put("Bounds (Absolute)", bounds.toString());
     if (name != null) {
@@ -192,6 +239,7 @@ abstract class BSSRandomAccess
 
   @Override
   public final OptionalLong bytesRemaining()
+    throws IOException
   {
     final var absEnd = this.absoluteEnd();
     if (absEnd.isPresent()) {
@@ -219,6 +267,14 @@ abstract class BSSRandomAccess
     throws IOException
   {
     if (!this.isClosed()) {
+      try {
+        @SuppressWarnings("unchecked") final Consumer<BSSRandomAccess<T>> f =
+          (Consumer<BSSRandomAccess<T>>) this.onUserClose;
+        f.accept(this);
+      } catch (final Exception e) {
+        LOG.error("ignored exception raised by on-close method: ", e);
+      }
+
       try {
         this.onClose.call();
       } catch (final IOException e) {

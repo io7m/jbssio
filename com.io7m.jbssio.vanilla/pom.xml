@@ -8,7 +8,7 @@
   <parent>
     <artifactId>com.io7m.jbssio</artifactId>
     <groupId>com.io7m.jbssio</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>com.io7m.jbssio.vanilla</artifactId>
@@ -28,6 +28,11 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.annotation.versioning</artifactId>

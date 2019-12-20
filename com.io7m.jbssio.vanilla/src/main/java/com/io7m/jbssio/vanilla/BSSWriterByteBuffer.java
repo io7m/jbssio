@@ -17,7 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -25,13 +24,17 @@ import java.nio.ByteOrder;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRandomAccessType
+final class BSSWriterByteBuffer
+  extends BSSRandomAccess<BSSWriterRandomAccessType> implements
+  BSSWriterRandomAccessType
 {
   private final ByteBuffer map;
+  private final BSSRangeHalfOpen physicalBounds;
 
   private BSSWriterByteBuffer(
     final BSSWriterByteBuffer inParent,
@@ -39,24 +42,38 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final BSSRangeHalfOpen inParentRangeRelative,
     final String inName,
     final ByteBuffer inMap,
-    final Callable<Void> inOnClose)
+    final Callable<Void> inOnClose,
+    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
   {
-    super(inParent, inParentRangeRelative, inOnClose, inURI, inName);
-    this.map = Objects.requireNonNull(inMap, "map");
+    super(
+      inParent,
+      inParentRangeRelative,
+      inOnClose,
+      inURI,
+      inName,
+      inOnUserClose);
+
+    this.map =
+      Objects.requireNonNull(inMap, "map");
+    this.physicalBounds =
+      BSSRangeHalfOpen.create(0L, (long) inMap.capacity());
   }
 
   static BSSWriterRandomAccessType createFromByteBuffer(
     final URI uri,
     final ByteBuffer buffer,
-    final String name)
+    final String name,
+    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
   {
     return new BSSWriterByteBuffer(
       null,
       uri,
-      new BSSRangeHalfOpen(0L, OptionalLong.of(Integer.toUnsignedLong(buffer.capacity()))),
+      new BSSRangeHalfOpen(
+        0L,
+        OptionalLong.of(Integer.toUnsignedLong(buffer.capacity()))),
       name,
       buffer,
-      () -> null);
+      () -> null, inOnUserClose);
   }
 
   private static int longPositionTo2GBLimitedByteBufferPosition(final long position)
@@ -87,7 +104,8 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
       this.createOffsetSubRange(offset),
       newName,
       this.map,
-      () -> null);
+      () -> null,
+      this.onUserClose());
   }
 
   @Override
@@ -114,7 +132,8 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
       this.createSubRange(offset, size),
       newName,
       this.map,
-      () -> null);
+      () -> null,
+      this.onUserClose());
   }
 
   @Override
@@ -138,7 +157,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
-    this.map.put(longPositionTo2GBLimitedByteBufferPosition(position), (byte) b);
+    this.map.put(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (byte) b);
   }
 
   private void writeU8p(
@@ -150,7 +171,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
-    this.map.put(longPositionTo2GBLimitedByteBufferPosition(position), (byte) (b & 0xff));
+    this.map.put(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (byte) (b & 0xff));
   }
 
   @Override
@@ -195,7 +218,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(LITTLE_ENDIAN);
-    this.map.putShort(longPositionTo2GBLimitedByteBufferPosition(position), (short) b);
+    this.map.putShort(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (short) b);
   }
 
   private void writeU16LEp(
@@ -208,7 +233,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(LITTLE_ENDIAN);
-    this.map.putChar(longPositionTo2GBLimitedByteBufferPosition(position), (char) (b & 0xffff));
+    this.map.putChar(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (char) (b & 0xffff));
   }
 
   private void writeS16BEp(
@@ -221,7 +248,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(BIG_ENDIAN);
-    this.map.putShort(longPositionTo2GBLimitedByteBufferPosition(position), (short) b);
+    this.map.putShort(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (short) b);
   }
 
   private void writeU16BEp(
@@ -234,7 +263,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
     this.map.order(BIG_ENDIAN);
-    this.map.putChar(longPositionTo2GBLimitedByteBufferPosition(position), (char) (b & 0xffff));
+    this.map.putChar(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (char) (b & 0xffff));
   }
 
   @Override
@@ -311,7 +342,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(LITTLE_ENDIAN);
-    this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) b);
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) b);
   }
 
   private void writeU32LEp(
@@ -324,7 +357,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(LITTLE_ENDIAN);
-    this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) (b & 0xffff_ffffL));
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) (b & 0xffff_ffffL));
   }
 
   private void writeS32BEp(
@@ -337,7 +372,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(BIG_ENDIAN);
-    this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) b);
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) b);
   }
 
   private void writeU32BEp(
@@ -350,7 +387,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(BIG_ENDIAN);
-    this.map.putInt(longPositionTo2GBLimitedByteBufferPosition(position), (int) (b & 0xffff_ffffL));
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) (b & 0xffff_ffffL));
   }
 
   @Override
@@ -556,7 +595,11 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final byte[] buffer)
     throws IOException
   {
-    this.writeBytesP(Objects.requireNonNull(name, "name"), buffer, 0, buffer.length);
+    this.writeBytesP(
+      Objects.requireNonNull(name, "name"),
+      buffer,
+      0,
+      buffer.length);
   }
 
   @Override
@@ -612,7 +655,9 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
     this.map.order(order);
-    this.map.putFloat(longPositionTo2GBLimitedByteBufferPosition(position), (float) b);
+    this.map.putFloat(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (float) b);
   }
 
   @Override
@@ -677,5 +722,11 @@ final class BSSWriterByteBuffer extends BSSRandomAccess implements BSSWriterRand
     throws IOException
   {
     this.writeF32p(null, b, LITTLE_ENDIAN);
+  }
+
+  @Override
+  protected BSSRangeHalfOpen physicalSourceAbsoluteBounds()
+  {
+    return this.physicalBounds;
   }
 }

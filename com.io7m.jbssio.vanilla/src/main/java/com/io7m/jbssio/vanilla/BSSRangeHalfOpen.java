@@ -56,6 +56,54 @@ public final class BSSRangeHalfOpen
     });
   }
 
+  /**
+   * Create a new range with the given bounds.
+   *
+   * @param lower The lower bound
+   * @param upper The upper bound
+   *
+   * @return A new range
+   */
+
+  public static BSSRangeHalfOpen create(
+    final long lower,
+    final long upper)
+  {
+    return new BSSRangeHalfOpen(lower, OptionalLong.of(upper));
+  }
+
+  /**
+   * Determine the smallest upper bound of the given ranges.
+   *
+   * @param bounds0 Range 0
+   * @param bounds1 Range 1
+   *
+   * @return The upper bound
+   */
+
+  public static OptionalLong minimumUpperBoundOf(
+    final BSSRangeHalfOpen bounds0,
+    final BSSRangeHalfOpen bounds1)
+  {
+    final var upper0 = bounds0.upper();
+    final var upper1 = bounds1.upper();
+
+    if (upper0.isEmpty()) {
+      return upper1;
+    }
+    if (upper1.isEmpty()) {
+      return upper0;
+    }
+
+    final long upperL0 = upper0.getAsLong();
+    final long upperL1 = upper1.getAsLong();
+
+    if (Long.compareUnsigned(upperL0, upperL1) < 0) {
+      return OptionalLong.of(upperL0);
+    }
+    return OptionalLong.of(upperL1);
+  }
+
   @Override
   public String toString()
   {
@@ -154,7 +202,9 @@ public final class BSSRangeHalfOpen
   {
     Objects.requireNonNull(other, "Other range");
 
-    final var lowerIncludes = Long.compareUnsigned(this.lower, other.lower) >= 0;
+    final var lowerIncludes = Long.compareUnsigned(
+      this.lower,
+      other.lower) >= 0;
 
     if (other.upper.isEmpty()) {
       return lowerIncludes;

@@ -17,6 +17,7 @@
 package com.io7m.jbssio.api;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * The type of sequential readers.
@@ -25,15 +26,36 @@ import java.io.IOException;
 public interface BSSReaderSequentialType extends BSSReaderType
 {
   @Override
-  BSSReaderSequentialType createSubReaderAt(
-    String name,
-    long offset)
+  Optional<BSSReaderSequentialType> parentReader();
+
+  /**
+   * Create a new sub reader with the given {@code name}.
+   *
+   * @param name The new name
+   *
+   * @return A new sub reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderSequentialType createSubReader(
+    String name)
     throws IOException;
 
-  @Override
-  BSSReaderSequentialType createSubReaderAtBounded(
+  /**
+   * Create a new sub reader with the given {@code name}, allowing the new
+   * sub reader to read at most {@code size} bytes.
+   *
+   * @param name The new name
+   * @param size The maximum number of bytes read
+   *
+   * @return A new sub reader
+   *
+   * @throws IOException On I/O errors
+   */
+
+  BSSReaderSequentialType createSubReaderBounded(
     String name,
-    long offset,
     long size)
     throws IOException;
 }

@@ -17,9 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSWriterSequentialType;
-import org.apache.commons.io.output.CloseShieldOutputStream;
-import org.apache.commons.io.output.CountingOutputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -27,10 +24,13 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.io.output.CloseShieldOutputStream;
+import org.apache.commons.io.output.CountingOutputStream;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -93,7 +93,9 @@ final class BSSWriterStream implements BSSWriterSequentialType
     if (name != null) {
       attributes.put("Field", name);
     }
-    attributes.put("Target Offset (Absolute)", "0x" + Long.toUnsignedString(targetPosition, 16));
+    attributes.put(
+      "Target Offset (Absolute)",
+      "0x" + Long.toUnsignedString(targetPosition, 16));
     if (this.size.isPresent()) {
       final var bounds = new BSSRangeHalfOpen(this.start, this.size);
       attributes.put("Bounds (Absolute)", bounds.toString());
@@ -561,7 +563,11 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final byte[] buffer)
     throws IOException
   {
-    this.writeBytesP(Objects.requireNonNull(name, "name"), buffer, 0, buffer.length);
+    this.writeBytesP(
+      Objects.requireNonNull(name, "name"),
+      buffer,
+      0,
+      buffer.length);
   }
 
   @Override
@@ -779,7 +785,9 @@ final class BSSWriterStream implements BSSWriterSequentialType
     final long targetOffset)
   {
     final var attributes = new HashMap<String, String>(4);
-    attributes.put("Target Offset (Relative)", "0x" + Long.toUnsignedString(targetOffset, 16));
+    attributes.put(
+      "Target Offset (Relative)",
+      "0x" + Long.toUnsignedString(targetOffset, 16));
     return BSSExceptions.createEOF(
       this,
       "Stream position has already exceeded the specified offset.",
@@ -834,5 +842,38 @@ final class BSSWriterStream implements BSSWriterSequentialType
       newStream,
       this.stream.getByteCount(),
       OptionalLong.of(newSize));
+  }
+
+  @Override
+  public long padTo(
+    final long offset,
+    final byte value)
+    throws IOException
+  {
+    final var diff = Math.max(0L, offset - this.offsetCurrentRelative());
+    if (diff == 0L) {
+      return 0L;
+    }
+
+    var diffTemp = diff;
+    if (diffTemp >= 4096L) {
+      final var bigBuffer = new byte[4096];
+      if (value != 0) {
+        Arrays.fill(bigBuffer, value);
+      }
+      while (diffTemp >= 4096L) {
+        this.writeBytes(bigBuffer);
+        diffTemp -= 4096L;
+      }
+    }
+
+    if (diffTemp > 0L) {
+      final byte[] smallBuffer = new byte[(int) diffTemp];
+      if (value != 0) {
+        Arrays.fill(smallBuffer, value);
+      }
+      this.writeBytes(smallBuffer);
+    }
+    return diff;
   }
 }

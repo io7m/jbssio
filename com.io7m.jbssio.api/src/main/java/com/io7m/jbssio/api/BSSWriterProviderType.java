@@ -88,7 +88,11 @@ public interface BSSWriterProviderType
     throws IOException
   {
     if (size.isPresent()) {
-      return this.createWriterFromStreamBounded(uri, stream, name, size.getAsLong());
+      return this.createWriterFromStreamBounded(
+        uri,
+        stream,
+        name,
+        size.getAsLong());
     }
     return this.createWriterFromStream(uri, stream, name);
   }
@@ -170,7 +174,11 @@ public interface BSSWriterProviderType
     throws IOException
   {
     if (size.isPresent()) {
-      return this.createWriterFromChannelBounded(uri, channel, name, size.getAsLong());
+      return this.createWriterFromChannelBounded(
+        uri,
+        channel,
+        name,
+        size.getAsLong());
     }
     return this.createWriterFromChannel(uri, channel, name);
   }

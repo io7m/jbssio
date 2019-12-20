@@ -17,21 +17,22 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 final class BSSReaderSeekableChannel
-  extends BSSRandomAccess implements BSSReaderRandomAccessType
+  extends BSSRandomAccess<BSSReaderRandomAccessType> implements BSSReaderRandomAccessType
 {
   private final SeekableByteChannel channel;
   private final ByteBuffer buffer;
@@ -43,9 +44,10 @@ final class BSSReaderSeekableChannel
     final String inName,
     final SeekableByteChannel inChannel,
     final ByteBuffer inBuffer,
-    final Callable<Void> inOnClose)
+    final Callable<Void> inOnClose,
+    final Consumer<? extends BSSReaderRandomAccessType> inOnUserClose)
   {
-    super(inParent, inRange, inOnClose, inURI, inName);
+    super(inParent, inRange, inOnClose, inURI, inName, inOnUserClose);
 
     this.channel =
       Objects.requireNonNull(inChannel, "channel");
@@ -53,11 +55,18 @@ final class BSSReaderSeekableChannel
       Objects.requireNonNull(inBuffer, "buffer");
   }
 
+  @Override
+  public Optional<BSSReaderRandomAccessType> parentReader()
+  {
+    return Optional.ofNullable((BSSReaderRandomAccessType) super.parent());
+  }
+
   static BSSReaderRandomAccessType createFromChannel(
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
-    final OptionalLong size)
+    final OptionalLong size,
+    final Consumer<? extends BSSReaderRandomAccessType> inOnUserClose)
   {
     final var buffer = ByteBuffer.allocateDirect(8);
 
@@ -71,7 +80,8 @@ final class BSSReaderSeekableChannel
       () -> {
         channel.close();
         return null;
-      });
+      },
+      inOnUserClose);
   }
 
   @Override
@@ -97,7 +107,8 @@ final class BSSReaderSeekableChannel
       newName,
       this.channel,
       this.buffer,
-      () -> null);
+      () -> null,
+      this.onUserClose());
   }
 
   @Override
@@ -125,7 +136,8 @@ final class BSSReaderSeekableChannel
       newName,
       this.channel,
       this.buffer,
-      () -> null);
+      () -> null,
+      this.onUserClose());
   }
 
   @Override
@@ -748,6 +760,16 @@ final class BSSReaderSeekableChannel
     final int length)
     throws IOException, EOFException
   {
-    return this.readBytesP(Objects.requireNonNull(name, "name"), inBuffer, length);
+    return this.readBytesP(
+      Objects.requireNonNull(name, "name"),
+      inBuffer,
+      length);
+  }
+
+  @Override
+  protected BSSRangeHalfOpen physicalSourceAbsoluteBounds()
+    throws IOException
+  {
+    return BSSRangeHalfOpen.create(0L, this.channel.size());
   }
 }

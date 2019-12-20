@@ -17,7 +17,6 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -26,13 +25,23 @@ import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 final class BSSWriterSeekableChannel
-  extends BSSRandomAccess implements BSSWriterRandomAccessType
+  extends BSSRandomAccess<BSSWriterRandomAccessType> implements BSSWriterRandomAccessType
 {
+  /**
+   * Seekable byte channels are assumed to be growable, for writers, and
+   * therefore have no specified upper bounds even if the size of the underlying
+   * channel is known.
+   */
+
+  private static final BSSRangeHalfOpen PHYSICAL_BOUNDS =
+    new BSSRangeHalfOpen(0L, OptionalLong.empty());
+
   private final SeekableByteChannel channel;
   private final ByteBuffer writeBuffer;
 
@@ -43,9 +52,10 @@ final class BSSWriterSeekableChannel
     final String inName,
     final SeekableByteChannel inChannel,
     final ByteBuffer inBuffer,
-    final Callable<Void> inOnClose)
+    final Callable<Void> inOnClose,
+    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
   {
-    super(inParent, inParentRangeRelative, inOnClose, inURI, inName);
+    super(inParent, inParentRangeRelative, inOnClose, inURI, inName, inOnUserClose);
 
     this.channel =
       Objects.requireNonNull(inChannel, "channel");
@@ -57,7 +67,8 @@ final class BSSWriterSeekableChannel
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
-    final OptionalLong size)
+    final OptionalLong size,
+    final Consumer<? extends BSSWriterRandomAccessType> inOnUserClose)
   {
     final var buffer = ByteBuffer.allocateDirect(8);
     return new BSSWriterSeekableChannel(
@@ -70,7 +81,8 @@ final class BSSWriterSeekableChannel
       () -> {
         channel.close();
         return null;
-      });
+      },
+      inOnUserClose);
   }
 
   @Override
@@ -97,7 +109,8 @@ final class BSSWriterSeekableChannel
       newName,
       this.channel,
       this.writeBuffer,
-      () -> null);
+      () -> null,
+      this.onUserClose());
   }
 
   @Override
@@ -125,7 +138,8 @@ final class BSSWriterSeekableChannel
       newName,
       this.channel,
       this.writeBuffer,
-      () -> null);
+      () -> null,
+      this.onUserClose());
   }
 
   @Override
@@ -633,7 +647,11 @@ final class BSSWriterSeekableChannel
     final byte[] buffer)
     throws IOException
   {
-    this.writeBytesP(Objects.requireNonNull(name, "name"), buffer, 0, buffer.length);
+    this.writeBytesP(
+      Objects.requireNonNull(name, "name"),
+      buffer,
+      0,
+      buffer.length);
   }
 
   @Override
@@ -780,5 +798,11 @@ final class BSSWriterSeekableChannel
     throws IOException
   {
     this.writeF32(null, LITTLE_ENDIAN, b);
+  }
+
+  @Override
+  protected BSSRangeHalfOpen physicalSourceAbsoluteBounds()
+  {
+    return PHYSICAL_BOUNDS;
   }
 }
