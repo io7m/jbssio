@@ -24,6 +24,42 @@ import java.io.IOException;
 
 public interface BSSWriterSequentialType extends BSSWriterType
 {
+  /**
+   * Create a sub writer at the current position.
+   *
+   * @param name The name of the writer
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSWriterSequentialType createSubWriter(
+    final String name)
+    throws IOException
+  {
+    return this.createSubWriterAt(name, this.offsetCurrentRelative());
+  }
+
+  /**
+   * Create a sub writer at the current position that may write at most {@code size} bytes.
+   *
+   * @param name The name of the writer
+   * @param size The maximum number of bytes that can be written
+   *
+   * @return A new writer
+   *
+   * @throws IOException On I/O errors
+   */
+
+  default BSSWriterSequentialType createSubWriterBounded(
+    final String name,
+    final long size)
+    throws IOException
+  {
+    return this.createSubWriterAtBounded(name, this.offsetCurrentRelative(), size);
+  }
+
   @Override
   BSSWriterSequentialType createSubWriterAt(
     String name,
