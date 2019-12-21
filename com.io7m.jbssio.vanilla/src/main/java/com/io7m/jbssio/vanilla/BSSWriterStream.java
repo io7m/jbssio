@@ -778,7 +778,9 @@ final class BSSWriterStream implements BSSWriterSequentialType
     throws IOException
   {
     if (this.closed.compareAndSet(false, true)) {
-      this.stream.close();
+      if (this.parent == null) {
+        this.stream.close();
+      }
     }
   }
 
