@@ -78,8 +78,8 @@
   </distributionManagement>
 
   <ciManagement>
-    <system>Travis CI</system>
-    <url>https://travis-ci.org/io7m/jbssio</url>
+    <system>GitHub Actions</system>
+    <url>https://github.com/jbssio/actions</url>
   </ciManagement>
 
   <dependencyManagement>
