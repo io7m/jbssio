@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -817,7 +818,7 @@ public final class BSSWriterStream implements BSSWriterSequentialType
     final var newName =
       new StringBuilder(this.path.length() + name.length() + 2)
         .append(this.path)
-        .append(".")
+        .append(PATH_SEPARATOR)
         .append(name)
         .toString();
 
@@ -880,7 +881,7 @@ public final class BSSWriterStream implements BSSWriterSequentialType
     final var newName =
       new StringBuilder(this.path.length() + name.length() + 2)
         .append(this.path)
-        .append(".")
+        .append(PATH_SEPARATOR)
         .append(name)
         .toString();
 
