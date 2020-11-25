@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2020 Mark Raynsford <code@io7m.com> http://io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,27 +14,8 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import com.io7m.jbssio.vanilla.BSSReaders;
-import com.io7m.jbssio.vanilla.BSSWriters;
-
 /**
- * Java bitstream structure I/O (Vanilla implementation)
+ * Java bitstream structure I/O (Vanilla implementation [Internal classes])
  */
 
-module com.io7m.jbssio.vanilla
-{
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
-  requires static org.osgi.service.component.annotations;
-
-  requires transitive com.io7m.jbssio.api;
-
-  requires com.io7m.ieee754b16.core;
-  requires org.apache.commons.io;
-  requires org.slf4j;
-
-  provides com.io7m.jbssio.api.BSSReaderProviderType with BSSReaders;
-  provides com.io7m.jbssio.api.BSSWriterProviderType with BSSWriters;
-
-  exports com.io7m.jbssio.vanilla;
-}
+package com.io7m.jbssio.vanilla.internal;

@@ -14,10 +14,11 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
@@ -28,7 +29,10 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
-final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessType>
+import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
+
+public final class BSSReaderByteBuffer
+  extends BSSRandomAccess<BSSReaderRandomAccessType>
   implements BSSReaderRandomAccessType
 {
   private final ByteBuffer map;
@@ -46,10 +50,10 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.map =
       Objects.requireNonNull(inMap, "map");
     this.physicalBounds =
-      BSSRangeHalfOpen.create(0L, (long) inMap.capacity());
+      BSSRangeHalfOpen.create(0L, inMap.capacity());
   }
 
-  static BSSReaderRandomAccessType createFromByteBuffer(
+  public static BSSReaderRandomAccessType createFromByteBuffer(
     final URI uri,
     final ByteBuffer buffer,
     final String name)
@@ -84,7 +88,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     final var newName =
       new StringBuilder(32)
         .append(this.path)
-        .append('.')
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
@@ -115,7 +119,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     final var newName =
       new StringBuilder(32)
         .append(this.path)
-        .append('.')
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
@@ -148,7 +152,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
     this.map.position(0);
-    return (int) this.map.get(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.get(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 
@@ -173,7 +177,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getShort(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.getShort(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 
@@ -186,7 +190,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getChar(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.getChar(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 
@@ -199,7 +203,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.LITTLE_ENDIAN);
     this.map.position(0);
-    return (long) this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 
@@ -249,7 +253,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getShort(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.getShort(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 
@@ -262,7 +266,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.increaseOffsetRelative(2L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (int) this.map.getChar(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.getChar(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 
@@ -275,7 +279,7 @@ final class BSSReaderByteBuffer extends BSSRandomAccess<BSSReaderRandomAccessTyp
     this.increaseOffsetRelative(4L);
     this.map.order(ByteOrder.BIG_ENDIAN);
     this.map.position(0);
-    return (long) this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(
+    return this.map.getInt(longPositionTo2GBLimitedByteBufferPosition(
       position));
   }
 

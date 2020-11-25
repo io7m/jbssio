@@ -15,12 +15,15 @@
  */
 
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.jbssio.api.BSSAddressableType;
 import com.io7m.jbssio.api.BSSCloseableType;
 import com.io7m.jbssio.api.BSSSeekableType;
 import com.io7m.jbssio.api.BSSSkippableType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
@@ -29,8 +32,6 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 abstract class BSSRandomAccess<T>
   implements BSSSeekableType,

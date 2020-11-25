@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <c:changelog project="com.io7m.jbssio" xmlns:c="urn:com.io7m.changelog:4.0">
-  <c:releases/>
+  <c:releases>
+    <c:release date="2020-11-25T20:09:47+00:00" ticket-system="com.github.io7m.jbssio" version="1.0.0">
+      <c:changes>
+        <c:change date="2020-11-25T20:09:47+00:00" summary="Initial public release"/>
+      </c:changes>
+    </c:release>
+  </c:releases>
   <c:ticket-systems>
     <c:ticket-system default="true" id="com.github.io7m.jbssio" url="https://www.github.com/io7m/jbssio/issues/"/>
   </c:ticket-systems>
