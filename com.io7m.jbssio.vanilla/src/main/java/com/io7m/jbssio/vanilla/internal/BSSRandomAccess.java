@@ -15,7 +15,7 @@
  */
 
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.jbssio.api.BSSAddressableType;
 import com.io7m.jbssio.api.BSSCloseableType;

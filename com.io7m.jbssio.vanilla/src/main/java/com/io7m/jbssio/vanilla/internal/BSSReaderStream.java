@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-final class BSSReaderStream implements BSSReaderSequentialType
+public final class BSSReaderStream implements BSSReaderSequentialType
 {
   private static final Logger LOG =
     LoggerFactory.getLogger(BSSReaderStream.class);
@@ -82,7 +82,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.buffer2w = ByteBuffer.wrap(this.buffer2);
   }
 
-  static BSSReaderStream create(
+  public static BSSReaderStream create(
     final URI uri,
     final InputStream inStream,
     final String inName,

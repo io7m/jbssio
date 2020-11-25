@@ -19,6 +19,9 @@ package com.io7m.jbssio.vanilla;
 import com.io7m.jbssio.api.BSSWriterProviderType;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
+import com.io7m.jbssio.vanilla.internal.BSSWriterByteBuffer;
+import com.io7m.jbssio.vanilla.internal.BSSWriterSeekableChannel;
+import com.io7m.jbssio.vanilla.internal.BSSWriterStream;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.OutputStream;

@@ -15,7 +15,7 @@
  */
 
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import java.util.Objects;
 

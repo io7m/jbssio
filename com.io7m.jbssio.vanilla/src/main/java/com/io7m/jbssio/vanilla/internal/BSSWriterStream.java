@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-final class BSSWriterStream implements BSSWriterSequentialType
+public final class BSSWriterStream implements BSSWriterSequentialType
 {
   private final BSSWriterStream parent;
   private final String path;
@@ -77,7 +77,7 @@ final class BSSWriterStream implements BSSWriterSequentialType
     this.buffer2w = ByteBuffer.wrap(this.buffer2);
   }
 
-  static BSSWriterStream create(
+  public static BSSWriterStream create(
     final URI uri,
     final OutputStream inStream,
     final String inName,

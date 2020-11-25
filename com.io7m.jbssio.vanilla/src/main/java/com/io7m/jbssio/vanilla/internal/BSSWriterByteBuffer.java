@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
@@ -23,65 +23,61 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
+import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-final class BSSWriterSeekableChannel
-  extends BSSRandomAccess<BSSWriterRandomAccessType> implements
-  BSSWriterRandomAccessType
+public final class BSSWriterByteBuffer
+  extends BSSRandomAccess<BSSWriterRandomAccessType>
+  implements BSSWriterRandomAccessType
 {
-  /**
-   * Seekable byte channels are assumed to be growable, for writers, and
-   * therefore have no specified upper bounds even if the size of the underlying
-   * channel is known.
-   */
+  private final ByteBuffer map;
+  private final BSSRangeHalfOpen physicalBounds;
 
-  private static final BSSRangeHalfOpen PHYSICAL_BOUNDS =
-    new BSSRangeHalfOpen(0L, OptionalLong.empty());
-
-  private final SeekableByteChannel channel;
-  private final ByteBuffer writeBuffer;
-
-  private BSSWriterSeekableChannel(
-    final BSSWriterSeekableChannel inParent,
+  private BSSWriterByteBuffer(
+    final BSSWriterByteBuffer inParent,
     final URI inURI,
     final BSSRangeHalfOpen inParentRangeRelative,
     final String inName,
-    final SeekableByteChannel inChannel,
-    final ByteBuffer inBuffer,
+    final ByteBuffer inMap,
     final Callable<Void> inOnClose)
   {
-    super(inParent, inParentRangeRelative, inOnClose, inURI, inName);
+    super(
+      inParent,
+      inParentRangeRelative,
+      inOnClose,
+      inURI,
+      inName);
 
-    this.channel =
-      Objects.requireNonNull(inChannel, "channel");
-    this.writeBuffer =
-      Objects.requireNonNull(inBuffer, "inBuffer");
+    this.map =
+      Objects.requireNonNull(inMap, "map");
+    this.physicalBounds =
+      BSSRangeHalfOpen.create(0L, inMap.capacity());
   }
 
-  static BSSWriterRandomAccessType createFromChannel(
+  public static BSSWriterRandomAccessType createFromByteBuffer(
     final URI uri,
-    final SeekableByteChannel channel,
-    final String name,
-    final OptionalLong size)
+    final ByteBuffer buffer,
+    final String name)
   {
-    final var buffer = ByteBuffer.allocateDirect(8);
-    return new BSSWriterSeekableChannel(
+    return new BSSWriterByteBuffer(
       null,
       uri,
-      new BSSRangeHalfOpen(0L, size),
+      new BSSRangeHalfOpen(
+        0L,
+        OptionalLong.of(Integer.toUnsignedLong(buffer.capacity()))),
       name,
-      channel,
       buffer,
-      () -> {
-        channel.close();
-        return null;
-      });
+      () -> null);
+  }
+
+  private static int longPositionTo2GBLimitedByteBufferPosition(final long position)
+  {
+    return Math.toIntExact(position);
   }
 
   @Override
@@ -97,17 +93,16 @@ final class BSSWriterSeekableChannel
     final var newName =
       new StringBuilder(32)
         .append(this.path())
-        .append(BSSPaths.PATH_SEPARATOR)
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
-    return new BSSWriterSeekableChannel(
+    return new BSSWriterByteBuffer(
       this,
       this.uri,
       this.createOffsetSubRange(offset),
       newName,
-      this.channel,
-      this.writeBuffer,
+      this.map,
       () -> null);
   }
 
@@ -125,17 +120,16 @@ final class BSSWriterSeekableChannel
     final var newName =
       new StringBuilder(32)
         .append(this.path())
-        .append(BSSPaths.PATH_SEPARATOR)
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
-    return new BSSWriterSeekableChannel(
+    return new BSSWriterByteBuffer(
       this,
       this.uri,
       this.createSubRange(offset, size),
       newName,
-      this.channel,
-      this.writeBuffer,
+      this.map,
       () -> null);
   }
 
@@ -143,7 +137,7 @@ final class BSSWriterSeekableChannel
   public String toString()
   {
     return new StringBuilder(64)
-      .append("[BSSWriterSeekableChannel ")
+      .append("[BSSWriterByteBuffer ")
       .append(this.uri())
       .append(" ")
       .append(this.path())
@@ -160,20 +154,9 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
-
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.limit(1);
-    this.writeBuffer.put(0, (byte) b);
-    this.writeAll();
-  }
-
-  private void writeAll()
-    throws IOException
-  {
-    while (this.writeBuffer.hasRemaining()) {
-      this.channel.write(this.writeBuffer);
-    }
+    this.map.put(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (byte) b);
   }
 
   private void writeU8p(
@@ -185,12 +168,9 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 1L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
-
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.limit(1);
-    this.writeBuffer.put(0, (byte) (b & 0xff));
-    this.writeAll();
+    this.map.put(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (byte) (b & 0xff));
   }
 
   @Override
@@ -225,34 +205,6 @@ final class BSSWriterSeekableChannel
     this.writeU8p(Objects.requireNonNull(name, "name"), b);
   }
 
-  private void writeS16(
-    final short b,
-    final long position,
-    final ByteOrder order)
-    throws IOException
-  {
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(2);
-    this.writeBuffer.putShort(0, b);
-    this.writeAll();
-  }
-
-  private void writeU16(
-    final int b,
-    final long position,
-    final ByteOrder order)
-    throws IOException
-  {
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(2);
-    this.writeBuffer.putChar(0, (char) (b & 0xffff));
-    this.writeAll();
-  }
-
   private void writeS16LEp(
     final String name,
     final int b)
@@ -262,7 +214,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.writeS16((short) b, position, LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
+    this.map.putShort(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (short) b);
   }
 
   private void writeU16LEp(
@@ -274,7 +229,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.writeU16(b, position, LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
+    this.map.putChar(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (char) (b & 0xffff));
   }
 
   private void writeS16BEp(
@@ -286,7 +244,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.writeS16((short) b, position, BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
+    this.map.putShort(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (short) b);
   }
 
   private void writeU16BEp(
@@ -298,7 +259,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-    this.writeU16(b, position, BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
+    this.map.putChar(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (char) (b & 0xffff));
   }
 
   @Override
@@ -365,20 +329,6 @@ final class BSSWriterSeekableChannel
     this.writeU16BEp(Objects.requireNonNull(name, "name"), b);
   }
 
-  private void writeInt(
-    final int b,
-    final long position,
-    final ByteOrder order)
-    throws IOException
-  {
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(4);
-    this.writeBuffer.putInt(0, b);
-    this.writeAll();
-  }
-
   private void writeS32LEp(
     final String name,
     final long b)
@@ -388,7 +338,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.writeInt((int) b, position, LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) b);
   }
 
   private void writeU32LEp(
@@ -400,7 +353,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.writeInt((int) (b & 0xffff_ffffL), position, LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) (b & 0xffff_ffffL));
   }
 
   private void writeS32BEp(
@@ -412,7 +368,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.writeInt((int) b, position, BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) b);
   }
 
   private void writeU32BEp(
@@ -424,7 +383,10 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.writeInt((int) (b & 0xffff_ffffL), position, BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
+    this.map.putInt(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (int) (b & 0xffff_ffffL));
   }
 
   @Override
@@ -491,20 +453,6 @@ final class BSSWriterSeekableChannel
     this.writeU32BEp(Objects.requireNonNull(name, "name"), b);
   }
 
-  private void writeLong(
-    final long b,
-    final long position,
-    final ByteOrder order)
-    throws IOException
-  {
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(8);
-    this.writeBuffer.putLong(0, b);
-    this.writeAll();
-  }
-
   private void writeS64LEp(
     final String name,
     final long b)
@@ -514,7 +462,8 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.writeLong(b, position, LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
+    this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
   private void writeU64LEp(
@@ -526,7 +475,8 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.writeLong(b, position, LITTLE_ENDIAN);
+    this.map.order(LITTLE_ENDIAN);
+    this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
   private void writeS64BEp(
@@ -538,7 +488,8 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.writeLong(b, position, BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
+    this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
   private void writeU64BEp(
@@ -550,7 +501,8 @@ final class BSSWriterSeekableChannel
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.writeLong(b, position, BIG_ENDIAN);
+    this.map.order(BIG_ENDIAN);
+    this.map.putLong(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
   @Override
@@ -624,18 +576,14 @@ final class BSSWriterSeekableChannel
     final int length)
     throws IOException
   {
-    Objects.requireNonNull(buffer, "writeBuffer");
+    Objects.requireNonNull(buffer, "buffer");
     this.checkNotClosed();
     final var llength = Integer.toUnsignedLong(length);
     this.checkHasBytesRemaining(name, llength);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(llength);
-
-    final var wrapper = ByteBuffer.wrap(buffer, offset, length);
-    this.channel.position(position);
-    while (wrapper.hasRemaining()) {
-      this.channel.write(wrapper);
-    }
+    this.map.position(longPositionTo2GBLimitedByteBufferPosition(position));
+    this.map.put(buffer, offset, length);
   }
 
   @Override
@@ -679,77 +627,50 @@ final class BSSWriterSeekableChannel
     this.writeBytesP(null, buffer, offset, length);
   }
 
-  private void writeF64(
+  private void writeF64p(
     final String name,
-    final ByteOrder order,
-    final double x)
+    final double b,
+    final ByteOrder order)
     throws IOException
   {
     this.checkNotClosed();
     this.checkHasBytesRemaining(name, 8L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(8L);
-    this.writeDouble(x, position, order);
+    this.map.order(order);
+    this.map.putDouble(longPositionTo2GBLimitedByteBufferPosition(position), b);
   }
 
-  private void writeF32(
+  private void writeF32p(
     final String name,
-    final ByteOrder order,
-    final double x)
+    final double b,
+    final ByteOrder order)
     throws IOException
   {
     this.checkNotClosed();
     this.checkHasBytesRemaining(name, 4L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(4L);
-    this.writeFloat(x, position, order);
+    this.map.order(order);
+    this.map.putFloat(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      (float) b);
   }
 
-  private void writeF16(
+  private void writeF16p(
     final String name,
-    final ByteOrder order,
-    final double x)
+    final double b,
+    final ByteOrder order)
     throws IOException
   {
     this.checkNotClosed();
     this.checkHasBytesRemaining(name, 2L);
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(2L);
-
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(2);
-    this.writeBuffer.putChar(0, Binary16.packDouble(x));
-    this.writeAll();
-  }
-
-  private void writeDouble(
-    final double x,
-    final long position,
-    final ByteOrder order)
-    throws IOException
-  {
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(8);
-    this.writeBuffer.putDouble(0, x);
-    this.writeAll();
-  }
-
-  private void writeFloat(
-    final double x,
-    final long position,
-    final ByteOrder order)
-    throws IOException
-  {
-    this.channel.position(position);
-    this.writeBuffer.position(0);
-    this.writeBuffer.order(order);
-    this.writeBuffer.limit(4);
-    this.writeBuffer.putFloat(0, (float) x);
-    this.writeAll();
+    this.map.order(order);
+    this.map.putChar(
+      longPositionTo2GBLimitedByteBufferPosition(position),
+      Binary16.packDouble(b));
   }
 
   @Override
@@ -758,46 +679,14 @@ final class BSSWriterSeekableChannel
     final double b)
     throws IOException
   {
-    this.writeF64(Objects.requireNonNull(name, "name"), BIG_ENDIAN, b);
+    this.writeF64p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
   }
 
   @Override
   public void writeF64BE(final double b)
     throws IOException
   {
-    this.writeF64(null, BIG_ENDIAN, b);
-  }
-
-  @Override
-  public void writeF16BE(
-    final String name,
-    final double b)
-    throws IOException
-  {
-    this.writeF16(Objects.requireNonNull(name, "name"), BIG_ENDIAN, b);
-  }
-
-  @Override
-  public void writeF16BE(final double b)
-    throws IOException
-  {
-    this.writeF16(null, BIG_ENDIAN, b);
-  }
-
-  @Override
-  public void writeF16LE(
-    final String name,
-    final double b)
-    throws IOException
-  {
-    this.writeF16(Objects.requireNonNull(name, "name"), LITTLE_ENDIAN, b);
-  }
-
-  @Override
-  public void writeF16LE(final double b)
-    throws IOException
-  {
-    this.writeF16(null, LITTLE_ENDIAN, b);
+    this.writeF64p(null, b, BIG_ENDIAN);
   }
 
   @Override
@@ -806,14 +695,14 @@ final class BSSWriterSeekableChannel
     final double b)
     throws IOException
   {
-    this.writeF32(Objects.requireNonNull(name, "name"), BIG_ENDIAN, b);
+    this.writeF32p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
   }
 
   @Override
   public void writeF32BE(final double b)
     throws IOException
   {
-    this.writeF32(null, BIG_ENDIAN, b);
+    this.writeF32p(null, b, BIG_ENDIAN);
   }
 
   @Override
@@ -822,14 +711,14 @@ final class BSSWriterSeekableChannel
     final double b)
     throws IOException
   {
-    this.writeF64(Objects.requireNonNull(name, "name"), LITTLE_ENDIAN, b);
+    this.writeF64p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
   }
 
   @Override
   public void writeF64LE(final double b)
     throws IOException
   {
-    this.writeF64(null, LITTLE_ENDIAN, b);
+    this.writeF64p(null, b, LITTLE_ENDIAN);
   }
 
   @Override
@@ -838,19 +727,51 @@ final class BSSWriterSeekableChannel
     final double b)
     throws IOException
   {
-    this.writeF32(Objects.requireNonNull(name, "name"), LITTLE_ENDIAN, b);
+    this.writeF32p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
   }
 
   @Override
   public void writeF32LE(final double b)
     throws IOException
   {
-    this.writeF32(null, LITTLE_ENDIAN, b);
+    this.writeF32p(null, b, LITTLE_ENDIAN);
+  }
+
+  @Override
+  public void writeF16BE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF16p(Objects.requireNonNull(name, "name"), b, BIG_ENDIAN);
+  }
+
+  @Override
+  public void writeF16BE(final double b)
+    throws IOException
+  {
+    this.writeF16p(null, b, BIG_ENDIAN);
+  }
+
+  @Override
+  public void writeF16LE(
+    final String name,
+    final double b)
+    throws IOException
+  {
+    this.writeF16p(Objects.requireNonNull(name, "name"), b, LITTLE_ENDIAN);
+  }
+
+  @Override
+  public void writeF16LE(final double b)
+    throws IOException
+  {
+    this.writeF16p(null, b, LITTLE_ENDIAN);
   }
 
   @Override
   protected BSSRangeHalfOpen physicalSourceAbsoluteBounds()
   {
-    return PHYSICAL_BOUNDS;
+    return this.physicalBounds;
   }
 }

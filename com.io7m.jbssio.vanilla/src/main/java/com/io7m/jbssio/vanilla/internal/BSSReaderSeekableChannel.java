@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.jbssio.vanilla;
+package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
@@ -29,11 +29,11 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
-import static com.io7m.jbssio.vanilla.BSSPaths.PATH_SEPARATOR;
+import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-final class BSSReaderSeekableChannel
+public final class BSSReaderSeekableChannel
   extends BSSRandomAccess<BSSReaderRandomAccessType> implements
   BSSReaderRandomAccessType
 {
@@ -57,7 +57,7 @@ final class BSSReaderSeekableChannel
       Objects.requireNonNull(inBuffer, "buffer");
   }
 
-  static BSSReaderRandomAccessType createFromChannel(
+  public static BSSReaderRandomAccessType createFromChannel(
     final URI uri,
     final SeekableByteChannel channel,
     final String name,
