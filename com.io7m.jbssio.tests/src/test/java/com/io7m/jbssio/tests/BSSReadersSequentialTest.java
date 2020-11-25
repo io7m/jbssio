@@ -80,11 +80,11 @@ public final class BSSReadersSequentialTest
         try (var s0 = reader.createSubReader("x")) {
           try (var s1 = s0.createSubReader("y")) {
             try (var s2 = s1.createSubReader("z")) {
-              Assertions.assertEquals("a.x.y.z", s2.path());
+              Assertions.assertEquals("a/x/y/z", s2.path());
             }
-            Assertions.assertEquals("a.x.y", s1.path());
+            Assertions.assertEquals("a/x/y", s1.path());
           }
-          Assertions.assertEquals("a.x", s0.path());
+          Assertions.assertEquals("a/x", s0.path());
         }
         Assertions.assertEquals("a", reader.path());
       }

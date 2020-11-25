@@ -36,6 +36,8 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
+
 public final class BSSReaderStream implements BSSReaderSequentialType
 {
   private static final Logger LOG =
@@ -782,7 +784,7 @@ public final class BSSReaderStream implements BSSReaderSequentialType
     final var newName =
       new StringBuilder(this.path.length() + name.length() + 2)
         .append(this.path)
-        .append(".")
+        .append(PATH_SEPARATOR)
         .append(name)
         .toString();
 
@@ -821,7 +823,7 @@ public final class BSSReaderStream implements BSSReaderSequentialType
     final var newName =
       new StringBuilder(this.path.length() + name.length() + 2)
         .append(this.path)
-        .append(".")
+        .append(PATH_SEPARATOR)
         .append(name)
         .toString();
 
