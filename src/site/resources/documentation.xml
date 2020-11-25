@@ -41,7 +41,7 @@
   <pre class="code"><![CDATA[
 java.io.IOException: Out of bounds.
   Reader URI: file://tmp/example.data
-  Reader path: header.info:size
+  Reader path: header/info:size
   Reader bounds: absolute [0x0, 0x10)
   Target offset: absolute 0x16
   Offset: absolute 0x0
