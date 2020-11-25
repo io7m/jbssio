@@ -18,6 +18,7 @@ package com.io7m.jbssio.vanilla;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -96,7 +97,7 @@ final class BSSWriterSeekableChannel
     final var newName =
       new StringBuilder(32)
         .append(this.path())
-        .append('.')
+        .append(BSSPaths.PATH_SEPARATOR)
         .append(inName)
         .toString();
 
@@ -124,7 +125,7 @@ final class BSSWriterSeekableChannel
     final var newName =
       new StringBuilder(32)
         .append(this.path())
-        .append('.')
+        .append(BSSPaths.PATH_SEPARATOR)
         .append(inName)
         .toString();
 

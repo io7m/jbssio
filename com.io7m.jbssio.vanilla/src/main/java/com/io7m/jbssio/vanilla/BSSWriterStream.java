@@ -18,6 +18,9 @@ package com.io7m.jbssio.vanilla;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterSequentialType;
+import org.apache.commons.io.output.CloseShieldOutputStream;
+import org.apache.commons.io.output.CountingOutputStream;
+
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -30,8 +33,6 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.io.output.CloseShieldOutputStream;
-import org.apache.commons.io.output.CountingOutputStream;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;

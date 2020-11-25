@@ -18,6 +18,7 @@ package com.io7m.jbssio.vanilla;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
+import static com.io7m.jbssio.vanilla.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -94,7 +96,7 @@ final class BSSReaderSeekableChannel
     final var newName =
       new StringBuilder(32)
         .append(this.path)
-        .append('.')
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
@@ -122,7 +124,7 @@ final class BSSReaderSeekableChannel
     final var newName =
       new StringBuilder(32)
         .append(this.path)
-        .append('.')
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
@@ -161,7 +163,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(1);
-    return (int) this.buffer.get(0);
+    return this.buffer.get(0);
   }
 
   private int readU8p(final String name)
@@ -196,7 +198,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(2);
-    return (int) this.buffer.getShort(0);
+    return this.buffer.getShort(0);
   }
 
   private int readU16LEp(final String name)
@@ -214,7 +216,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(2);
-    return (int) this.buffer.getChar(0);
+    return this.buffer.getChar(0);
   }
 
   private long readS32LEp(final String name)
@@ -232,7 +234,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(4);
-    return (long) this.buffer.getInt(0);
+    return this.buffer.getInt(0);
   }
 
   private long readU32LEp(final String name)
@@ -304,7 +306,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(2);
-    return (int) this.buffer.getShort(0);
+    return this.buffer.getShort(0);
   }
 
   private int readU16BEp(final String name)
@@ -322,7 +324,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(2);
-    return (int) this.buffer.getChar(0);
+    return this.buffer.getChar(0);
   }
 
   private long readS32BEp(final String name)
@@ -340,7 +342,7 @@ final class BSSReaderSeekableChannel
     this.channel.read(this.buffer);
     this.buffer.position(0);
     this.buffer.limit(4);
-    return (long) this.buffer.getInt(0);
+    return this.buffer.getInt(0);
   }
 
   private long readU32BEp(final String name)

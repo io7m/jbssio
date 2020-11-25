@@ -19,6 +19,8 @@ package com.io7m.jbssio.vanilla;
 import com.io7m.jbssio.api.BSSReaderProviderType;
 import com.io7m.jbssio.api.BSSReaderRandomAccessType;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
+import org.osgi.service.component.annotations.Component;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -26,7 +28,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Objects;
 import java.util.OptionalLong;
-import org.osgi.service.component.annotations.Component;
 
 /**
  * A default provider of readers.

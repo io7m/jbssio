@@ -18,6 +18,12 @@ package com.io7m.jbssio.vanilla;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSReaderSequentialType;
+import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.io.input.CloseShieldInputStream;
+import org.apache.commons.io.input.CountingInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,11 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.io.input.CountingInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class BSSReaderStream implements BSSReaderSequentialType
 {
@@ -166,7 +167,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 1L);
     final var r = this.stream.read();
     checkEOF(r);
-    return (int) (byte) r;
+    return (byte) r;
   }
 
   private void checkLimit(
@@ -207,9 +208,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
-    this.checkNotShortRead(name, 2L, (long) r);
+    this.checkNotShortRead(name, 2L, r);
     this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
-    return (int) this.buffer2w.getShort(0);
+    return this.buffer2w.getShort(0);
   }
 
   private int readU16LEp(final String name)
@@ -218,9 +219,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
-    this.checkNotShortRead(name, 2L, (long) r);
+    this.checkNotShortRead(name, 2L, r);
     this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
-    return (int) this.buffer2w.getChar(0);
+    return this.buffer2w.getChar(0);
   }
 
   private long readS32LEp(final String name)
@@ -229,9 +230,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
-    this.checkNotShortRead(name, 4L, (long) r);
+    this.checkNotShortRead(name, 4L, r);
     this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
-    return (long) this.buffer4w.getInt(0);
+    return this.buffer4w.getInt(0);
   }
 
   private long readU32LEp(final String name)
@@ -240,7 +241,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
-    this.checkNotShortRead(name, 4L, (long) r);
+    this.checkNotShortRead(name, 4L, r);
     this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
     return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
   }
@@ -251,7 +252,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
-    this.checkNotShortRead(name, 8L, (long) r);
+    this.checkNotShortRead(name, 8L, r);
     this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
     return this.buffer8w.getLong(0);
   }
@@ -262,7 +263,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
-    this.checkNotShortRead(name, 8L, (long) r);
+    this.checkNotShortRead(name, 8L, r);
     this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
     return this.buffer8w.getLong(0);
   }
@@ -273,9 +274,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
-    this.checkNotShortRead(name, 2L, (long) r);
+    this.checkNotShortRead(name, 2L, r);
     this.buffer2w.order(ByteOrder.BIG_ENDIAN);
-    return (int) this.buffer2w.getShort(0);
+    return this.buffer2w.getShort(0);
   }
 
   private int readU16BEp(final String name)
@@ -284,9 +285,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
-    this.checkNotShortRead(name, 2L, (long) r);
+    this.checkNotShortRead(name, 2L, r);
     this.buffer2w.order(ByteOrder.BIG_ENDIAN);
-    return (int) this.buffer2w.getChar(0);
+    return this.buffer2w.getChar(0);
   }
 
   private long readS32BEp(final String name)
@@ -295,9 +296,9 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
-    this.checkNotShortRead(name, 4L, (long) r);
+    this.checkNotShortRead(name, 4L, r);
     this.buffer4w.order(ByteOrder.BIG_ENDIAN);
-    return (long) this.buffer4w.getInt(0);
+    return this.buffer4w.getInt(0);
   }
 
   private long readU32BEp(final String name)
@@ -306,7 +307,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
-    this.checkNotShortRead(name, 4L, (long) r);
+    this.checkNotShortRead(name, 4L, r);
     this.buffer4w.order(ByteOrder.BIG_ENDIAN);
     return (long) this.buffer4w.getInt(0) & 0xffff_ffffL;
   }
@@ -317,7 +318,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
-    this.checkNotShortRead(name, 8L, (long) r);
+    this.checkNotShortRead(name, 8L, r);
     this.buffer8w.order(ByteOrder.BIG_ENDIAN);
     return this.buffer8w.getLong(0);
   }
@@ -328,7 +329,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
-    this.checkNotShortRead(name, 8L, (long) r);
+    this.checkNotShortRead(name, 8L, r);
     this.buffer8w.order(ByteOrder.BIG_ENDIAN);
     return this.buffer8w.getLong(0);
   }
@@ -339,7 +340,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
-    this.checkNotShortRead(name, 4L, (long) r);
+    this.checkNotShortRead(name, 4L, r);
     this.buffer4w.order(ByteOrder.BIG_ENDIAN);
     return this.buffer4w.getFloat(0);
   }
@@ -350,7 +351,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 4L);
     final var r = this.stream.read(this.buffer4, 0, 4);
     checkEOF(r);
-    this.checkNotShortRead(name, 4L, (long) r);
+    this.checkNotShortRead(name, 4L, r);
     this.buffer4w.order(ByteOrder.LITTLE_ENDIAN);
     return this.buffer4w.getFloat(0);
   }
@@ -361,7 +362,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
-    this.checkNotShortRead(name, 8L, (long) r);
+    this.checkNotShortRead(name, 8L, r);
     this.buffer8w.order(ByteOrder.BIG_ENDIAN);
     return this.buffer8w.getDouble(0);
   }
@@ -372,7 +373,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 8L);
     final var r = this.stream.read(this.buffer8, 0, 8);
     checkEOF(r);
-    this.checkNotShortRead(name, 8L, (long) r);
+    this.checkNotShortRead(name, 8L, r);
     this.buffer8w.order(ByteOrder.LITTLE_ENDIAN);
     return this.buffer8w.getDouble(0);
   }
@@ -383,7 +384,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
-    this.checkNotShortRead(name, 2L, (long) r);
+    this.checkNotShortRead(name, 2L, r);
     this.buffer2w.order(ByteOrder.BIG_ENDIAN);
     return Binary16.unpackFloat(this.buffer2w.getChar(0));
   }
@@ -394,7 +395,7 @@ final class BSSReaderStream implements BSSReaderSequentialType
     this.checkLimit(name, 2L);
     final var r = this.stream.read(this.buffer2, 0, 2);
     checkEOF(r);
-    this.checkNotShortRead(name, 2L, (long) r);
+    this.checkNotShortRead(name, 2L, r);
     this.buffer2w.order(ByteOrder.LITTLE_ENDIAN);
     return Binary16.unpackFloat(this.buffer2w.getChar(0));
   }

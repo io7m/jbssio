@@ -18,6 +18,7 @@ package com.io7m.jbssio.vanilla;
 
 import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 
+import static com.io7m.jbssio.vanilla.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -54,7 +56,7 @@ final class BSSWriterByteBuffer
     this.map =
       Objects.requireNonNull(inMap, "map");
     this.physicalBounds =
-      BSSRangeHalfOpen.create(0L, (long) inMap.capacity());
+      BSSRangeHalfOpen.create(0L, inMap.capacity());
   }
 
   static BSSWriterRandomAccessType createFromByteBuffer(
@@ -91,7 +93,7 @@ final class BSSWriterByteBuffer
     final var newName =
       new StringBuilder(32)
         .append(this.path())
-        .append('.')
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 
@@ -118,7 +120,7 @@ final class BSSWriterByteBuffer
     final var newName =
       new StringBuilder(32)
         .append(this.path())
-        .append('.')
+        .append(PATH_SEPARATOR)
         .append(inName)
         .toString();
 

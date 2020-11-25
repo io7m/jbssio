@@ -18,6 +18,7 @@
 package com.io7m.jbssio.vanilla;
 
 import com.io7m.jbssio.api.BSSAddressableType;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
