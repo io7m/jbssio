@@ -18,7 +18,7 @@ package com.io7m.jbssio.vanilla.internal;
 
 final class BSSPaths
 {
-  static final char PATH_SEPARATOR = '.';
+  static final char PATH_SEPARATOR = '/';
 
   private BSSPaths()
   {

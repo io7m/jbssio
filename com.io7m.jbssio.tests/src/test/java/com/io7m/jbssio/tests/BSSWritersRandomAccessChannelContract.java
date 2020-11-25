@@ -109,11 +109,11 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
       try (var s0 = writer.createSubWriterAt("x", 0L)) {
         try (var s1 = s0.createSubWriterAt("y", 0L)) {
           try (var s2 = s1.createSubWriterAt("z", 0L)) {
-            Assertions.assertEquals("a.x.y.z", s2.path());
+            Assertions.assertEquals("a/x/y/z", s2.path());
           }
-          Assertions.assertEquals("a.x.y", s1.path());
+          Assertions.assertEquals("a/x/y", s1.path());
         }
-        Assertions.assertEquals("a.x", s0.path());
+        Assertions.assertEquals("a/x", s0.path());
       }
       Assertions.assertEquals("a", writer.path());
     }

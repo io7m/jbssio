@@ -152,8 +152,7 @@ public final class BSSReaderByteBuffer
     final var position = this.offsetCurrentAbsolute();
     this.increaseOffsetRelative(1L);
     this.map.position(0);
-    return this.map.get(longPositionTo2GBLimitedByteBufferPosition(
-      position));
+    return this.map.get(longPositionTo2GBLimitedByteBufferPosition(position));
   }
 
   private int readU8p(final String name)
