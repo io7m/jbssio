@@ -31,7 +31,9 @@ public interface BSSReaderType
   BSSAddressableType,
   BSSSkippableType,
   BSSReaderIntegerSignedType,
-  BSSReaderIntegerUnsignedType, BSSReaderFloatType, BSSReaderBytesType
+  BSSReaderIntegerUnsignedType,
+  BSSReaderFloatType,
+  BSSReaderBytesType
 {
   /**
    * @return The parent of this reader, if one exists
