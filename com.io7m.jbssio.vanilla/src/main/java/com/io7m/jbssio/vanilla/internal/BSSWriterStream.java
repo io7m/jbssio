@@ -38,6 +38,10 @@ import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
+/**
+ * A sequential stream writer.
+ */
+
 public final class BSSWriterStream implements BSSWriterSequentialType
 {
   private final BSSWriterStream parent;
@@ -77,6 +81,17 @@ public final class BSSWriterStream implements BSSWriterSequentialType
     this.buffer2 = new byte[2];
     this.buffer2w = ByteBuffer.wrap(this.buffer2);
   }
+
+  /**
+   * Create a stream writer.
+   *
+   * @param uri      The target URI
+   * @param inStream The output stream
+   * @param inName   The name
+   * @param inSize   The size
+   *
+   * @return A stream writer
+   */
 
   public static BSSWriterStream create(
     final URI uri,

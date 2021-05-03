@@ -38,6 +38,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 
+/**
+ * A sequential reader based on a stream.
+ */
+
 public final class BSSReaderStream implements BSSReaderSequentialType
 {
   private static final Logger LOG =
@@ -83,6 +87,17 @@ public final class BSSReaderStream implements BSSReaderSequentialType
     this.buffer2 = new byte[2];
     this.buffer2w = ByteBuffer.wrap(this.buffer2);
   }
+
+  /**
+   * Create a reader based on the given stream.
+   *
+   * @param uri      The source URI
+   * @param inStream The source stream
+   * @param inName   The name
+   * @param inSize   The size
+   *
+   * @return A reader
+   */
 
   public static BSSReaderStream create(
     final URI uri,

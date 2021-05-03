@@ -33,6 +33,10 @@ import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
+/**
+ * A random access reader based on a seekable byte channel.
+ */
+
 public final class BSSReaderSeekableChannel
   extends BSSRandomAccess<BSSReaderRandomAccessType> implements
   BSSReaderRandomAccessType
@@ -56,6 +60,17 @@ public final class BSSReaderSeekableChannel
     this.buffer =
       Objects.requireNonNull(inBuffer, "buffer");
   }
+
+  /**
+   * Create a random access reader based on a seekable byte channel.
+   *
+   * @param uri     The source URI
+   * @param channel The source channel
+   * @param name    The name
+   * @param size    The size
+   *
+   * @return A random access reader
+   */
 
   public static BSSReaderRandomAccessType createFromChannel(
     final URI uri,

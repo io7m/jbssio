@@ -31,6 +31,10 @@ import java.util.concurrent.Callable;
 
 import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 
+/**
+ * A random access reader based on a byte buffer.
+ */
+
 public final class BSSReaderByteBuffer
   extends BSSRandomAccess<BSSReaderRandomAccessType>
   implements BSSReaderRandomAccessType
@@ -52,6 +56,16 @@ public final class BSSReaderByteBuffer
     this.physicalBounds =
       BSSRangeHalfOpen.create(0L, inMap.capacity());
   }
+
+  /**
+   * Create a reader.
+   *
+   * @param uri    The target URI
+   * @param buffer The target buffer
+   * @param name   The name
+   *
+   * @return A reader
+   */
 
   public static BSSReaderRandomAccessType createFromByteBuffer(
     final URI uri,
