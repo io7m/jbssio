@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2019 Mark Raynsford <code@io7m.com> https://www.io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -33,6 +33,10 @@ import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
+/**
+ * A random access reader based on a seekable byte channel.
+ */
+
 public final class BSSReaderSeekableChannel
   extends BSSRandomAccess<BSSReaderRandomAccessType> implements
   BSSReaderRandomAccessType
@@ -56,6 +60,17 @@ public final class BSSReaderSeekableChannel
     this.buffer =
       Objects.requireNonNull(inBuffer, "buffer");
   }
+
+  /**
+   * Create a random access reader based on a seekable byte channel.
+   *
+   * @param uri     The source URI
+   * @param channel The source channel
+   * @param name    The name
+   * @param size    The size
+   *
+   * @return A random access reader
+   */
 
   public static BSSReaderRandomAccessType createFromChannel(
     final URI uri,

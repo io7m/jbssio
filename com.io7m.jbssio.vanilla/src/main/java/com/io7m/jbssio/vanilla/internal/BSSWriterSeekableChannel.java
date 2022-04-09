@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2019 Mark Raynsford <code@io7m.com> https://www.io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,10 @@ import java.util.concurrent.Callable;
 
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
+/**
+ * A random access writer based on a seekable byte channel.
+ */
 
 public final class BSSWriterSeekableChannel
   extends BSSRandomAccess<BSSWriterRandomAccessType> implements
@@ -63,6 +67,17 @@ public final class BSSWriterSeekableChannel
     this.writeBuffer =
       Objects.requireNonNull(inBuffer, "inBuffer");
   }
+
+  /**
+   * Create a writer.
+   *
+   * @param uri     The target URI
+   * @param channel The target channel
+   * @param name    The name
+   * @param size    The size
+   *
+   * @return A writer
+   */
 
   public static BSSWriterRandomAccessType createFromChannel(
     final URI uri,

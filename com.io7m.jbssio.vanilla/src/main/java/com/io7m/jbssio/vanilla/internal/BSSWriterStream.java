@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2019 Mark Raynsford <code@io7m.com> https://www.io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
+
+/**
+ * A sequential stream writer.
+ */
 
 public final class BSSWriterStream implements BSSWriterSequentialType
 {
@@ -77,6 +81,17 @@ public final class BSSWriterStream implements BSSWriterSequentialType
     this.buffer2 = new byte[2];
     this.buffer2w = ByteBuffer.wrap(this.buffer2);
   }
+
+  /**
+   * Create a stream writer.
+   *
+   * @param uri      The target URI
+   * @param inStream The output stream
+   * @param inName   The name
+   * @param inSize   The size
+   *
+   * @return A stream writer
+   */
 
   public static BSSWriterStream create(
     final URI uri,

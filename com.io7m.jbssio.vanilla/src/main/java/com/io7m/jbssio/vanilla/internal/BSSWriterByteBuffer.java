@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Mark Raynsford <code@io7m.com> http://io7m.com
+ * Copyright © 2019 Mark Raynsford <code@io7m.com> https://www.io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +31,10 @@ import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
+/**
+ * A random access writer based on a byte buffer.
+ */
+
 public final class BSSWriterByteBuffer
   extends BSSRandomAccess<BSSWriterRandomAccessType>
   implements BSSWriterRandomAccessType
@@ -58,6 +62,16 @@ public final class BSSWriterByteBuffer
     this.physicalBounds =
       BSSRangeHalfOpen.create(0L, inMap.capacity());
   }
+
+  /**
+   * Create a writer.
+   *
+   * @param uri    The target URI
+   * @param buffer The target buffer
+   * @param name   The name
+   *
+   * @return A writer
+   */
 
   public static BSSWriterRandomAccessType createFromByteBuffer(
     final URI uri,
