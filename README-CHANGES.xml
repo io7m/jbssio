@@ -24,9 +24,17 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2020-12-24T15:32:05+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.0">
+    <c:release date="2020-12-24T00:00:00+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.0">
       <c:changes>
         <c:change date="2020-12-24T00:00:00+00:00" summary="Add reader/writer implementations that throw UnsupportedOperationException"/>
+      </c:changes>
+    </c:release>
+    <c:release date="2022-04-09T18:21:46+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.1">
+      <c:changes>
+        <c:change date="2022-04-09T00:00:00+00:00" summary="Update ieee754b16"/>
+        <c:change date="2022-04-09T00:00:00+00:00" summary="Update OSGi bundle annotations"/>
+        <c:change date="2022-04-09T00:00:00+00:00" summary="Update Logback"/>
+        <c:change date="2022-04-09T00:00:00+00:00" summary="Update commons-io"/>
       </c:changes>
     </c:release>
   </c:releases>
