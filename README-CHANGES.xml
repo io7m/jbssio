@@ -15,6 +15,26 @@
         </c:change>
       </c:changes>
     </c:release>
+    <c:release date="2020-12-24T00:00:00+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.0">
+      <c:changes>
+        <c:change date="2020-12-24T00:00:00+00:00" summary="Add reader/writer implementations that throw UnsupportedOperationException"/>
+      </c:changes>
+    </c:release>
+    <c:release date="2023-04-02T11:30:36+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="2.0.0">
+      <c:changes>
+        <c:change date="2023-04-02T00:00:00+00:00" summary="Updated dependencies."/>
+        <c:change date="2023-04-02T00:00:00+00:00" summary="Added bounded extensions.">
+          <c:tickets>
+            <c:ticket id="5"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2023-04-02T00:00:00+00:00" summary="Added fallible interface for creating exceptions.">
+          <c:tickets>
+            <c:ticket id="4"/>
+          </c:tickets>
+        </c:change>
+      </c:changes>
+    </c:release>
     <c:release date="2020-11-25T00:00:00+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.0.2">
       <c:changes>
         <c:change date="2020-11-25T00:00:00+00:00" summary="Correctly use slashes in paths (again!)">
@@ -24,12 +44,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2020-12-24T00:00:00+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.0">
-      <c:changes>
-        <c:change date="2020-12-24T00:00:00+00:00" summary="Add reader/writer implementations that throw UnsupportedOperationException"/>
-      </c:changes>
-    </c:release>
-    <c:release date="2022-04-09T18:21:46+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.1">
+    <c:release date="2022-04-09T00:00:00+00:00" is-open="false" ticket-system="com.github.io7m.jbssio" version="1.1.1">
       <c:changes>
         <c:change date="2022-04-09T00:00:00+00:00" summary="Update ieee754b16"/>
         <c:change date="2022-04-09T00:00:00+00:00" summary="Update OSGi bundle annotations"/>
