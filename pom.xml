@@ -31,7 +31,7 @@
   </modules>
 
   <properties>
-    <io7m.api.previousVersion>1.1.0</io7m.api.previousVersion>
+    <io7m.api.previousVersion>2.0.0</io7m.api.previousVersion>
     <com.io7m.junit.version>5.9.2</com.io7m.junit.version>
   </properties>
 
