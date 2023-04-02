@@ -16,17 +16,24 @@
 
 package com.io7m.jbssio.tests;
 
+import com.io7m.ieee754b16.Binary16;
 import com.io7m.jbssio.api.BSSWriterRandomAccessType;
+import com.io7m.jbssio.vanilla.BSSReaders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channel;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
 {
@@ -471,6 +478,37 @@ public abstract class BSSWritersRandomAccessChannelContract<T extends Channel>
         'C', 'C', 'C', 'C',
         'D', 'D', 'D', 'D'
       }, this.writtenDataOf(data));
+    }
+  }
+
+  @Test
+  public final void testException()
+    throws IOException
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+
+        final var ex = reader.createException(
+          "message",
+          Map.ofEntries(
+            Map.entry("x", "y"),
+            Map.entry("z", "0.0")
+          ),
+          IOException::new
+        );
+
+        assertTrue(ex.getMessage().contains("message"));
+        assertTrue(ex.getMessage().contains("x"));
+        assertTrue(ex.getMessage().contains("y"));
+        assertTrue(ex.getMessage().contains("z"));
+        assertTrue(ex.getMessage().contains("0.0"));
+        assertTrue(ex.getMessage().contains("Offset"));
+      }
     }
   }
 }

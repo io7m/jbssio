@@ -31,10 +31,12 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 
@@ -848,5 +850,19 @@ public final class BSSReaderStream implements BSSReaderSequentialType
       newName,
       newStream,
       OptionalLong.of(newSize));
+  }
+
+  @Override
+  public <E extends Exception> E createException(
+    final String message,
+    final Map<String, String> attributes,
+    final Function<String, E> constructor)
+  {
+    return BSSExceptions.create(
+      this,
+      message,
+      attributes,
+      constructor
+    );
   }
 }

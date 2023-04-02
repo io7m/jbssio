@@ -19,8 +19,10 @@ package com.io7m.jbssio.api;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Function;
 
 /**
  * A reader that throws {@link UnsupportedOperationException} for all read operations.
@@ -375,5 +377,14 @@ public final class BSSReaderSequentialUnsupported implements BSSReaderSequential
     throws IOException
   {
 
+  }
+
+  @Override
+  public <E extends Exception> E createException(
+    final String message,
+    final Map<String, String> attributes,
+    final Function<String, E> constructor)
+  {
+    throw new UnsupportedOperationException();
   }
 }

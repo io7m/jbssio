@@ -28,6 +28,7 @@ import java.util.Optional;
 
 public interface BSSReaderType
   extends BSSCloseableType,
+  BSSFallibleType,
   BSSAddressableType,
   BSSSkippableType,
   BSSReaderIntegerSignedType,

@@ -14,7 +14,7 @@
 
   <groupId>com.io7m.jbssio</groupId>
   <artifactId>com.io7m.jbssio</artifactId>
-  <version>1.1.2-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>com.io7m.jbssio</name>
@@ -31,7 +31,7 @@
 
   <properties>
     <io7m.api.previousVersion>1.1.0</io7m.api.previousVersion>
-    <com.io7m.junit.version>5.8.2</com.io7m.junit.version>
+    <com.io7m.junit.version>5.9.1</com.io7m.junit.version>
   </properties>
 
   <licenses>
@@ -92,17 +92,17 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.6</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.4.1</version>
+        <version>1.4.5</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.component.annotations</artifactId>
-        <version>1.5.0</version>
+        <version>1.5.1</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>

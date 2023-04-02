@@ -19,6 +19,7 @@ package com.io7m.jbssio.vanilla.internal;
 
 import com.io7m.jbssio.api.BSSAddressableType;
 import com.io7m.jbssio.api.BSSCloseableType;
+import com.io7m.jbssio.api.BSSFallibleType;
 import com.io7m.jbssio.api.BSSSeekableType;
 import com.io7m.jbssio.api.BSSSkippableType;
 import org.slf4j.Logger;
@@ -28,13 +29,16 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 abstract class BSSRandomAccess<T>
   implements BSSSeekableType,
+  BSSFallibleType,
   BSSSkippableType,
   BSSAddressableType,
   BSSCloseableType
@@ -307,5 +311,19 @@ abstract class BSSRandomAccess<T>
   public final String path()
   {
     return this.path;
+  }
+
+  @Override
+  public final <E extends Exception> E createException(
+    final String message,
+    final Map<String, String> attributes,
+    final Function<String, E> constructor)
+  {
+    return BSSExceptions.create(
+      this,
+      message,
+      attributes,
+      constructor
+    );
   }
 }
