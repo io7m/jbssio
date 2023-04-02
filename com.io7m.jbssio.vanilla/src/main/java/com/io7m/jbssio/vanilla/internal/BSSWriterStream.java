@@ -30,9 +30,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static com.io7m.jbssio.vanilla.internal.BSSPaths.PATH_SEPARATOR;
 import static java.nio.ByteOrder.BIG_ENDIAN;
@@ -940,5 +942,19 @@ public final class BSSWriterStream implements BSSWriterSequentialType
       this.writeBytes(smallBuffer);
     }
     return diff;
+  }
+
+  @Override
+  public <E extends Exception> E createException(
+    final String message,
+    final Map<String, String> attributes,
+    final Function<String, E> constructor)
+  {
+    return BSSExceptions.create(
+      this,
+      message,
+      attributes,
+      constructor
+    );
   }
 }

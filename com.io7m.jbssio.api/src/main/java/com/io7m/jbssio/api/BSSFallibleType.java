@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Mark Raynsford <code@io7m.com> https://www.io7m.com
+ * Copyright © 2023 Mark Raynsford <code@io7m.com> https://www.io7m.com
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,13 +14,31 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * Java bitstream structure I/O (API)
- */
-
-@Export
-@Version("2.0.0")
 package com.io7m.jbssio.api;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.versioning.Version;
+import java.util.Map;
+import java.util.function.Function;
+
+/**
+ * The interface for creating exceptions with contextual information.
+ */
+
+public interface BSSFallibleType
+{
+  /**
+   * Create an exception.
+   *
+   * @param message     The base exception message
+   * @param attributes  The exception attributes
+   * @param constructor The exception constructor
+   * @param <E>         The type of exception
+   *
+   * @return A new exception
+   */
+
+  <E extends Exception> E createException(
+    String message,
+    Map<String, String> attributes,
+    Function<String, E> constructor
+  );
+}

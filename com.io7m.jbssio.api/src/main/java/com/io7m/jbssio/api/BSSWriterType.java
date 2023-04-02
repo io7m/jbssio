@@ -28,6 +28,7 @@ import java.io.IOException;
 
 public interface BSSWriterType
   extends BSSCloseableType,
+  BSSFallibleType,
   BSSAddressableType,
   BSSSkippableType,
   BSSWriterFloatType,

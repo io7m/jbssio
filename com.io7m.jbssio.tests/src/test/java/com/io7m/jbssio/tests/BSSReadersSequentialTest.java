@@ -24,11 +24,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.OptionalLong;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class BSSReadersSequentialTest
 {
@@ -40,7 +43,7 @@ public final class BSSReadersSequentialTest
     final String text)
   {
     LOG.debug("ex: ", e);
-    Assertions.assertTrue(
+    assertTrue(
       e.getMessage().contains(text),
       "Exception message " + e.getMessage() + " contains " + text);
   }
@@ -103,7 +106,7 @@ public final class BSSReadersSequentialTest
         "a");
       Assertions.assertFalse(reader.isClosed());
       reader.close();
-      Assertions.assertTrue(reader.isClosed());
+      assertTrue(reader.isClosed());
       Assertions.assertThrows(IOException.class, () -> reader.readS8());
     }
   }
@@ -273,7 +276,7 @@ public final class BSSReadersSequentialTest
           });
 
         LOG.debug("ex: ", ex);
-        Assertions.assertTrue(ex.getMessage().contains(
+        assertTrue(ex.getMessage().contains(
           "Size limit           : 4"));
       }
     }
@@ -1051,10 +1054,11 @@ public final class BSSReadersSequentialTest
         "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(
           16,
-          reader.readBytes("q",
-                           buffer,
-                           0,
-                           buffer.length));
+          reader.readBytes(
+            "q",
+            buffer,
+            0,
+            buffer.length));
         Assertions.assertEquals(16, reader.readBytes("q", buffer));
         Assertions.assertThrows(
           EOFException.class,
@@ -1123,6 +1127,37 @@ public final class BSSReadersSequentialTest
       try (var reader = readers.createReaderFromStreamBounded(URI.create(
         "urn:fake"), stream, "a", 32L)) {
         Assertions.assertEquals(1.0f, reader.readF16LE("x"), 0.001);
+      }
+    }
+  }
+
+  @Test
+  public void testException()
+    throws IOException
+  {
+    final var data = ByteBuffer.wrap(new byte[32]).order(ByteOrder.LITTLE_ENDIAN);
+    data.putChar(0, Binary16.packDouble(1.0));
+
+    final var readers = new BSSReaders();
+    try (var stream = new ByteArrayInputStream(data.array())) {
+      try (var reader = readers.createReaderFromStreamBounded(URI.create(
+        "urn:fake"), stream, "a", 32L)) {
+
+        final var ex = reader.createException(
+          "message",
+          Map.ofEntries(
+            Map.entry("x", "y"),
+            Map.entry("z", "0.0")
+          ),
+          IOException::new
+        );
+
+        assertTrue(ex.getMessage().contains("message"));
+        assertTrue(ex.getMessage().contains("x"));
+        assertTrue(ex.getMessage().contains("y"));
+        assertTrue(ex.getMessage().contains("z"));
+        assertTrue(ex.getMessage().contains("0.0"));
+        assertTrue(ex.getMessage().contains("Offset"));
       }
     }
   }
