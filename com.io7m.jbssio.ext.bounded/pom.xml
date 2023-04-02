@@ -12,13 +12,19 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>com.io7m.jbssio.api</artifactId>
+  <artifactId>com.io7m.jbssio.ext.bounded</artifactId>
 
-  <name>com.io7m.jbssio.api</name>
-  <description>Java bitstream structure I/O (API)</description>
+  <name>com.io7m.jbssio.ext.bounded</name>
+  <description>Java bitstream structure I/O (Bounded extensions)</description>
   <url>https://www.io7m.com/software/jbssio</url>
 
   <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>com.io7m.jbssio.api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.annotation.versioning</artifactId>

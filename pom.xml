@@ -25,6 +25,7 @@
 
   <modules>
     <module>com.io7m.jbssio.api</module>
+    <module>com.io7m.jbssio.ext.bounded</module>
     <module>com.io7m.jbssio.tests</module>
     <module>com.io7m.jbssio.vanilla</module>
   </modules>
